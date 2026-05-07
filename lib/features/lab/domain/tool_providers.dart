@@ -1,0 +1,73 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../shared/models/booking_model.dart';
+import '../../../shared/models/tool_model.dart';
+import '../../../shared/repositories/supabase_client.dart';
+import '../../auth/data/auth_repository.dart';
+import '../data/tool_repository.dart';
+
+/// Provider for the ToolRepository
+final toolRepositoryProvider = Provider<ToolRepository>((ref) {
+  return ToolRepository(supabase);
+});
+
+/// Future provider for the list of tools, optionally filtered by category
+final toolsProvider = FutureProvider.family<List<ToolModel>, String?>((ref, category) async {
+  final repo = ref.watch(toolRepositoryProvider);
+  return repo.getTools(category: category);
+});
+
+/// Future provider for the current user's bookings
+final myBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+  final userAsync = ref.watch(currentUserProvider);
+  final userId = userAsync.valueOrNull?.id;
+  if (userId == null) return [];
+
+  final repo = ref.watch(toolRepositoryProvider);
+  return repo.getMyBookings(userId);
+});
+
+/// The current user's active or upcoming booking
+final activeBookingProvider = Provider<AsyncValue<BookingModel?>>((ref) {
+  final bookingsAsync = ref.watch(myBookingsProvider);
+  return bookingsAsync.whenData((bookings) {
+    if (bookings.isEmpty) return null;
+    final now = DateTime.now().toUtc();
+    try {
+      return bookings.firstWhere((b) => 
+        (b.status == 'active') || 
+        (b.status == 'approved' && b.slotStart.isBefore(now.add(const Duration(hours: 1))) && b.slotEnd.isAfter(now))
+      );
+    } catch (_) {
+      return null;
+    }
+  });
+});
+
+/// Future provider for tool bookings on a specific day
+final toolBookingsForDayProvider = FutureProvider.family<List<BookingModel>, ({String toolId, DateTime date})>((ref, arg) async {
+  final supabase = ref.watch(toolRepositoryProvider); // Actually it's better to just use the client or repo
+  // We can query bookings where slot_start is between date.startOfDay and date.endOfDay
+  final start = DateTime(arg.date.year, arg.date.month, arg.date.day).toUtc();
+  final end = start.add(const Duration(days: 1));
+
+  final data = await supabase.client
+      .from('tool_bookings')
+      .select()
+      .eq('tool_id', arg.toolId)
+      .inFilter('status', ['approved', 'active'])
+      .filter('slot_start', 'lt', end.toIso8601String())
+      .filter('slot_end', 'gt', start.toIso8601String());
+
+  return (data as List).map((row) => BookingModel.fromJson(row)).toList();
+});
+
+/// Extension on ToolRepository to expose the client if needed (or just use repo methods)
+extension ToolRepoExt on ToolRepository {
+  SupabaseClient get client => _client;
+}
+
+/// State provider for the currently selected tool in the catalog
+final selectedToolProvider = StateProvider<ToolModel?>((ref) => null);
+
+/// State provider for the current category filter
+final toolCategoryFilterProvider = StateProvider<String>((ref) => 'All');
