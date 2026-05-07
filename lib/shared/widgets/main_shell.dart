@@ -31,7 +31,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   void initState() {
     super.initState();
     _heartbeatTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      AppLogger.info('Shell', 'Heartbeat tick — checking session freshness');
+      AppLogger.info(LogCategory.SYSTEM, 'Heartbeat tick — checking session freshness');
       ref.read(labRepositoryProvider).refreshSession();
     });
   }

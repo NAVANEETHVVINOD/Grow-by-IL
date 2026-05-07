@@ -75,7 +75,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         context.go('/home');
       }
     } catch (e, st) {
-      AppLogger.error('Profile', 'Profile setup failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'Profile setup failed', error: e, stack: st);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

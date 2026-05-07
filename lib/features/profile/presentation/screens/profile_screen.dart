@@ -15,7 +15,7 @@ import '../../../auth/data/auth_repository.dart';
 import '../../../lab/domain/lab_providers.dart';
 import '../../../lab/domain/tool_providers.dart';
 import '../../../projects/domain/project_providers.dart';
-
+import '../domain/profile_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -34,8 +34,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_off_rounded,
-                        size: 48, color: AppColors.textSecondary),
+                    Icon(Icons.person_off_rounded, size: 48, color: AppColors.textSecondary),
                     SizedBox(height: AppSizes.md),
                     Text('No user data'),
                   ],
@@ -49,6 +48,10 @@ class ProfileScreen extends ConsumerWidget {
                 DigitalIdCard(user: user),
                 const SizedBox(height: AppSizes.md),
                 _buildBadges(user),
+                const SizedBox(height: AppSizes.xl),
+
+                // ── Stats Row ──────────────────────────────────
+                _buildStatsRow(ref),
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Tool Belt (Expertise) ────────────────────────
@@ -98,17 +101,17 @@ class ProfileScreen extends ConsumerWidget {
                   textColor: AppColors.red,
                   borderColor: AppColors.red,
                   onPressed: () async {
-                    AppLogger.action('Profile', 'signOut');
+                    AppLogger.action(LogCategory.AUTH, 'signOut');
                     // Auto-checkout if user has active session
                     try {
                       final activeSession = await ref.read(activeSessionProvider.future);
                       if (activeSession != null) {
-                        AppLogger.info('Profile', 'Auto-checking out session: ${activeSession.id}');
+                        AppLogger.info(LogCategory.LAB, 'Auto-checking out session: ${activeSession.id}');
                         final repo = ref.read(labRepositoryProvider);
                         await repo.checkOut(activeSession.id);
                       }
                     } catch (e) {
-                      AppLogger.warn('Profile', 'Auto-checkout failed, continuing sign-out: $e');
+                      AppLogger.warn(LogCategory.LAB, 'Auto-checkout failed, continuing sign-out: $e');
                     }
 
                     await ref.read(authRepositoryProvider).signOut();
@@ -137,8 +140,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: AppColors.red),
+                const Icon(Icons.error_outline, size: 48, color: AppColors.red),
                 const SizedBox(height: AppSizes.md),
                 const Text('Something went wrong'),
                 const SizedBox(height: AppSizes.md),
@@ -152,6 +154,34 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatsRow(WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _StatItem(
+          label: 'Visits',
+          countAsync: ref.watch(userLabVisitsCountProvider),
+          icon: Icons.science_outlined,
+        ),
+        _StatItem(
+          label: 'Tools',
+          countAsync: ref.watch(userToolsUsedCountProvider),
+          icon: Icons.build_outlined,
+        ),
+        _StatItem(
+          label: 'Events',
+          countAsync: ref.watch(userEventsCountProvider),
+          icon: Icons.event_outlined,
+        ),
+        _StatItem(
+          label: 'Projects',
+          countAsync: ref.watch(userProjectsCountProvider),
+          icon: Icons.rocket_launch_outlined,
+        ),
+      ],
     );
   }
 
@@ -193,24 +223,24 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildToolBelt(WidgetRef ref) {
-    // Show top 3 tools used by user
     final bookingsAsync = ref.watch(myBookingsProvider);
     return bookingsAsync.when(
       data: (bookings) {
         if (bookings.isEmpty) return const Text('No equipment used yet.');
-        // Simplified: just show unique tools
         final uniqueTools = bookings.map((b) => b.toolId).toSet().take(4).toList();
         return Wrap(
           spacing: 8,
-          children: uniqueTools.map((id) => Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.navy, width: 2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.build_circle_outlined, size: 24),
-          )).toList(),
+          children: uniqueTools
+              .map((id) => Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppColors.navy, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.build_circle_outlined, size: 24),
+                  ))
+              .toList(),
         );
       },
       loading: () => const ShimmerSkeleton(width: double.infinity, height: 50),
@@ -303,27 +333,56 @@ class ProfileScreen extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       alignment: WrapAlignment.center,
-      children: badges.map((b) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: (b['color'] as Color).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: b['color'] as Color, width: 1.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(b['icon'] as IconData, size: 14, color: b['color'] as Color),
-            const SizedBox(width: 4),
-            Text(
-              b['name'] as String,
-              style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.bold, color: b['color'] as Color),
-            ),
-          ],
-        ),
-      )).toList(),
+      children: badges
+          .map((b) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (b['color'] as Color).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: b['color'] as Color, width: 1.5),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(b['icon'] as IconData, size: 14, color: b['color'] as Color),
+                    const SizedBox(width: 4),
+                    Text(
+                      b['name'] as String,
+                      style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.bold, color: b['color'] as Color),
+                    ),
+                  ],
+                ),
+              ))
+          .toList(),
     );
   }
 }
 
+class _StatItem extends StatelessWidget {
+  const _StatItem({required this.label, required this.countAsync, required this.icon});
+  final String label;
+  final AsyncValue<int> countAsync;
+  final IconData icon;
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 20, color: AppColors.navy.withOpacity(0.5)),
+        const SizedBox(height: 4),
+        countAsync.when(
+          data: (count) => Text(
+            count.toString(),
+            style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+          ),
+          loading: () => const ShimmerSkeleton(width: 24, height: 20),
+          error: (_, __) => const Text('0'),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+}

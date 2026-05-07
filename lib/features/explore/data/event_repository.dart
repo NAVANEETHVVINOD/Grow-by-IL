@@ -9,7 +9,7 @@ class EventRepository {
 
   /// Fetch active events.
   Future<List<EventModel>> getEvents() async {
-    AppLogger.action('Event', 'getEvents');
+    AppLogger.action(LogCategory.EVENTS, 'getEvents');
     try {
       final data = await _client
           .from('events')
@@ -18,7 +18,7 @@ class EventRepository {
           .order('start_time', ascending: true);
       return (data as List).map((row) => EventModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error('Event', 'getEvents failed', e, st);
+      AppLogger.error(LogCategory.EVENTS, 'getEvents failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -29,14 +29,14 @@ class EventRepository {
       final data = await _client.from('events').select().eq('id', id).single();
       return EventModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Event', 'getEventById failed', e, st);
+      AppLogger.error(LogCategory.EVENTS, 'getEventById failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// RSVP to an event with a race condition guard.
   Future<RsvpModel> rsvpToEvent(String eventId, String userId) async {
-    AppLogger.action('Event', 'rsvpToEvent', data: {'eventId': eventId, 'userId': userId});
+    AppLogger.action(LogCategory.EVENTS, 'rsvpToEvent', {'eventId': eventId, 'userId': userId});
     try {
       // 1. Guard: Check if already going to prevent double counting
       final existing = await getUserRsvp(eventId, userId);
@@ -70,17 +70,17 @@ class EventRepository {
         'related_id': eventId,
       });
 
-      AppLogger.info('Event', 'RSVP successful for event $eventId');
+      AppLogger.info(LogCategory.EVENTS, 'RSVP successful for event $eventId');
       return RsvpModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Event', 'rsvpToEvent failed', e, st);
+      AppLogger.error(LogCategory.EVENTS, 'rsvpToEvent failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Cancel an RSVP.
   Future<void> cancelRsvp(String eventId, String userId) async {
-    AppLogger.action('Event', 'cancelRsvp', data: {'eventId': eventId, 'userId': userId});
+    AppLogger.action(LogCategory.EVENTS, 'cancelRsvp', {'eventId': eventId, 'userId': userId});
     try {
       // 1. Guard: Only cancel if currently going
       final existing = await getUserRsvp(eventId, userId);
@@ -103,26 +103,25 @@ class EventRepository {
         'related_id': eventId,
       });
 
-      AppLogger.info('Event', 'RSVP cancelled for event $eventId');
+      AppLogger.info(LogCategory.EVENTS, 'RSVP cancelled for event $eventId');
     } catch (e, st) {
-      AppLogger.error('Event', 'cancelRsvp failed', e, st);
+      AppLogger.error(LogCategory.EVENTS, 'cancelRsvp failed', error: e, stack: st);
       rethrow;
     }
   }
 
-  /// Fetch user's RSVP status for an event.
-  Future<RsvpModel?> getUserRsvp(String eventId, String userId) async {
+  /// Fetch all RSVPs for a user.
+  Future<List<RsvpModel>> getUserRsvps(String userId) async {
     try {
       final data = await _client
           .from('rsvps')
           .select()
-          .match({'event_id': eventId, 'user_id': userId})
-          .maybeSingle();
-      if (data == null) return null;
-      return RsvpModel.fromJson(data);
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return (data as List).map((row) => RsvpModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error('Event', 'getUserRsvp failed', e, st);
-      return null;
+      AppLogger.error(LogCategory.EVENTS, 'getUserRsvps failed', error: e, stack: st);
+      return [];
     }
   }
 }

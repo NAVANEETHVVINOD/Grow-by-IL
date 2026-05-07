@@ -4,46 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/models/event_model.dart';
-import '../../../../shared/models/project_model.dart';
 import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../../projects/domain/project_providers.dart';
-import '../domain/event_providers.dart';
 
-class ExploreScreen extends ConsumerStatefulWidget {
+class ExploreScreen extends ConsumerWidget {
   const ExploreScreen({super.key});
 
   @override
-  ConsumerState<ExploreScreen> createState() => _ExploreScreenState();
-}
-
-class _ExploreScreenState extends ConsumerState<ExploreScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSizes.lg),
-              child: Text(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                 'Explore',
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 32,
@@ -51,159 +27,77 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> with SingleTicker
                   color: AppColors.navy,
                 ),
               ),
-            ),
-            TabBar(
-              controller: _tabController,
-              labelColor: AppColors.navy,
-              unselectedLabelColor: AppColors.textSecondary,
-              indicatorColor: AppColors.yellow,
-              indicatorWeight: 4,
-              labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16),
-              tabs: const [
-                Tab(text: 'Events'),
-                Tab(text: 'Projects'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _EventsTab(),
-                  const _ProjectsTab(),
-                ],
+              const SizedBox(height: AppSizes.xl),
+              
+              _buildSectionHeader('Our Services'),
+              const SizedBox(height: AppSizes.md),
+              _buildServiceCard(
+                title: 'Innovation Lab',
+                desc: 'Access state-of-the-art tools and a collaborative workspace to build your dreams.',
+                icon: Icons.science_rounded,
+                color: AppColors.yellow,
+                onTap: () => context.go('/lab'),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EventsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventsAsync = ref.watch(activeEventsProvider);
-
-    return eventsAsync.when(
-      data: (events) => events.isEmpty
-          ? const Center(child: Text('No active events found.'))
-          : RefreshIndicator(
-              onRefresh: () => ref.refresh(activeEventsProvider.future),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(AppSizes.lg),
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final event = events[index];
-                  return _EventCard(event: event);
-                },
+              _buildServiceCard(
+                title: 'Tool Catalog',
+                desc: 'Browse and book precision equipment from 3D printers to laser cutters.',
+                icon: Icons.build_rounded,
+                color: AppColors.cobalt,
+                iconColor: Colors.white,
+                onTap: () => context.push('/tools'),
               ),
-            ),
-      loading: () => ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.lg),
-        itemCount: 3,
-        itemBuilder: (context, index) => const Padding(
-          padding: EdgeInsets.only(bottom: AppSizes.md),
-          child: ShimmerSkeleton(width: double.infinity, height: 180),
-        ),
-      ),
-      error: (e, st) => Center(child: Text('Error: $e')),
-    );
-  }
-}
-
-class _EventCard extends StatelessWidget {
-  const _EventCard({required this.event});
-  final EventModel event;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.md),
-      child: GestureDetector(
-        onTap: () => context.push('/events/${event.id}'),
-        child: NeoCard(
-          color: Colors.white,
-          padding: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Event Image Placeholder
-              Container(
-                height: 140,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.navy.withOpacity(0.8), AppColors.navy],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: event.imageUrl != null
-                    ? Image.network(event.imageUrl!, fit: BoxFit.cover)
-                    : Center(
-                        child: Icon(
-                          _getIconForType(event.type),
-                          size: 48,
-                          color: AppColors.yellow,
-                        ),
-                      ),
+              _buildServiceCard(
+                title: 'Project Support',
+                desc: 'Get mentorship, find teammates, and showcase your builds to the community.',
+                icon: Icons.rocket_launch_rounded,
+                color: AppColors.green,
+                onTap: () {}, // Future projects overview
               ),
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.yellow,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            event.type.toUpperCase(),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.navy,
+              
+              const SizedBox(height: AppSizes.xl),
+              _buildSectionHeader('Knowledge Base'),
+              const SizedBox(height: AppSizes.md),
+              NeoCard(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.menu_book_rounded, color: AppColors.textSecondary),
+                      const SizedBox(width: AppSizes.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Maker Wiki',
+                              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '${event.rsvpCount}${event.capacity != null ? '/${event.capacity}' : ''} attending',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      event.title,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.navy,
-                      ),
-                    ),
-                    if (event.organizationName != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'by ${event.organizationName}',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
+                            Text(
+                              'SOPs, tutorials, and guides coming soon.',
+                              style: GoogleFonts.dmSans(fontSize: 14, color: AppColors.textSecondary),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
               ),
+              
+              const SizedBox(height: AppSizes.xxl),
+              _buildSectionHeader('About IdeaLab'),
+              const SizedBox(height: AppSizes.md),
+              Text(
+                'IdeaLab is the heart of innovation at our campus. We provide the tools, the space, and the community for students to transition from consumers to creators.',
+                style: GoogleFonts.dmSans(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: AppSizes.md),
+              Text(
+                'Grow~ by IdeaLab',
+                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.navy),
+              ),
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -211,150 +105,74 @@ class _EventCard extends StatelessWidget {
     );
   }
 
-  IconData _getIconForType(String type) {
-    switch (type) {
-      case 'workshop': return Icons.engineering_rounded;
-      case 'hackathon': return Icons.code_rounded;
-      case 'talk': return Icons.record_voice_over_rounded;
-      case 'competition': return Icons.emoji_events_rounded;
-      default: return Icons.event_rounded;
-    }
-  }
-}
-
-class _ProjectsTab extends ConsumerWidget {
-  const _ProjectsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final projectsAsync = ref.watch(publicProjectsProvider);
-
-    return projectsAsync.when(
-      data: (projects) => projects.isEmpty
-          ? const Center(child: Text('No public projects found.'))
-          : RefreshIndicator(
-              onRefresh: () => ref.refresh(publicProjectsProvider.future),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(AppSizes.lg),
-                itemCount: projects.length,
-                itemBuilder: (context, index) {
-                  final project = projects[index];
-                  return _ProjectCard(project: project);
-                },
-              ),
-            ),
-      loading: () => ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.lg),
-        itemCount: 3,
-        itemBuilder: (context, index) => const Padding(
-          padding: EdgeInsets.only(bottom: AppSizes.md),
-          child: ShimmerSkeleton(width: double.infinity, height: 120),
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 20,
+          decoration: BoxDecoration(
+            color: AppColors.navy,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
-      ),
-      error: (e, st) => Center(child: Text('Error: $e')),
+        const SizedBox(width: AppSizes.sm),
+        Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
+        ),
+      ],
     );
   }
-}
 
-class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({required this.project});
-  final ProjectModel project;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildServiceCard({
+    required String title,
+    required String desc,
+    required IconData icon,
+    required Color color,
+    Color? iconColor,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
-      child: GestureDetector(
-        onTap: () => context.push('/projects/${project.id}'),
-        child: NeoCard(
-          color: Colors.white,
+      child: NeoCard(
+        color: color,
+        onTap: onTap,
+        child: Padding(
           padding: const EdgeInsets.all(AppSizes.md),
           child: Row(
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.navy, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: project.coverImageUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.network(project.coverImageUrl!, fit: BoxFit.cover),
-                      )
-                    : const Icon(Icons.architecture_rounded, color: AppColors.navy),
-              ),
+              Icon(icon, size: 32, color: iconColor ?? AppColors.navy),
               const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        _TypeChip(type: project.type),
-                        const Spacer(),
-                        if (!project.isActive)
-                          Text(
-                            project.status.toUpperCase(),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
                     Text(
-                      project.title,
+                      title,
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.navy,
+                        fontSize: 18,
+                        color: iconColor ?? AppColors.navy,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      project.description ?? 'No description',
+                      desc,
                       style: GoogleFonts.dmSans(
                         fontSize: 13,
-                        color: AppColors.textSecondary,
+                        color: (iconColor ?? AppColors.navy).withOpacity(0.7),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: iconColor ?? AppColors.navy),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  const _TypeChip({required this.type});
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.navy,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        type.toUpperCase(),
-        style: GoogleFonts.dmSans(
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
         ),
       ),
     );

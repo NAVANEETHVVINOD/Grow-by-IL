@@ -8,30 +8,32 @@ class ToolRepository {
   ToolRepository(this._client);
   final SupabaseClient _client;
 
-  /// Fetch all tools, optionally filtered by category.
-  Future<List<ToolModel>> getTools({String? category}) async {
-    AppLogger.action('Tool', 'getTools', data: {'category': category});
+  Future<List<ToolModel>> getTools({String? category, String? searchQuery}) async {
+    AppLogger.action(LogCategory.TOOLS, 'getTools', {'category': category, 'query': searchQuery});
     try {
       var query = _client.from('tools').select();
       if (category != null && category != 'All') {
         query = query.eq('category', category.toLowerCase().replaceAll(' ', '_'));
       }
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        query = query.ilike('name', '%$searchQuery%');
+      }
       final data = await query;
       return (data as List).map((row) => ToolModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error('Tool', 'getTools failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'getTools failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Fetch a single tool by ID.
   Future<ToolModel> getToolById(String id) async {
-    AppLogger.action('Tool', 'getToolById', data: {'id': id});
+    AppLogger.action(LogCategory.TOOLS, 'getToolById', {'id': id});
     try {
       final data = await _client.from('tools').select().eq('id', id).single();
       return ToolModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Tool', 'getToolById failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'getToolById failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -44,7 +46,7 @@ class ToolRepository {
     required DateTime slotEnd,
     String? projectId,
   }) async {
-    AppLogger.action('Tool', 'createBooking', data: {
+    AppLogger.action(LogCategory.TOOLS, 'createBooking', {
       'toolId': toolId,
       'userId': userId,
       'start': slotStart,
@@ -90,17 +92,17 @@ class ToolRepository {
         'related_id': data['id'],
       });
 
-      AppLogger.info('Tool', 'Booking created successfully with status: $status');
+      AppLogger.info(LogCategory.TOOLS, 'Booking created successfully with status: $status');
       return BookingModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Tool', 'createBooking failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'createBooking failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Approve a pending booking (OpHead/Admin only).
   Future<void> approveBooking(String bookingId, UserModel actor) async {
-    AppLogger.action('Tool', 'approveBooking', data: {
+    AppLogger.action(LogCategory.TOOLS, 'approveBooking', {
       'bookingId': bookingId,
       'actor': actor.email,
     });
@@ -128,39 +130,39 @@ class ToolRepository {
         'related_id': bookingId,
       });
 
-      AppLogger.info('Tool', 'Booking $bookingId approved by ${actor.name}');
+      AppLogger.info(LogCategory.TOOLS, 'Booking $bookingId approved by ${actor.name}');
     } catch (e, st) {
-      AppLogger.error('Tool', 'approveBooking failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'approveBooking failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Check out a tool (set to active).
   Future<void> checkoutTool(String bookingId) async {
-    AppLogger.action('Tool', 'checkoutTool', data: {'bookingId': bookingId});
+    AppLogger.action(LogCategory.TOOLS, 'checkoutTool', {'bookingId': bookingId});
     try {
       await _client.from('tool_bookings').update({
         'status': 'active',
         'checkout_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', bookingId);
-      AppLogger.info('Tool', 'Tool checkout successful for booking $bookingId');
+      AppLogger.info(LogCategory.TOOLS, 'Tool checkout successful for booking $bookingId');
     } catch (e, st) {
-      AppLogger.error('Tool', 'checkoutTool failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'checkoutTool failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Return a tool (set to returned).
   Future<void> returnTool(String bookingId) async {
-    AppLogger.action('Tool', 'returnTool', data: {'bookingId': bookingId});
+    AppLogger.action(LogCategory.TOOLS, 'returnTool', {'bookingId': bookingId});
     try {
       await _client.from('tool_bookings').update({
         'status': 'returned',
         'returned_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', bookingId);
-      AppLogger.info('Tool', 'Tool return successful for booking $bookingId');
+      AppLogger.info(LogCategory.TOOLS, 'Tool return successful for booking $bookingId');
     } catch (e, st) {
-      AppLogger.error('Tool', 'returnTool failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'returnTool failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -188,7 +190,7 @@ class ToolRepository {
       final data = await query.order('created_at', ascending: false);
       return (data as List).map((row) => BookingModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error('Tool', 'getMyBookings failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'getMyBookings failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -203,7 +205,7 @@ class ToolRepository {
           .lt('slot_end', DateTime.now().toUtc().toIso8601String());
       return (data as List).map((row) => BookingModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error('Tool', 'getOverdueBookings failed', e, st);
+      AppLogger.error(LogCategory.TOOLS, 'getOverdueBookings failed', error: e, stack: st);
       rethrow;
     }
   }

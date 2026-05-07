@@ -9,7 +9,7 @@ class LabRepository {
 
   /// Get the user's currently active session (checkin without checkout).
   Future<LabSessionModel?> getActiveSession(String userId) async {
-    AppLogger.action('Lab', 'getActiveSession', data: {'userId': userId});
+    AppLogger.action(LogCategory.LAB, 'getActiveSession', {'userId': userId});
     try {
       final data = await _client
           .from('lab_sessions')
@@ -23,14 +23,14 @@ class LabRepository {
       if (data == null) return null;
       return LabSessionModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Lab', 'getActiveSession failed', e, st);
+      AppLogger.error(LogCategory.LAB, 'getActiveSession failed', error: e, stack: st);
       return null;
     }
   }
 
   /// Check the user into the lab.
   Future<LabSessionModel> checkIn(String userId, String purpose) async {
-    AppLogger.action('Lab', 'checkIn', data: {
+    AppLogger.action(LogCategory.LAB, 'checkIn', {
       'userId': userId,
       'purpose': purpose,
     });
@@ -42,33 +42,33 @@ class LabRepository {
       }).select().single();
 
       final session = LabSessionModel.fromJson(data);
-      AppLogger.info('Lab', 'Check-in successful, sessionId: ${session.id}');
+      AppLogger.info(LogCategory.LAB, 'Check-in successful, sessionId: ${session.id}');
       return session;
     } catch (e, st) {
-      AppLogger.error('Lab', 'Check-in failed', e, st);
+      AppLogger.error(LogCategory.LAB, 'Check-in failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Check the user out of the lab.
   Future<void> checkOut(String sessionId) async {
-    AppLogger.action('Lab', 'checkOut', data: {'sessionId': sessionId});
+    AppLogger.action(LogCategory.LAB, 'checkOut', {'sessionId': sessionId});
 
     try {
       await _client.from('lab_sessions').update({
         'checkout_time': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', sessionId);
 
-      AppLogger.info('Lab', 'Check-out successful, sessionId: $sessionId');
+      AppLogger.info(LogCategory.LAB, 'Check-out successful, sessionId: $sessionId');
     } catch (e, st) {
-      AppLogger.error('Lab', 'Check-out failed', e, st);
+      AppLogger.error(LogCategory.LAB, 'Check-out failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Real-time stream of active visitor count.
   Stream<int> getLiveVisitorCount() {
-    AppLogger.info('Lab', 'Subscribing to live visitor count stream');
+    AppLogger.info(LogCategory.LAB, 'Subscribing to live visitor count stream');
     return _client
         .from('lab_sessions')
         .stream(primaryKey: ['id'])
@@ -78,7 +78,7 @@ class LabRepository {
   /// Get the user's session history.
   Future<List<LabSessionModel>> getMyHistory(String userId,
       {int limit = 20}) async {
-    AppLogger.action('Lab', 'getMyHistory', data: {'userId': userId});
+    AppLogger.action(LogCategory.LAB, 'getMyHistory', {'userId': userId});
     final data = await _client
         .from('lab_sessions')
         .select()
@@ -95,7 +95,7 @@ class LabRepository {
     try {
       final session = _client.auth.currentSession;
       if (session == null) {
-        AppLogger.warn('Auth', 'Heartbeat: no active session found');
+        AppLogger.warn(LogCategory.AUTH, 'Heartbeat: no active session found');
         return;
       }
       final expiresAt = session.expiresAt;
@@ -104,12 +104,12 @@ class LabRepository {
           .difference(DateTime.now().toUtc());
       if (expiresIn.inMinutes < 10) {
         AppLogger.info(
-            'Auth', 'Session expiring in ${expiresIn.inMinutes}m, refreshing...');
+            LogCategory.AUTH, 'Session expiring in ${expiresIn.inMinutes}m, refreshing...');
         await _client.auth.refreshSession();
-        AppLogger.info('Auth', 'Session refreshed successfully');
+        AppLogger.info(LogCategory.AUTH, 'Session refreshed successfully');
       }
     } catch (e, st) {
-      AppLogger.error('Auth', 'Session refresh failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'Session refresh failed', error: e, stack: st);
     }
   }
 }

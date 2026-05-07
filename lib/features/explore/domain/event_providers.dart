@@ -26,3 +26,10 @@ final userRsvpProvider = FutureProvider.family<RsvpModel?, String>((ref, eventId
   final repo = ref.watch(eventRepositoryProvider);
   return repo.getUserRsvp(eventId, user.id);
 });
+
+final myRsvpsProvider = FutureProvider<List<RsvpModel>>((ref) async {
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  if (user == null) return [];
+  final repo = ref.watch(eventRepositoryProvider);
+  return repo.getUserRsvps(user.id);
+});

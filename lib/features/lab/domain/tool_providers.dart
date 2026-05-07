@@ -10,10 +10,18 @@ final toolRepositoryProvider = Provider<ToolRepository>((ref) {
   return ToolRepository(supabase);
 });
 
-/// Future provider for the list of tools, optionally filtered by category
-final toolsProvider = FutureProvider.family<List<ToolModel>, String?>((ref, category) async {
+/// State provider for the current category filter
+final toolCategoryFilterProvider = StateProvider<String>((ref) => 'All');
+
+/// State provider for the current search query
+final toolSearchQueryProvider = StateProvider<String>((ref) => '');
+
+/// Future provider for the list of tools, filtered by category and search
+final toolsProvider = FutureProvider<List<ToolModel>>((ref) async {
+  final category = ref.watch(toolCategoryFilterProvider);
+  final searchQuery = ref.watch(toolSearchQueryProvider);
   final repo = ref.watch(toolRepositoryProvider);
-  return repo.getTools(category: category);
+  return repo.getTools(category: category, searchQuery: searchQuery);
 });
 
 /// Future provider for the current user's bookings
@@ -68,6 +76,3 @@ extension ToolRepoExt on ToolRepository {
 
 /// State provider for the currently selected tool in the catalog
 final selectedToolProvider = StateProvider<ToolModel?>((ref) => null);
-
-/// State provider for the current category filter
-final toolCategoryFilterProvider = StateProvider<String>((ref) => 'All');

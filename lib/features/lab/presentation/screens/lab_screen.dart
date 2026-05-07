@@ -548,7 +548,7 @@ class _CheckedInView extends ConsumerWidget {
               NeoButton(
                 label: 'Submit',
                 onPressed: () {
-                  AppLogger.action('Lab', 'Issue reported', data: {'issue': controller.text});
+                  AppLogger.action(LogCategory.LAB, 'Issue reported', {'issue': controller.text});
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Issue reported. Thank you!')),

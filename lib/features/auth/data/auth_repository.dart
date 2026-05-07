@@ -37,7 +37,7 @@ class AuthRepository {
     required String collegeRoll,
     required String phone,
   }) async {
-    AppLogger.action('Auth', 'signUp', data: {'email': email});
+    AppLogger.action(LogCategory.AUTH, 'signUp', {'email': email});
 
     try {
       // 1. Create auth user
@@ -65,9 +65,9 @@ class AuthRepository {
         'qr_code_data': 'GROWLAB-USER-$userId',
       });
 
-      AppLogger.info('Auth', 'Sign-up successful, userId: $userId');
+      AppLogger.info(LogCategory.AUTH, 'Sign-up successful, userId: $userId');
     } catch (e, st) {
-      AppLogger.error('Auth', 'Sign-up failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'Sign-up failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -77,28 +77,28 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    AppLogger.action('Auth', 'signIn', data: {'email': email});
+    AppLogger.action(LogCategory.AUTH, 'signIn', {'email': email});
 
     try {
       await _client.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      AppLogger.info('Auth', 'Sign-in successful, email: $email');
+      AppLogger.info(LogCategory.AUTH, 'Sign-in successful, email: $email');
     } catch (e, st) {
-      AppLogger.error('Auth', 'Sign-in failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'Sign-in failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Sign out the current user
   Future<void> signOut() async {
-    AppLogger.action('Auth', 'signOut');
+    AppLogger.action(LogCategory.AUTH, 'signOut');
     try {
       await _client.auth.signOut();
-      AppLogger.info('Auth', 'Sign-out successful');
+      AppLogger.info(LogCategory.AUTH, 'Sign-out successful');
     } catch (e, st) {
-      AppLogger.error('Auth', 'Sign-out failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'Sign-out failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -113,7 +113,7 @@ class AuthRepository {
           .single();
       return UserModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error('Auth', 'getUserProfile failed', e, st);
+      AppLogger.error(LogCategory.AUTH, 'getUserProfile failed', error: e, stack: st);
       return null;
     }
   }

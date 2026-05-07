@@ -32,7 +32,7 @@ class HomeRepository {
   final SupabaseClient _client;
 
   Future<List<EventModel>> getUpcomingEvents() async {
-    AppLogger.action('Home', 'getUpcomingEvents');
+    AppLogger.action(LogCategory.SYSTEM, 'getUpcomingEvents');
     try {
       final response = await _client
           .from('events')
@@ -41,16 +41,16 @@ class HomeRepository {
           .order('event_date', ascending: true)
           .limit(5);
 
-      AppLogger.info('Home', 'Fetched ${(response as List).length} events');
+      AppLogger.info(LogCategory.SYSTEM, 'Fetched ${(response as List).length} events');
       return response.map((data) => EventModel.fromJson(data)).toList();
     } catch (e, st) {
-      AppLogger.error('Home', 'getUpcomingEvents failed', e, st);
+      AppLogger.error(LogCategory.SYSTEM, 'getUpcomingEvents failed', error: e, stack: st);
       rethrow;
     }
   }
 
   Future<List<ProjectModel>> getUserProjects(String userId) async {
-    AppLogger.action('Home', 'getUserProjects', data: {'userId': userId});
+    AppLogger.action(LogCategory.SYSTEM, 'getUserProjects', {'userId': userId});
     try {
       final response = await _client
           .from('project_members')
@@ -63,13 +63,13 @@ class HomeRepository {
         return ProjectModel.fromJson(projectData);
       }).toList();
     } catch (e, st) {
-      AppLogger.error('Home', 'getUserProjects failed', e, st);
+      AppLogger.error(LogCategory.SYSTEM, 'getUserProjects failed', error: e, stack: st);
       rethrow;
     }
   }
 
   Future<List<BookingModel>> getUserBookings(String userId) async {
-    AppLogger.action('Home', 'getUserBookings', data: {'userId': userId});
+    AppLogger.action(LogCategory.SYSTEM, 'getUserBookings', {'userId': userId});
     try {
       final response = await _client
           .from('tool_bookings')
@@ -82,7 +82,7 @@ class HomeRepository {
           .map((data) => BookingModel.fromJson(data))
           .toList();
     } catch (e, st) {
-      AppLogger.error('Home', 'getUserBookings failed', e, st);
+      AppLogger.error(LogCategory.SYSTEM, 'getUserBookings failed', error: e, stack: st);
       rethrow;
     }
   }

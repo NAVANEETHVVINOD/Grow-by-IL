@@ -157,17 +157,24 @@ CREATE TABLE public.project_members (
   UNIQUE(project_id, user_id)
 );
 
--- 10. notifications
-CREATE TABLE public.notifications (
+-- 10. project_members (was here, moved up)
+
+-- 10.1 project_updates
+CREATE TABLE IF NOT EXISTS public.project_updates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
   user_id UUID REFERENCES public.users(id),
-  type TEXT NOT NULL,
-  title TEXT NOT NULL,
-  message TEXT,
-  related_id UUID,
-  is_read BOOLEAN DEFAULT false,
+  content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.project_updates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "updates_select_auth" ON public.project_updates
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "updates_insert_member" ON public.project_updates
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- 11. knowledge_articles
 CREATE TABLE public.knowledge_articles (
@@ -306,6 +313,41 @@ USING (
 
 -- ── Tool Bookings RLS Policies ───────────────────────────────────
 -- Users can view their own bookings
+-- ── Events RLS Policies ──────────────────────────────────────────
+-- 1. Events are viewable by everyone
+CREATE POLICY "Events are viewable by everyone"
+ON public.events FOR SELECT USING (true);
+
+-- 2. Admins/OpHeads can manage all events
+CREATE POLICY "Admins can manage all events"
+ON public.events USING (
+  auth.uid() IN (SELECT id FROM public.users WHERE system_role IN ('admin', 'operation_head'))
+);
+
+-- ── RSVPs RLS Policies ───────────────────────────────────────────
+-- 1. RSVPs are viewable by the user who RSVP'd
+CREATE POLICY "Users can view own RSVPs"
+ON public.rsvps FOR SELECT USING (auth.uid() = user_id);
+
+-- 2. RSVPs are viewable by event organizers/admins
+CREATE POLICY "Organizers can view event RSVPs"
+ON public.rsvps FOR SELECT
+USING (
+  auth.uid() IN (
+    SELECT created_by FROM public.events WHERE id = event_id
+  ) OR auth.uid() IN (
+    SELECT id FROM public.users WHERE system_role IN ('admin', 'operation_head')
+  )
+);
+
+-- 3. Users can create their own RSVPs
+CREATE POLICY "Users can create own RSVPs"
+ON public.rsvps FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- 4. Users can update (cancel) their own RSVPs
+CREATE POLICY "Users can update own RSVPs"
+ON public.rsvps FOR UPDATE USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can view own bookings"
 ON public.tool_bookings
 FOR SELECT
@@ -344,6 +386,58 @@ USING (
     SELECT user_id FROM public.project_members WHERE project_id = public.tool_bookings.project_id
   )
 );
+
+-- ── Projects RLS Policies ────────────────────────────────────────
+-- 1. Public projects are viewable by everyone
+CREATE POLICY "Public projects are viewable by everyone"
+ON public.projects FOR SELECT
+USING (visibility = 'public');
+
+-- 2. Private projects are viewable by members
+CREATE POLICY "Private projects are viewable by members"
+ON public.projects FOR SELECT
+USING (
+  auth.uid() IN (SELECT user_id FROM public.project_members WHERE project_id = id)
+);
+
+-- 3. Authenticated users can create projects
+CREATE POLICY "Auth users can create projects"
+ON public.projects FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+
+-- 4. Owners and Admins can update projects
+CREATE POLICY "Owners and Admins can update projects"
+ON public.projects FOR UPDATE
+USING (
+  auth.uid() IN (
+    SELECT user_id FROM public.project_members 
+    WHERE project_id = id AND role IN ('owner', 'admin')
+  )
+);
+
+-- ── Project Members RLS Policies ─────────────────────────────────
+-- 1. Members are viewable by other project members
+CREATE POLICY "Project members are viewable by project members"
+ON public.project_members FOR SELECT
+USING (
+  auth.uid() IN (SELECT user_id FROM public.project_members WHERE project_id = project_id)
+);
+
+-- 2. Authenticated users can join public projects
+CREATE POLICY "Auth users can join projects"
+ON public.project_members FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+
+-- 3. Only owners can manage roles or remove members
+CREATE POLICY "Owners can manage members"
+ON public.project_members FOR UPDATE
+USING (
+  auth.uid() IN (
+    SELECT user_id FROM public.project_members 
+    WHERE project_id = project_id AND role = 'owner'
+  )
+);
+
 
 -- 12. inventory_items
 CREATE TABLE public.inventory_items (
@@ -417,6 +511,6 @@ ON public.notifications FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own notifications"
 ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "System can create notifications"
-ON public.notifications FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated users can create notifications"
+ON public.notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 

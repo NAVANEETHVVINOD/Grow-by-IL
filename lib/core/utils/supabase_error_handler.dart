@@ -7,7 +7,7 @@ import 'app_logger.dart';
 /// Use in catch blocks to provide clean error text for SnackBars.
 String handleSupabaseError(Object error) {
   if (error is AuthException) {
-    AppLogger.warn('Auth', 'AuthException: ${error.message}');
+    AppLogger.warn(LogCategory.AUTH, 'AuthException: ${error.message}');
     switch (error.message) {
       case 'Invalid login credentials':
         return 'Wrong email or password.';
@@ -21,7 +21,7 @@ String handleSupabaseError(Object error) {
   }
   if (error is PostgrestException) {
     AppLogger.warn(
-        'DB', 'PostgrestException code=${error.code}: ${error.message}');
+        LogCategory.NETWORK, 'PostgrestException code=${error.code}: ${error.message}');
     switch (error.code) {
       case '23505':
         return 'This username is already taken.';
@@ -34,6 +34,6 @@ String handleSupabaseError(Object error) {
     }
   }
   AppLogger.error(
-      'Unknown', 'Unhandled error type: ${error.runtimeType}', error);
+      LogCategory.SYSTEM, 'Unhandled error type: ${error.runtimeType}', error: error);
   return 'Something went wrong. Please try again.';
 }

@@ -35,14 +35,14 @@ final goRouter = GoRouter(
     const publicPaths = ['/splash', '/onboarding', '/login', '/register'];
     final isPublic = publicPaths.contains(path);
 
-    AppLogger.info('Router', 'Redirect check: path=$path, authed=${session != null}');
+    AppLogger.info(LogCategory.ROUTER, 'Redirect check: path=$path, authed=${session != null}');
 
     if (session == null && !isPublic) {
-      AppLogger.warn('Router', 'Unauthenticated access to $path → redirecting to /login');
+      AppLogger.warn(LogCategory.ROUTER, 'Unauthenticated access to $path → redirecting to /login');
       return '/login';
     }
     if (session != null && (path == '/login' || path == '/register')) {
-      AppLogger.info('Router', 'Already authed, redirecting from $path → /home');
+      AppLogger.info(LogCategory.ROUTER, 'Already authed, redirecting from $path → /home');
       return '/home';
     }
     return null;
