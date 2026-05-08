@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../domain/tool_providers.dart';
-import '../widgets/booking_bottom_sheet.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/shimmer_skeleton.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:grow/features/lab/presentation/widgets/booking_bottom_sheet.dart';
+import 'package:grow/shared/models/tool_model.dart';
 
 class ToolsScreen extends ConsumerWidget {
   const ToolsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedCategory = ref.watch(toolCategoryFilterProvider);
-    final toolsAsync = ref.watch(toolsProvider(selectedCategory));
+    final toolsAsync = ref.watch(toolsProvider);
     final selectedTool = ref.watch(selectedToolProvider);
 
     return Scaffold(
@@ -48,7 +48,7 @@ class ToolsScreen extends ConsumerWidget {
                     children: [
                       _buildSearchBar(),
                       const SizedBox(height: AppSizes.md),
-                      _buildFilterChips(ref, selectedCategory),
+                      _buildFilterChips(ref, ref.watch(toolCategoryFilterProvider)),
                     ],
                   ),
                 ),
@@ -235,7 +235,7 @@ class _ToolCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.navy.withOpacity(0.1)),
+                  border: Border.all(color: AppColors.navy.withValues(alpha: 0.1)),
                 ),
                 child: tool.imageUrl != null
                     ? ClipRRect(
@@ -284,7 +284,7 @@ class _ToolCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color, width: 1),
       ),

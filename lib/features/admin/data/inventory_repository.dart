@@ -2,7 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../shared/models/inventory_item_model.dart';
 import '../../../shared/models/inventory_transaction_model.dart';
-import '../../../shared/models/tool_model.dart';
 
 class InventoryRepository {
   InventoryRepository(this._client);
@@ -10,7 +9,7 @@ class InventoryRepository {
 
   /// Fetch all inventory items (consumables, components, kits).
   Future<List<InventoryItemModel>> getInventoryItems({String? category, String? type}) async {
-    AppLogger.action(LogCategory.INVENTORY, 'getInventoryItems', {'category': category, 'type': type});
+    AppLogger.action(LogCategory.inventory, 'getInventoryItems', {'category': category, 'type': type});
     try {
       var query = _client.from('inventory_items').select();
       if (category != null && category != 'All') query = query.eq('category', category);
@@ -19,7 +18,7 @@ class InventoryRepository {
       final data = await query.order('name', ascending: true);
       return (data as List).map((row) => InventoryItemModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.INVENTORY, 'getInventoryItems failed', error: e, stack: st);
+      AppLogger.error(LogCategory.inventory, 'getInventoryItems failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -32,7 +31,7 @@ class InventoryRepository {
     required String transactionType,
     String? notes,
   }) async {
-    AppLogger.action(LogCategory.INVENTORY, 'adjustStock', {'itemId': itemId, 'change': change});
+    AppLogger.action(LogCategory.inventory, 'adjustStock', {'itemId': itemId, 'change': change});
     try {
       // 1. Fetch current quantity to ensure no negative stock
       final item = await _client.from('inventory_items').select('quantity').eq('id', itemId).single();
@@ -54,9 +53,9 @@ class InventoryRepository {
         'notes': notes,
       });
 
-      AppLogger.info(LogCategory.INVENTORY, 'Stock adjusted for $itemId: $change');
+      AppLogger.info(LogCategory.inventory, 'Stock adjusted for $itemId: $change');
     } catch (e, st) {
-      AppLogger.error(LogCategory.INVENTORY, 'adjustStock failed', error: e, stack: st);
+      AppLogger.error(LogCategory.inventory, 'adjustStock failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -69,7 +68,7 @@ class InventoryRepository {
     required String newStatus,
     String? notes,
   }) async {
-    AppLogger.action(LogCategory.INVENTORY, 'logToolStatus', {'toolId': toolId, 'type': transactionType});
+    AppLogger.action(LogCategory.inventory, 'logToolStatus', {'toolId': toolId, 'type': transactionType});
     try {
       // 1. Update Tool Status
       await _client.from('tools').update({
@@ -85,9 +84,9 @@ class InventoryRepository {
         'notes': notes,
       });
 
-      AppLogger.info(LogCategory.INVENTORY, 'Tool $toolId status updated to $newStatus');
+      AppLogger.info(LogCategory.inventory, 'Tool $toolId status updated to $newStatus');
     } catch (e, st) {
-      AppLogger.error(LogCategory.INVENTORY, 'logToolStatus failed', error: e, stack: st);
+      AppLogger.error(LogCategory.inventory, 'logToolStatus failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -102,7 +101,7 @@ class InventoryRepository {
       final data = await query.order('created_at', ascending: false).limit(20);
       return (data as List).map((row) => InventoryTransactionModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.INVENTORY, 'getTransactionHistory failed', error: e, stack: st);
+      AppLogger.error(LogCategory.inventory, 'getTransactionHistory failed', error: e, stack: st);
       rethrow;
     }
   }

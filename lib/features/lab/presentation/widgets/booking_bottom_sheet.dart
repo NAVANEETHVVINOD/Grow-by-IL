@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/utils/app_logger.dart';
-import '../../../../shared/models/tool_model.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../../home/data/home_repository.dart';
-import '../domain/tool_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/tool_model.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:grow/features/projects/domain/project_providers.dart';
 
 class BookingBottomSheet extends ConsumerStatefulWidget {
   const BookingBottomSheet({super.key, required this.tool});
@@ -35,7 +33,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final projectsAsync = ref.watch(activeProjectsProvider);
+    final projectsAsync = ref.watch(userProjectsProvider);
     final bookingsAsync = ref.watch(toolBookingsForDayProvider((toolId: widget.tool.id, date: _selectedDate)));
 
     return Container(

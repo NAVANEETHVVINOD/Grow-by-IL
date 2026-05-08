@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/models/inventory_item_model.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../domain/inventory_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/inventory_item_model.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/admin/domain/inventory_providers.dart';
 
 class StockAdjustSheet extends ConsumerStatefulWidget {
   const StockAdjustSheet({super.key, required this.item});

@@ -28,7 +28,7 @@ class ProjectMemberModel {
       joinedAt: json['joined_at'] != null 
           ? DateTime.parse(json['joined_at'] as String).toUtc() 
           : null,
-      userName: json['users']?['full_name'] as String?,
+      userName: json['users']?['name'] as String?,
       userAvatar: json['users']?['avatar_url'] as String?,
     );
   }

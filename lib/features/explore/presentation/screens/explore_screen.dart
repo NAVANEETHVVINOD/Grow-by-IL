@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/neo_card.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
 
 class ExploreScreen extends ConsumerWidget {
   const ExploreScreen({super.key});
@@ -164,7 +164,7 @@ class ExploreScreen extends ConsumerWidget {
                       desc,
                       style: GoogleFonts.dmSans(
                         fontSize: 13,
-                        color: (iconColor ?? AppColors.navy).withOpacity(0.7),
+                        color: (iconColor ?? AppColors.navy).withValues(alpha: 0.7),
                       ),
                     ),
                   ],

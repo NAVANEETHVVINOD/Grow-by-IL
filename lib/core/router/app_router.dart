@@ -32,19 +32,33 @@ final goRouter = GoRouter(
   redirect: (context, state) {
     final session = supabase.auth.currentSession;
     final path = state.uri.path;
-    const publicPaths = ['/splash', '/onboarding', '/login', '/register'];
-    final isPublic = publicPaths.contains(path);
 
-    AppLogger.info(LogCategory.ROUTER, 'Redirect check: path=$path, authed=${session != null}');
+    final publicRoutes = {'/splash', '/onboarding', '/login', '/register'};
+    final isPublic = publicRoutes.contains(path);
 
+    AppLogger.info(LogCategory.router, 'REDIRECT_CHECK | '
+      'path=$path authed=${session != null}');
+
+    // Unauthenticated trying to access protected route
     if (session == null && !isPublic) {
-      AppLogger.warn(LogCategory.ROUTER, 'Unauthenticated access to $path → redirecting to /login');
+      AppLogger.warn(LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
       return '/login';
     }
-    if (session != null && (path == '/login' || path == '/register')) {
-      AppLogger.info(LogCategory.ROUTER, 'Already authed, redirecting from $path → /home');
+
+    // Authenticated user trying to access auth routes (onboarding/login) → send home
+    // We EXCLUDE /splash here so SplashScreen can do its async database check.
+    if (session != null && (path == '/onboarding' || path == '/login' || path == '/register')) {
+      AppLogger.info(LogCategory.router, 'AUTH_USER_REDIRECTED_HOME | from=$path');
       return '/home';
     }
+
+    // Authenticated but profile not complete → profile setup
+    // (Only redirect if NOT already going to profile-setup)
+    if (session != null && path != '/profile-setup') {
+      // Check profile_completed via a synchronous cache check only
+      // Full async check happens in splash_screen.dart
+    }
+
     return null;
   },
   routes: [

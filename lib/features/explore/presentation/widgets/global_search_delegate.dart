@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/models/tool_model.dart';
-import '../../../../shared/models/event_model.dart';
-import '../../../../shared/models/project_model.dart';
-import '../../../lab/domain/tool_providers.dart';
-import '../../../explore/domain/event_providers.dart';
-import '../../../projects/domain/project_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:grow/features/explore/domain/event_providers.dart';
+import 'package:grow/features/projects/domain/project_providers.dart';
 
 class GlobalSearchDelegate extends SearchDelegate {
   GlobalSearchDelegate(this.ref);
@@ -49,7 +47,7 @@ class GlobalSearchDelegate extends SearchDelegate {
   Widget _buildSearchResults(BuildContext context) {
     // Note: In a real app, we'd use a dedicated search repository.
     // For MVP, we filter the already cached providers.
-    final tools = ref.watch(toolsProvider(null)).valueOrNull ?? [];
+    final tools = ref.watch(toolsProvider).valueOrNull ?? [];
     final projects = ref.watch(publicProjectsProvider).valueOrNull ?? [];
     final events = ref.watch(activeEventsProvider).valueOrNull ?? [];
 

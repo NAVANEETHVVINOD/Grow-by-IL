@@ -24,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -57,85 +58,145 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final response = await ref.read(authRepositoryProvider).signInWithGoogle();
+      if (response == null) return; // user cancelled
+      if (!mounted) return;
+      
+      // Check profile completion
+      final user = await ref.read(authRepositoryProvider).getCurrentUser();
+      if (!mounted) return;
+      
+      if (user?.profileCompleted == true) {
+        context.go('/home');
+      } else {
+        // New user or incomplete profile -> show onboarding slides first
+        context.go('/onboarding');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(handleSupabaseError(e)),
+          backgroundColor: AppColors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSizes.xl),
-              Text(
-                'Welcome Back',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const SizedBox(height: AppSizes.sm),
-              Text(
-                'Sign in to access Grow~',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
+    return PopScope(
+      canPop: false, // prevents back to onboarding/splash
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSizes.xl),
+                Text(
+                  'Welcome Back',
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Text(
+                  'Sign in to access Grow~',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: AppSizes.xxl),
+                NeoCard(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        NeoTextField(
+                          label: 'Email Address',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: Icons.email_outlined,
+                          validator: AppValidators.email,
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+                        NeoTextField(
+                          label: 'Password',
+                          controller: _passwordController,
+                          obscureText: true,
+                          prefixIcon: Icons.lock_outline,
+                          validator: AppValidators.password,
+                        ),
+                        const SizedBox(height: AppSizes.xl),
+                        NeoButton(
+                          label: 'Sign In',
+                          isLoading: _isLoading,
+                          onPressed: _login,
+                        ),
+                      ],
                     ),
-              ),
-              const SizedBox(height: AppSizes.xxl),
-              NeoCard(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      NeoTextField(
-                        label: 'Email Address',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email_outlined,
-                        validator: AppValidators.email,
-                      ),
-                      const SizedBox(height: AppSizes.lg),
-                      NeoTextField(
-                        label: 'Password',
-                        controller: _passwordController,
-                        obscureText: true,
-                        prefixIcon: Icons.lock_outline,
-                        validator: AppValidators.password,
-                      ),
-                      const SizedBox(height: AppSizes.xl),
-                      NeoButton(
-                        label: 'Sign In',
-                        isLoading: _isLoading,
-                        onPressed: _login,
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSizes.xl),
-              Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 4,
-                children: [
-                  Text(
-                    'Don\'t have an account?',
-                    style: GoogleFonts.dmSans(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go('/register'),
-                    child: Text(
-                      'Create Account',
-                      style: GoogleFonts.dmSans(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
+                const SizedBox(height: AppSizes.lg),
+                // Divider with "or" text
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppColors.textSecondary)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'or',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const Expanded(child: Divider(color: AppColors.textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.lg),
+                // Google button
+                NeoButton(
+                  label: 'Continue with Google',
+                  color: Colors.white,
+                  textColor: AppColors.navy,
+                  icon: Icons.account_circle_outlined,
+                  isLoading: _isGoogleLoading,
+                  onPressed: _handleGoogleSignIn,
+                ),
+                const SizedBox(height: AppSizes.xl),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      'Don\'t have an account?',
+                      style: GoogleFonts.dmSans(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go('/register'),
+                      child: Text(
+                        'Create Account',
+                        style: GoogleFonts.dmSans(
+                          color: AppColors.navy,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../auth/shared/models/user_model.dart';
-import '../../../../shared/widgets/neo_card.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/user_model.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
 
 class DigitalIdCard extends StatefulWidget {
-  const DigitalIdCard({super.key, required this.user});
+  const DigitalIdCard({super.key, required this.user, this.onAvatarTap, this.isUploading = false});
   final UserModel user;
+  final VoidCallback? onAvatarTap;
+  final bool isUploading;
 
   @override
   State<DigitalIdCard> createState() => _DigitalIdCardState();
@@ -89,22 +91,71 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
                 const Icon(Icons.bolt_rounded, color: AppColors.yellow),
               ],
             ),
-            const Spacer(),
-            Text(
-              widget.user.name.toUpperCase(),
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              widget.user.baseRole.toUpperCase(),
-              style: GoogleFonts.dmSans(
-                color: Colors.white70,
-                fontSize: 14,
-                letterSpacing: 1,
-              ),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: widget.onAvatarTap,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 35,
+                        backgroundColor: AppColors.yellow,
+                        backgroundImage: widget.user.avatarUrl != null 
+                          ? NetworkImage(widget.user.avatarUrl!) 
+                          : null,
+                        child: widget.user.avatarUrl == null 
+                          ? const Icon(Icons.person, size: 40, color: AppColors.navy) 
+                          : null,
+                      ),
+                      if (widget.isUploading)
+                        const CircleAvatar(
+                          radius: 35,
+                          backgroundColor: Colors.black54,
+                          child: CircularProgressIndicator(color: AppColors.yellow),
+                        ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.yellow,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.camera_alt, size: 12, color: AppColors.navy),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSizes.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.user.name.toUpperCase(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        widget.user.role.toUpperCase(),
+                        style: GoogleFonts.dmSans(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
             Row(

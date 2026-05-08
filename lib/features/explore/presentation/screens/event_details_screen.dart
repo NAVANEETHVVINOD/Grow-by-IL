@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/models/event_model.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../auth/data/auth_repository.dart';
-import '../domain/event_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/event_model.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/explore/domain/event_providers.dart';
 
 class EventDetailsScreen extends ConsumerStatefulWidget {
   const EventDetailsScreen({super.key, required this.eventId});
@@ -76,7 +76,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
             : Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.navy.withOpacity(0.8), AppColors.navy],
+                    colors: [AppColors.navy.withValues(alpha: 0.8), AppColors.navy],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),

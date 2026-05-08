@@ -7,7 +7,7 @@ class UserModel {
     this.phone,
     this.collegeRoll,
     this.username,
-    this.baseRole = 'student',
+    this.role = 'student',
     this.systemRole = 'user',
     this.skills = const [],
     this.interests = const [],
@@ -21,6 +21,7 @@ class UserModel {
     this.isBlocked = false,
     this.createdAt,
     this.updatedAt,
+    this.avatarUrl,
   });
 
   final String id;
@@ -29,7 +30,7 @@ class UserModel {
   final String? phone;
   final String? collegeRoll;
   final String? username;
-  final String baseRole;
+  final String role;
   final String systemRole;
   final List<String> skills;
   final List<String> interests;
@@ -43,6 +44,7 @@ class UserModel {
   final bool isBlocked;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? avatarUrl;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -52,7 +54,7 @@ class UserModel {
       phone: json['phone'] as String?,
       collegeRoll: json['college_roll'] as String?,
       username: json['username'] as String?,
-      baseRole: json['base_role'] as String? ?? 'student',
+      role: json['role'] as String? ?? 'student',
       systemRole: json['system_role'] as String? ?? 'user',
       skills: (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
       interests: (json['interests'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
@@ -70,6 +72,7 @@ class UserModel {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
+      avatarUrl: json['avatar_url'] as String?,
     );
   }
 
@@ -81,7 +84,7 @@ class UserModel {
       'phone': phone,
       'college_roll': collegeRoll,
       'username': username,
-      'base_role': baseRole,
+      'role': role,
       'system_role': systemRole,
       'skills': skills,
       'interests': interests,
@@ -93,6 +96,7 @@ class UserModel {
       'qr_code_data': qrCodeData,
       'fcm_token': fcmToken,
       'is_blocked': isBlocked,
+      'avatar_url': avatarUrl,
     };
   }
 
@@ -103,7 +107,7 @@ class UserModel {
     String? phone,
     String? collegeRoll,
     String? username,
-    String? baseRole,
+    String? role,
     String? systemRole,
     List<String>? skills,
     List<String>? interests,
@@ -117,6 +121,7 @@ class UserModel {
     bool? isBlocked,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? avatarUrl,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -125,7 +130,7 @@ class UserModel {
       phone: phone ?? this.phone,
       collegeRoll: collegeRoll ?? this.collegeRoll,
       username: username ?? this.username,
-      baseRole: baseRole ?? this.baseRole,
+      role: role ?? this.role,
       systemRole: systemRole ?? this.systemRole,
       skills: skills ?? this.skills,
       interests: interests ?? this.interests,
@@ -139,6 +144,7 @@ class UserModel {
       isBlocked: isBlocked ?? this.isBlocked,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 }

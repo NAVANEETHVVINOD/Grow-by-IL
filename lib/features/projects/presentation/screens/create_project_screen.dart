@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../auth/data/auth_repository.dart';
-import '../domain/project_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/projects/domain/project_providers.dart';
+
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:grow/core/services/media_providers.dart';
 
 class CreateProjectScreen extends ConsumerStatefulWidget {
   const CreateProjectScreen({super.key});
@@ -21,9 +25,22 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
   final _descController = TextEditingController();
   final _linkController = TextEditingController();
   
+  XFile? _imageFile;
   String _type = 'team';
   String _visibility = 'public';
   bool _isLoading = false;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1920,
+      maxHeight: 1080,
+    );
+    if (image != null) {
+      setState(() => _imageFile = image);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +67,40 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSizes.lg),
           children: [
+            _buildFieldLabel('Project Cover Image'),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.navy, width: 2),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                ),
+                child: _imageFile != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusMd - 2),
+                        child: Image.file(File(_imageFile!.path), fit: BoxFit.cover, width: double.infinity),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.textSecondary),
+                          const SizedBox(height: 8),
+                          Text(
+                            'SELECT COVER PHOTO',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: AppSizes.md),
+
             _buildFieldLabel('Project Title'),
             _buildTextField(_titleController, 'e.g. Solar Powered Car', true),
             const SizedBox(height: AppSizes.md),
@@ -148,6 +199,18 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
 
     setState(() => _isLoading = true);
     try {
+      String? coverUrl;
+      if (_imageFile != null) {
+        // We use a temporary project ID or handle it after creation
+        // But MediaService.uploadProjectImage expects a projectId.
+        // Let's generate a temporary UUID or just use 'temp' if needed, 
+        // but better to create project first, then update it.
+        // Wait, MediaService.uploadProjectImage just uses the ID for the path.
+        // I'll use user.id + timestamp as a temporary folder name.
+        final tempPathId = 'temp_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
+        coverUrl = await ref.read(mediaServiceProvider).uploadProjectImage(tempPathId, _imageFile!);
+      }
+
       final project = await ref.read(projectRepositoryProvider).createProject({
         'title': _titleController.text.trim(),
         'description': _descController.text.trim(),
@@ -155,6 +218,7 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
         'visibility': _visibility,
         'external_link': _linkController.text.trim().isEmpty ? null : _linkController.text.trim(),
         'created_by': user.id,
+        'cover_image_url': coverUrl,
       });
 
       ref.invalidate(publicProjectsProvider);

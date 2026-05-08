@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/utils/app_logger.dart';
-import '../../../shared/models/event_model.dart';
-import '../../../shared/models/rsvp_model.dart';
+import 'package:grow/core/utils/app_logger.dart';
+import 'package:grow/shared/models/event_model.dart';
+import 'package:grow/shared/models/rsvp_model.dart';
 
 class EventRepository {
   EventRepository(this._client);
@@ -9,16 +9,19 @@ class EventRepository {
 
   /// Fetch active events.
   Future<List<EventModel>> getEvents() async {
-    AppLogger.action(LogCategory.EVENTS, 'getEvents');
+    AppLogger.action(LogCategory.events, 'getEvents');
+    AppLogger.info(LogCategory.events, 
+      'QUERY_COLUMNS | id, title, description, event_type, start_time, end_time, status, location_name, created_by, created_at, capacity, rsvp_count');
+    
     try {
       final data = await _client
           .from('events')
           .select()
-          .eq('status', 'active')
+          .filter('status', 'in', '("active","upcoming")') // Handle both legacy and new statuses
           .order('start_time', ascending: true);
       return (data as List).map((row) => EventModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.EVENTS, 'getEvents failed', error: e, stack: st);
+      AppLogger.error(LogCategory.events, 'getEvents failed', error: e, stack: st);
       rethrow;
     }
   }
@@ -29,14 +32,14 @@ class EventRepository {
       final data = await _client.from('events').select().eq('id', id).single();
       return EventModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.EVENTS, 'getEventById failed', error: e, stack: st);
+      AppLogger.error(LogCategory.events, 'getEventById failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// RSVP to an event with a race condition guard.
   Future<RsvpModel> rsvpToEvent(String eventId, String userId) async {
-    AppLogger.action(LogCategory.EVENTS, 'rsvpToEvent', {'eventId': eventId, 'userId': userId});
+    AppLogger.action(LogCategory.events, 'rsvpToEvent', {'eventId': eventId, 'userId': userId});
     try {
       // 1. Guard: Check if already going to prevent double counting
       final existing = await getUserRsvp(eventId, userId);
@@ -70,17 +73,17 @@ class EventRepository {
         'related_id': eventId,
       });
 
-      AppLogger.info(LogCategory.EVENTS, 'RSVP successful for event $eventId');
+      AppLogger.info(LogCategory.events, 'RSVP successful for event $eventId');
       return RsvpModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.EVENTS, 'rsvpToEvent failed', error: e, stack: st);
+      AppLogger.error(LogCategory.events, 'rsvpToEvent failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Cancel an RSVP.
   Future<void> cancelRsvp(String eventId, String userId) async {
-    AppLogger.action(LogCategory.EVENTS, 'cancelRsvp', {'eventId': eventId, 'userId': userId});
+    AppLogger.action(LogCategory.events, 'cancelRsvp', {'eventId': eventId, 'userId': userId});
     try {
       // 1. Guard: Only cancel if currently going
       final existing = await getUserRsvp(eventId, userId);
@@ -103,10 +106,27 @@ class EventRepository {
         'related_id': eventId,
       });
 
-      AppLogger.info(LogCategory.EVENTS, 'RSVP cancelled for event $eventId');
+      AppLogger.info(LogCategory.events, 'RSVP cancelled for event $eventId');
     } catch (e, st) {
-      AppLogger.error(LogCategory.EVENTS, 'cancelRsvp failed', error: e, stack: st);
+      AppLogger.error(LogCategory.events, 'cancelRsvp failed', error: e, stack: st);
       rethrow;
+    }
+  }
+
+  /// Fetch a single RSVP for a specific event and user.
+  Future<RsvpModel?> getUserRsvp(String eventId, String userId) async {
+    try {
+      final data = await _client
+          .from('rsvps')
+          .select()
+          .eq('event_id', eventId)
+          .eq('user_id', userId)
+          .maybeSingle();
+      if (data == null) return null;
+      return RsvpModel.fromJson(data);
+    } catch (e, st) {
+      AppLogger.error(LogCategory.events, 'getUserRsvp failed', error: e, stack: st);
+      return null;
     }
   }
 
@@ -120,7 +140,7 @@ class EventRepository {
           .order('created_at', ascending: false);
       return (data as List).map((row) => RsvpModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.EVENTS, 'getUserRsvps failed', error: e, stack: st);
+      AppLogger.error(LogCategory.events, 'getUserRsvps failed', error: e, stack: st);
       return [];
     }
   }

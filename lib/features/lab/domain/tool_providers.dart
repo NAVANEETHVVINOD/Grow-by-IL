@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/models/booking_model.dart';
-import '../../../shared/models/tool_model.dart';
-import '../../../shared/repositories/supabase_client.dart';
-import '../../auth/data/auth_repository.dart';
-import '../data/tool_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:grow/shared/models/booking_model.dart';
+import 'package:grow/shared/models/tool_model.dart';
+import 'package:grow/shared/repositories/supabase_client.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/lab/data/tool_repository.dart';
 
 /// Provider for the ToolRepository
 final toolRepositoryProvider = Provider<ToolRepository>((ref) {
@@ -71,7 +72,7 @@ final toolBookingsForDayProvider = FutureProvider.family<List<BookingModel>, ({S
 
 /// Extension on ToolRepository to expose the client if needed (or just use repo methods)
 extension ToolRepoExt on ToolRepository {
-  SupabaseClient get client => _client;
+  SupabaseClient get client => supabase;
 }
 
 /// State provider for the currently selected tool in the catalog

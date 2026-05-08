@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/repositories/supabase_client.dart';
+import '../../data/auth_repository.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -28,13 +30,10 @@ class _SplashScreenState extends State<SplashScreen> {
     final session = supabase.auth.currentSession;
     if (session != null) {
       try {
-        final data = await supabase
-            .from('users')
-            .select('profile_completed')
-            .eq('id', session.user.id)
-            .maybeSingle();
+        // Calling getCurrentUser() triggers the ensureUserProfileExists() sync
+        final user = await ref.read(authRepositoryProvider).getCurrentUser();
 
-        if (data != null && data['profile_completed'] == true) {
+        if (user?.profileCompleted == true) {
           if (mounted) context.go('/home');
         } else {
           if (mounted) context.go('/profile-setup');

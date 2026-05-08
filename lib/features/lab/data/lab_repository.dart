@@ -9,7 +9,7 @@ class LabRepository {
 
   /// Get the user's currently active session (checkin without checkout).
   Future<LabSessionModel?> getActiveSession(String userId) async {
-    AppLogger.action(LogCategory.LAB, 'getActiveSession', {'userId': userId});
+    AppLogger.action(LogCategory.lab, 'getActiveSession', {'userId': userId});
     try {
       final data = await _client
           .from('lab_sessions')
@@ -23,14 +23,14 @@ class LabRepository {
       if (data == null) return null;
       return LabSessionModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.LAB, 'getActiveSession failed', error: e, stack: st);
+      AppLogger.error(LogCategory.lab, 'getActiveSession failed', error: e, stack: st);
       return null;
     }
   }
 
   /// Check the user into the lab.
   Future<LabSessionModel> checkIn(String userId, String purpose) async {
-    AppLogger.action(LogCategory.LAB, 'checkIn', {
+    AppLogger.action(LogCategory.lab, 'checkIn', {
       'userId': userId,
       'purpose': purpose,
     });
@@ -42,33 +42,33 @@ class LabRepository {
       }).select().single();
 
       final session = LabSessionModel.fromJson(data);
-      AppLogger.info(LogCategory.LAB, 'Check-in successful, sessionId: ${session.id}');
+      AppLogger.info(LogCategory.lab, 'Check-in successful, sessionId: ${session.id}');
       return session;
     } catch (e, st) {
-      AppLogger.error(LogCategory.LAB, 'Check-in failed', error: e, stack: st);
+      AppLogger.error(LogCategory.lab, 'Check-in failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Check the user out of the lab.
   Future<void> checkOut(String sessionId) async {
-    AppLogger.action(LogCategory.LAB, 'checkOut', {'sessionId': sessionId});
+    AppLogger.action(LogCategory.lab, 'checkOut', {'sessionId': sessionId});
 
     try {
       await _client.from('lab_sessions').update({
         'checkout_time': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', sessionId);
 
-      AppLogger.info(LogCategory.LAB, 'Check-out successful, sessionId: $sessionId');
+      AppLogger.info(LogCategory.lab, 'Check-out successful, sessionId: $sessionId');
     } catch (e, st) {
-      AppLogger.error(LogCategory.LAB, 'Check-out failed', error: e, stack: st);
+      AppLogger.error(LogCategory.lab, 'Check-out failed', error: e, stack: st);
       rethrow;
     }
   }
 
   /// Real-time stream of active visitor count.
   Stream<int> getLiveVisitorCount() {
-    AppLogger.info(LogCategory.LAB, 'Subscribing to live visitor count stream');
+    AppLogger.info(LogCategory.lab, 'Subscribing to live visitor count stream');
     return _client
         .from('lab_sessions')
         .stream(primaryKey: ['id'])
@@ -78,7 +78,7 @@ class LabRepository {
   /// Get the user's session history.
   Future<List<LabSessionModel>> getMyHistory(String userId,
       {int limit = 20}) async {
-    AppLogger.action(LogCategory.LAB, 'getMyHistory', {'userId': userId});
+    AppLogger.action(LogCategory.lab, 'getMyHistory', {'userId': userId});
     final data = await _client
         .from('lab_sessions')
         .select()
@@ -95,7 +95,7 @@ class LabRepository {
     try {
       final session = _client.auth.currentSession;
       if (session == null) {
-        AppLogger.warn(LogCategory.AUTH, 'Heartbeat: no active session found');
+        AppLogger.warn(LogCategory.auth, 'Heartbeat: no active session found');
         return;
       }
       final expiresAt = session.expiresAt;
@@ -104,12 +104,12 @@ class LabRepository {
           .difference(DateTime.now().toUtc());
       if (expiresIn.inMinutes < 10) {
         AppLogger.info(
-            LogCategory.AUTH, 'Session expiring in ${expiresIn.inMinutes}m, refreshing...');
+            LogCategory.auth, 'Session expiring in ${expiresIn.inMinutes}m, refreshing...');
         await _client.auth.refreshSession();
-        AppLogger.info(LogCategory.AUTH, 'Session refreshed successfully');
+        AppLogger.info(LogCategory.auth, 'Session refreshed successfully');
       }
     } catch (e, st) {
-      AppLogger.error(LogCategory.AUTH, 'Session refresh failed', error: e, stack: st);
+      AppLogger.error(LogCategory.auth, 'Session refresh failed', error: e, stack: st);
     }
   }
 }

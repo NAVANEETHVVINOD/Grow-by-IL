@@ -95,7 +95,9 @@ app.*.map.json
 
 # Secrets & Configs
 .env
+.env.*
 *.secrets
+.vscode/launch.json
 supabase/.temp/
 .supabase/
 .gemini/

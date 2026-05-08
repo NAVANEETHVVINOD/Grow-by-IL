@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/repositories/supabase_client.dart';
 import '../../../shared/models/inventory_item_model.dart';
 import '../../../shared/models/inventory_transaction_model.dart';
-import '../../lab/domain/lab_providers.dart';
 import '../data/inventory_repository.dart';
 
 final inventoryRepositoryProvider = Provider<InventoryRepository>((ref) {

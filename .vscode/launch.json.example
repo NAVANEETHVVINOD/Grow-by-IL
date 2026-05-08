@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Grow~ (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=SUPABASE_URL=YOUR_URL_HERE",
+        "--dart-define=SUPABASE_ANON_KEY=YOUR_KEY_HERE",
+        "--dart-define=GOOGLE_WEB_CLIENT_ID=YOUR_WEB_CLIENT_ID_HERE"
+      ]
+    }
+  ]
+}

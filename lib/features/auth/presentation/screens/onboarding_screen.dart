@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../shared/widgets/neo_button.dart';
 import '../../../../shared/widgets/neo_card.dart';
+import '../../../../shared/repositories/supabase_client.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -135,7 +136,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: 140,
                     onPressed: () {
                       if (_currentPage == _pages.length - 1) {
-                        context.go('/login');
+                        final session = supabase.auth.currentSession;
+                        if (session != null) {
+                          context.go('/profile-setup');
+                        } else {
+                          context.go('/login');
+                        }
                       } else {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),

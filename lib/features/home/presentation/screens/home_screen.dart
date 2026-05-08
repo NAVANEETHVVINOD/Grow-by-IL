@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../explore/presentation/widgets/global_search_delegate.dart';
-import '../../notifications/domain/notification_providers.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../../explore/domain/event_providers.dart';
-import '../../../lab/domain/lab_providers.dart';
-import '../../../projects/domain/project_providers.dart';
-import '../../data/home_repository.dart';
+import 'package:grow/features/notifications/domain/notification_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/constants/app_strings.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/shimmer_skeleton.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/explore/domain/event_providers.dart';
+import 'package:grow/features/lab/domain/lab_providers.dart';
+import 'package:grow/features/projects/domain/project_providers.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -70,8 +70,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildHeader(context, ref),
-                  const SizedBox(height: AppSizes.lg),
-                  _buildSearchBar(context, ref),
+                  // const SizedBox(height: AppSizes.lg),
+                  // _buildSearchBar(context, ref), // REMOVED: fake search
                   const SizedBox(height: AppSizes.lg),
                   _buildLiveStatus(ref),
                   const SizedBox(height: AppSizes.lg),
@@ -98,30 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildSearchBar(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () => showSearch(context: context, delegate: GlobalSearchDelegate(ref)),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: AppColors.navy, width: 2),
-          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          boxShadow: const [BoxShadow(color: AppColors.navy, offset: Offset(4, 4))],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.search_rounded, color: AppColors.textSecondary),
-            const SizedBox(width: AppSizes.md),
-            Text(
-              'Search projects, tools, events...',
-              style: GoogleFonts.dmSans(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildLiveStatus(WidgetRef ref) {
     final sessionAsync = ref.watch(activeSessionProvider);
@@ -135,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSizes.md),
               child: NeoCard(
-                color: AppColors.green.withOpacity(0.1),
+                color: AppColors.green.withValues(alpha: 0.1),
                 borderColor: AppColors.green,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.md),
@@ -152,7 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.green),
                             ),
                             Text(
-                              'Checked in at ${session.checkinTime.toLocal().toString().substring(11, 16)}',
+                              'Checked in at ${session.checkinTime?.toLocal().toString().substring(11, 16) ?? "--:--"}',
                               style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
                             ),
                           ],
@@ -173,7 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           data: (booking) {
             if (booking == null) return const SizedBox.shrink();
             return NeoCard(
-              color: AppColors.cobalt.withOpacity(0.1),
+              color: AppColors.cobalt.withValues(alpha: 0.1),
               borderColor: AppColors.cobalt,
               child: Padding(
                 padding: const EdgeInsets.all(AppSizes.md),
@@ -344,20 +321,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           onTap: () => context.push('/tools'),
         ),
         _ActionTile(
-          title: AppStrings.events,
-          subtitle: Text(
-            'Workshops & talks',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 12,
-              color: AppColors.navy.withValues(alpha: 0.6),
-            ),
-          ),
-          icon: Icons.calendar_month_rounded,
-          color: Colors.white,
-          onTap: () => context.go('/events'),
-        ),
-        _ActionTile(
           title: AppStrings.myProjects,
           subtitle: Text(
             'Manage builds',
@@ -441,7 +404,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             return Column(
               children: upcomingEvents.map((e) => _ScheduleItem(
                 title: e.title,
-                time: '${e.startTime.toLocal().toString().substring(5, 16)}',
+                time: e.startTime.toLocal().toString().substring(5, 16),
                 icon: Icons.event_available_rounded,
                 color: AppColors.yellow,
                 onTap: () => context.push('/events/${e.id}'),
@@ -459,7 +422,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             return Column(
               children: futureBookings.map((b) => _ScheduleItem(
                 title: 'Equipment Booking',
-                time: '${b.slotStart.toLocal().toString().substring(5, 16)}',
+                time: b.slotStart.toLocal().toString().substring(5, 16),
                 icon: Icons.precision_manufacturing_rounded,
                 color: AppColors.cobalt,
                 iconColor: Colors.white,
@@ -511,9 +474,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             final project = projects[index];
             return NeoCard(
               color: Colors.white,
-              padding: const EdgeInsets.all(AppSizes.md),
+              padding: const EdgeInsets.all(AppSizes.sm),
               child: Row(
                 children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.navy, width: 1.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: project.coverImageUrl != null
+                          ? CachedNetworkImage(
+                              imageUrl: project.coverImageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const ShimmerSkeleton(width: 60, height: 60),
+                              errorWidget: (context, url, error) => const Icon(Icons.broken_image_rounded, size: 20),
+                            )
+                          : const Icon(Icons.architecture_rounded, color: AppColors.textSecondary),
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,23 +508,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: AppSizes.xs),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: AppColors.yellow,
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
                               color: AppColors.navy,
-                              width: 1.5,
+                              width: 1.2,
                             ),
                           ),
                           child: Text(
                             project.type.toUpperCase(),
                             style: GoogleFonts.dmSans(
-                              fontSize: 10,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -549,7 +535,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
                   const Icon(Icons.arrow_forward_ios_rounded,
-                      size: 16, color: AppColors.textSecondary),
+                      size: 14, color: AppColors.textSecondary),
                 ],
               ),
               onTap: () => context.push('/projects/${project.id}'),
@@ -585,20 +571,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Color _stageColor(String stage) {
-    switch (stage) {
-      case 'ideation':
-        return AppColors.yellow;
-      case 'in_progress':
-        return AppColors.cobalt.withValues(alpha: 0.2);
-      case 'completed':
-        return AppColors.green.withValues(alpha: 0.3);
-      case 'showcase':
-        return AppColors.orange.withValues(alpha: 0.3);
-      default:
-        return AppColors.surface;
-    }
-  }
 }
 
 /// Animated action tile with scale-on-press effect.

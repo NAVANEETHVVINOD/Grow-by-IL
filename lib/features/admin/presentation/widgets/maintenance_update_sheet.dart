@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/models/tool_model.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../data/inventory_repository.dart';
-import '../domain/inventory_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/tool_model.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/admin/domain/inventory_providers.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
 
 class MaintenanceUpdateSheet extends ConsumerStatefulWidget {
   const MaintenanceUpdateSheet({super.key, required this.tool});
@@ -107,7 +107,6 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
 
     setState(() => _isLoading = true);
     try {
-      final isMaintenance = _status == 'maintenance' || _status == 'available';
       await ref.read(inventoryRepositoryProvider).logToolStatus(
         toolId: widget.tool.id,
         userId: user.id,
@@ -117,7 +116,7 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
       );
       
       // Refresh tools list
-      ref.invalidate(toolsProvider(null));
+      ref.invalidate(toolsProvider);
       
       if (mounted) Navigator.pop(context);
     } catch (e) {

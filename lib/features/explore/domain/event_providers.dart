@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/models/event_model.dart';
-import '../../../shared/models/rsvp_model.dart';
-import '../../../shared/repositories/supabase_client.dart';
-import '../../auth/data/auth_repository.dart';
-import '../data/event_repository.dart';
+import 'package:grow/shared/models/event_model.dart';
+import 'package:grow/shared/models/rsvp_model.dart';
+import 'package:grow/shared/repositories/supabase_client.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/explore/data/event_repository.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
   return EventRepository(supabase);

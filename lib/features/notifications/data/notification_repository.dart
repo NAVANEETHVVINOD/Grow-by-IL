@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../shared/models/notification_model.dart';
-import '../../core/utils/app_logger.dart';
+import 'package:grow/shared/models/notification_model.dart';
+import 'package:grow/core/utils/app_logger.dart';
 
 class NotificationRepository {
   final SupabaseClient _client;
@@ -16,7 +16,7 @@ class NotificationRepository {
 
       return (response as List).map((n) => NotificationModel.fromJson(n)).toList();
     } catch (e) {
-      AppLogger.error(LogCategory.NOTIFICATIONS, 'Error fetching notifications', error: e);
+      AppLogger.error(LogCategory.notifications, 'Error fetching notifications', error: e);
       rethrow;
     }
   }
@@ -28,7 +28,7 @@ class NotificationRepository {
           .update({'is_read': true})
           .eq('id', notificationId);
     } catch (e) {
-      AppLogger.error(LogCategory.NOTIFICATIONS, 'Error marking as read', error: e);
+      AppLogger.error(LogCategory.notifications, 'Error marking as read', error: e);
       rethrow;
     }
   }
@@ -40,7 +40,7 @@ class NotificationRepository {
           .update({'is_read': true})
           .eq('user_id', userId);
     } catch (e) {
-      AppLogger.error(LogCategory.NOTIFICATIONS, 'Error marking all as read', error: e);
+      AppLogger.error(LogCategory.notifications, 'Error marking all as read', error: e);
       rethrow;
     }
   }
@@ -49,7 +49,7 @@ class NotificationRepository {
     try {
       await _client.from('notifications').insert(notification.toJson());
     } catch (e) {
-      AppLogger.error(LogCategory.NOTIFICATIONS, 'Error creating notification', error: e);
+      AppLogger.error(LogCategory.notifications, 'Error creating notification', error: e);
       rethrow;
     }
   }

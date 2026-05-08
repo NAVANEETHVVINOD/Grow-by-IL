@@ -16,6 +16,8 @@ class BookingModel {
     this.returnReminderSent = false,
     this.notes,
     this.createdAt,
+    this.toolName,
+    this.userName,
   });
 
   final String id;
@@ -33,6 +35,8 @@ class BookingModel {
   final bool returnReminderSent;
   final String? notes;
   final DateTime? createdAt;
+  final String? toolName;
+  final String? userName;
 
   bool get isOverdue =>
       status == 'active' && DateTime.now().toUtc().isAfter(slotEnd.toUtc());
@@ -62,6 +66,8 @@ class BookingModel {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
+      toolName: json['tools'] is Map ? json['tools']['name'] as String? : null,
+      userName: json['users'] is Map ? json['users']['full_name'] as String? : null,
     );
   }
 

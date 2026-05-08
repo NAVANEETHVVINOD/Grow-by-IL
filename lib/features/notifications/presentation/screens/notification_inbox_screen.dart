@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../../lab/domain/lab_providers.dart';
-
-import '../domain/notification_providers.dart';
-import '../../../../shared/models/notification_model.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/notifications/domain/notification_providers.dart';
+import 'package:grow/shared/models/notification_model.dart';
 
 class NotificationInboxScreen extends ConsumerWidget {
   const NotificationInboxScreen({super.key});
@@ -96,7 +94,7 @@ class _NotificationTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: NeoCard(
-        color: notification.isRead ? Colors.white : AppColors.yellow.withOpacity(0.05),
+        color: notification.isRead ? Colors.white : AppColors.yellow.withValues(alpha: 0.05),
         borderColor: notification.isRead ? AppColors.navy : AppColors.yellow,
         onTap: () {
           if (!notification.isRead) {
@@ -127,7 +125,7 @@ class _NotificationTile extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       notification.createdAt.toLocal().toString().substring(5, 16),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.textSecondary.withOpacity(0.6)),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.textSecondary.withValues(alpha: 0.6)),
                     ),
                   ],
                 ),
@@ -167,7 +165,7 @@ class _NotificationTile extends ConsumerWidget {
     }
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
       child: Icon(icon, size: 20, color: color),
     );
   }

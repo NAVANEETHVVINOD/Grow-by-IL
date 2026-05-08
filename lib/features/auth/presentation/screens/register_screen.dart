@@ -68,110 +68,113 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/login'),
+    return PopScope(
+      canPop: false, // prevents back to onboarding/splash
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/login'),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Create Account',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const SizedBox(height: AppSizes.sm),
-              Text(
-                'Join the Grow~ maker community',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Create Account',
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Text(
+                  'Join the Grow~ maker community',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: AppSizes.xl),
+                NeoCard(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        NeoTextField(
+                          label: 'Full Name',
+                          controller: _nameController,
+                          prefixIcon: Icons.person_outline,
+                          validator: (v) => AppValidators.required(v, 'Name'),
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+                        NeoTextField(
+                          label: 'College Roll Number',
+                          controller: _rollController,
+                          prefixIcon: Icons.badge_outlined,
+                          validator: (v) => AppValidators.required(v, 'Roll Number'),
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+                        NeoTextField(
+                          label: 'Phone Number',
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          prefixIcon: Icons.phone_outlined,
+                          validator: (v) => AppValidators.required(v, 'Phone'),
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+                        NeoTextField(
+                          label: 'Email Address',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: Icons.email_outlined,
+                          validator: AppValidators.email,
+                        ),
+                        const SizedBox(height: AppSizes.lg),
+                        NeoTextField(
+                          label: 'Password',
+                          controller: _passwordController,
+                          obscureText: true,
+                          prefixIcon: Icons.lock_outline,
+                          validator: AppValidators.password,
+                        ),
+                        const SizedBox(height: AppSizes.xl),
+                        NeoButton(
+                          label: 'Sign Up',
+                          isLoading: _isLoading,
+                          onPressed: _register,
+                        ),
+                      ],
                     ),
-              ),
-              const SizedBox(height: AppSizes.xl),
-              NeoCard(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      NeoTextField(
-                        label: 'Full Name',
-                        controller: _nameController,
-                        prefixIcon: Icons.person_outline,
-                        validator: (v) => AppValidators.required(v, 'Name'),
-                      ),
-                      const SizedBox(height: AppSizes.lg),
-                      NeoTextField(
-                        label: 'College Roll Number',
-                        controller: _rollController,
-                        prefixIcon: Icons.badge_outlined,
-                        validator: (v) => AppValidators.required(v, 'Roll Number'),
-                      ),
-                      const SizedBox(height: AppSizes.lg),
-                      NeoTextField(
-                        label: 'Phone Number',
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: Icons.phone_outlined,
-                        validator: (v) => AppValidators.required(v, 'Phone'),
-                      ),
-                      const SizedBox(height: AppSizes.lg),
-                      NeoTextField(
-                        label: 'Email Address',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email_outlined,
-                        validator: AppValidators.email,
-                      ),
-                      const SizedBox(height: AppSizes.lg),
-                      NeoTextField(
-                        label: 'Password',
-                        controller: _passwordController,
-                        obscureText: true,
-                        prefixIcon: Icons.lock_outline,
-                        validator: AppValidators.password,
-                      ),
-                      const SizedBox(height: AppSizes.xl),
-                      NeoButton(
-                        label: 'Sign Up',
-                        isLoading: _isLoading,
-                        onPressed: _register,
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSizes.xl),
-              Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 4,
-                children: [
-                  Text(
-                    'Already have an account?',
-                    style: GoogleFonts.dmSans(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go('/login'),
-                    child: Text(
-                      'Sign In',
+                const SizedBox(height: AppSizes.xl),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      'Already have an account?',
                       style: GoogleFonts.dmSans(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: Text(
+                        'Sign In',
+                        style: GoogleFonts.dmSans(
+                          color: AppColors.navy,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

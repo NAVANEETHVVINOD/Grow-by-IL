@@ -6,12 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../domain/lab_providers.dart';
-import '../domain/tool_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/lab/domain/lab_providers.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
 
 class QrScanScreen extends ConsumerStatefulWidget {
   const QrScanScreen({super.key});
@@ -144,7 +144,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
   Widget _buildOverlay() {
     return ColorFiltered(
       colorFilter: ColorFilter.mode(
-        Colors.black.withOpacity(0.5),
+        Colors.black.withValues(alpha: 0.5),
         BlendMode.srcOut,
       ),
       child: Stack(
@@ -172,7 +172,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
 
   Widget _buildResultOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -3,25 +3,72 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/utils/app_logger.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../widgets/digital_id_card.dart';
-import '../../../auth/shared/models/user_model.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../../lab/domain/lab_providers.dart';
-import '../../../lab/domain/tool_providers.dart';
-import '../../../projects/domain/project_providers.dart';
-import '../domain/profile_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/utils/app_logger.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/shimmer_skeleton.dart';
+import 'package:grow/features/profile/presentation/widgets/digital_id_card.dart';
+import 'package:grow/shared/models/user_model.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/lab/domain/lab_providers.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:grow/features/projects/domain/project_providers.dart';
+import 'package:grow/features/profile/domain/profile_providers.dart';
 
-class ProfileScreen extends ConsumerWidget {
+import 'package:image_picker/image_picker.dart';
+import 'package:grow/core/services/media_providers.dart';
+// import 'package:grow/shared/repositories/supabase_client.dart'; // removed unused import
+
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadAvatar(String userId) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1000,
+      maxHeight: 1000,
+    );
+
+    if (image == null) return;
+
+    setState(() => _isUploading = true);
+    try {
+      final signedUrl = await ref.read(mediaServiceProvider).uploadAvatar(userId, image);
+      if (signedUrl != null) {
+        // Update user profile in database
+        await ref.read(authRepositoryProvider).updateProfile(userId, {'avatar_url': signedUrl});
+        
+        if (mounted) {
+          ref.invalidate(currentUserProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Avatar updated successfully!')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e'), backgroundColor: AppColors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
@@ -30,13 +77,20 @@ class ProfileScreen extends ConsumerWidget {
         child: userAsync.when(
           data: (user) {
             if (user == null) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_off_rounded, size: 48, color: AppColors.textSecondary),
-                    SizedBox(height: AppSizes.md),
-                    Text('No user data'),
+                    const Icon(Icons.person_off_outlined, size: 48, color: AppColors.textSecondary),
+                    const SizedBox(height: 12),
+                    const Text('Could not load profile'),
+                    const SizedBox(height: 16),
+                    NeoButton(
+                      label: 'Retry',
+                      onPressed: () => ref.invalidate(currentUserProvider),
+                      width: 120,
+                      height: 40,
+                    ),
                   ],
                 ),
               );
@@ -45,19 +99,23 @@ class ProfileScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSizes.lg),
               children: [
                 // ── Maker Identity Card ────────────────────────
-                DigitalIdCard(user: user),
+                DigitalIdCard(
+                  user: user,
+                  isUploading: _isUploading,
+                  onAvatarTap: () => _pickAndUploadAvatar(user.id),
+                ),
                 const SizedBox(height: AppSizes.md),
                 _buildBadges(user),
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Stats Row ──────────────────────────────────
-                _buildStatsRow(ref),
+                _buildStatsRow(),
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Tool Belt (Expertise) ────────────────────────
                 _buildSectionHeader('Tool Belt'),
                 const SizedBox(height: AppSizes.md),
-                _buildToolBelt(ref),
+                _buildToolBelt(),
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Portfolio Showcase ────────────────────────
@@ -67,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
                   actionLabel: 'ADD',
                 ),
                 const SizedBox(height: AppSizes.md),
-                _buildPortfolio(ref),
+                _buildPortfolio(),
                 const SizedBox(height: AppSizes.xl),
 
                 // ── Recognition & Links ────────────────────────
@@ -101,17 +159,17 @@ class ProfileScreen extends ConsumerWidget {
                   textColor: AppColors.red,
                   borderColor: AppColors.red,
                   onPressed: () async {
-                    AppLogger.action(LogCategory.AUTH, 'signOut');
+                    AppLogger.action(LogCategory.auth, 'signOut');
                     // Auto-checkout if user has active session
                     try {
                       final activeSession = await ref.read(activeSessionProvider.future);
                       if (activeSession != null) {
-                        AppLogger.info(LogCategory.LAB, 'Auto-checking out session: ${activeSession.id}');
+                        AppLogger.info(LogCategory.lab, 'Auto-checking out session: ${activeSession.id}');
                         final repo = ref.read(labRepositoryProvider);
                         await repo.checkOut(activeSession.id);
                       }
                     } catch (e) {
-                      AppLogger.warn(LogCategory.LAB, 'Auto-checkout failed, continuing sign-out: $e');
+                      AppLogger.warn(LogCategory.lab, 'Auto-checkout failed, continuing sign-out: $e');
                     }
 
                     await ref.read(authRepositoryProvider).signOut();
@@ -157,7 +215,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsRow(WidgetRef ref) {
+  Widget _buildStatsRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -222,7 +280,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildToolBelt(WidgetRef ref) {
+  Widget _buildToolBelt() {
     final bookingsAsync = ref.watch(myBookingsProvider);
     return bookingsAsync.when(
       data: (bookings) {
@@ -248,7 +306,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPortfolio(WidgetRef ref) {
+  Widget _buildPortfolio() {
     final projectsAsync = ref.watch(userProjectsProvider);
     return projectsAsync.when(
       data: (projects) {
@@ -269,20 +327,44 @@ class ProfileScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [BoxShadow(color: AppColors.navy, offset: Offset(4, 4))],
                 ),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(2),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      project.title,
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      flex: 2,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: project.coverImageUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: project.coverImageUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const ShimmerSkeleton(width: double.infinity, height: double.infinity),
+                                errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image_rounded)),
+                              )
+                            : Container(
+                                color: AppColors.surface,
+                                child: const Icon(Icons.architecture_rounded, color: AppColors.textSecondary),
+                              ),
+                      ),
                     ),
-                    const Spacer(),
-                    Text(
-                      project.type.toUpperCase(),
-                      style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            project.title,
+                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            project.type.toUpperCase(),
+                            style: GoogleFonts.dmSans(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -337,7 +419,7 @@ class ProfileScreen extends ConsumerWidget {
           .map((b) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: (b['color'] as Color).withOpacity(0.1),
+                  color: (b['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: b['color'] as Color, width: 1.5),
                 ),
@@ -368,7 +450,7 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: AppColors.navy.withOpacity(0.5)),
+        Icon(icon, size: 20, color: AppColors.navy.withValues(alpha: 0.5)),
         const SizedBox(height: 4),
         countAsync.when(
           data: (count) => Text(

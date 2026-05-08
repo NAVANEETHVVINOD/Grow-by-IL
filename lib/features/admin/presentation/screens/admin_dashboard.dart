@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../shared/models/inventory_item_model.dart';
-import '../../../../shared/models/tool_model.dart';
-import '../../../../shared/models/booking_model.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../../../lab/domain/lab_providers.dart';
-import '../../../lab/domain/tool_providers.dart';
-import '../../auth/data/auth_repository.dart';
-import '../domain/inventory_providers.dart';
-import '../widgets/maintenance_update_sheet.dart';
-import '../widgets/stock_adjust_sheet.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/shared/models/inventory_item_model.dart';
+import 'package:grow/shared/models/tool_model.dart';
+import 'package:grow/shared/models/booking_model.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/features/lab/domain/lab_providers.dart';
+import 'package:grow/features/lab/domain/tool_providers.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/admin/domain/inventory_providers.dart';
+import 'package:grow/features/admin/presentation/widgets/maintenance_update_sheet.dart';
+import 'package:grow/features/admin/presentation/widgets/stock_adjust_sheet.dart';
 
 final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
   final repo = ref.watch(toolRepositoryProvider);
@@ -151,7 +150,7 @@ class _QuickStatCard extends StatelessWidget {
         child: Column(
           children: [
             Text(value, style: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.bold, color: textColor ?? AppColors.navy)),
-            Text(label, style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.bold, color: (textColor ?? AppColors.navy).withOpacity(0.7))),
+            Text(label, style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.bold, color: (textColor ?? AppColors.navy).withValues(alpha: 0.7))),
           ],
         ),
       ),
@@ -185,7 +184,7 @@ class _PendingBookingCard extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '${booking.slotStart.toLocal().toString().substring(5, 16)}',
+                  booking.slotStart.toLocal().toString().substring(5, 16),
                   style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -248,7 +247,7 @@ class _EquipmentTab extends ConsumerWidget {
           width: double.infinity,
           margin: const EdgeInsets.all(AppSizes.lg),
           padding: const EdgeInsets.all(AppSizes.md),
-          decoration: BoxDecoration(color: AppColors.red.withOpacity(0.1), border: Border.all(color: AppColors.red, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+          decoration: BoxDecoration(color: AppColors.red.withValues(alpha: 0.1), border: Border.all(color: AppColors.red, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
           child: Row(
             children: [
               const Icon(Icons.warning_amber_rounded, color: AppColors.red),
@@ -297,7 +296,7 @@ class _InventoryTab extends ConsumerWidget {
           width: double.infinity,
           margin: const EdgeInsets.all(AppSizes.lg),
           padding: const EdgeInsets.all(AppSizes.md),
-          decoration: BoxDecoration(color: AppColors.orange.withOpacity(0.1), border: Border.all(color: AppColors.orange, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+          decoration: BoxDecoration(color: AppColors.orange.withValues(alpha: 0.1), border: Border.all(color: AppColors.orange, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
           child: Row(
             children: [
               const Icon(Icons.inventory_2_outlined, color: AppColors.orange),

@@ -6,15 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/utils/supabase_error_handler.dart';
-import '../../../../shared/widgets/neo_button.dart';
-import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/neo_chip.dart';
-import '../../../../shared/widgets/shimmer_skeleton.dart';
-import '../../../auth/data/auth_repository.dart';
-import '../../domain/lab_providers.dart';
+import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/utils/supabase_error_handler.dart';
+import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/neo_chip.dart';
+import 'package:grow/shared/widgets/shimmer_skeleton.dart';
+import 'package:grow/core/utils/app_logger.dart';
+import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/lab/domain/lab_providers.dart';
+import 'package:grow/features/lab/presentation/screens/tools_screen.dart';
 
 /// State to prevent double-tap check-in/check-out
 final _isCheckingInProvider = StateProvider.autoDispose<bool>((ref) => false);
@@ -428,7 +430,7 @@ class _CheckedInView extends ConsumerWidget {
                 child: NeoCard(
                   color: Colors.white,
                   padding: const EdgeInsets.all(AppSizes.md),
-                  onTap: () => context.push('/tools'),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ToolsScreen())),
                   child: Column(
                     children: [
                       const Icon(Icons.build_rounded, size: 28, color: AppColors.cobalt),
@@ -548,7 +550,7 @@ class _CheckedInView extends ConsumerWidget {
               NeoButton(
                 label: 'Submit',
                 onPressed: () {
-                  AppLogger.action(LogCategory.LAB, 'Issue reported', {'issue': controller.text});
+                  AppLogger.action(LogCategory.lab, 'Issue reported', {'issue': controller.text});
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Issue reported. Thank you!')),
