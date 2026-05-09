@@ -30,17 +30,15 @@ class NeoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final offset = shadowOffset ?? const Offset(AppSizes.shadowX, AppSizes.shadowY);
+    final offset =
+        shadowOffset ?? const Offset(AppSizes.shadowX, AppSizes.shadowY);
 
     final card = Container(
       padding: padding,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: borderColor,
-          width: borderWidth,
-        ),
+        border: Border.all(color: borderColor, width: borderWidth),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowColor,
@@ -54,10 +52,7 @@ class NeoCard extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: card,
-      );
+      return GestureDetector(onTap: onTap, child: card);
     }
     return card;
   }

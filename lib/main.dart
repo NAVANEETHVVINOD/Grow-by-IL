@@ -14,7 +14,9 @@ void main() async {
 
   if (!SupabaseKeys.isConfigured) {
     debugPrint('\n[CONFIG ERROR] Supabase keys are missing!');
-    debugPrint('Please run with: flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...\n');
+    debugPrint(
+      'Please run with: flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...\n',
+    );
   }
 
   await Supabase.initialize(
@@ -22,11 +24,7 @@ void main() async {
     anonKey: SupabaseKeys.anonKey,
   );
 
-  runApp(
-    const ProviderScope(
-      child: GrowApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: GrowApp()));
 }
 
 class GrowApp extends StatelessWidget {

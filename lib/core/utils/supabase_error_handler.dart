@@ -21,7 +21,9 @@ String handleSupabaseError(Object error) {
   }
   if (error is PostgrestException) {
     AppLogger.warn(
-        LogCategory.network, 'PostgrestException code=${error.code}: ${error.message}');
+      LogCategory.network,
+      'PostgrestException code=${error.code}: ${error.message}',
+    );
     switch (error.code) {
       case '23505':
         return 'This username is already taken.';
@@ -34,6 +36,9 @@ String handleSupabaseError(Object error) {
     }
   }
   AppLogger.error(
-      LogCategory.system, 'Unhandled error type: ${error.runtimeType}', error: error);
+    LogCategory.system,
+    'Unhandled error type: ${error.runtimeType}',
+    error: error,
+  );
   return 'Something went wrong. Please try again.';
 }

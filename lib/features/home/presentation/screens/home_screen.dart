@@ -98,8 +98,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-
-
   Widget _buildLiveStatus(WidgetRef ref) {
     final sessionAsync = ref.watch(activeSessionProvider);
     final bookingAsync = ref.watch(activeBookingProvider);
@@ -126,16 +124,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           children: [
                             Text(
                               'Live in Lab',
-                              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.green),
+                              style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.green,
+                              ),
                             ),
                             Text(
                               'Checked in at ${session.checkinTime?.toLocal().toString().substring(11, 16) ?? "--:--"}',
-                              style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.green),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.green,
+                      ),
                     ],
                   ),
                 ),
@@ -143,7 +151,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             );
           },
-          loading: () => const ShimmerSkeleton(width: double.infinity, height: 70),
+          loading: () =>
+              const ShimmerSkeleton(width: double.infinity, height: 70),
           error: (_, __) => const SizedBox.shrink(),
         ),
         bookingAsync.when(
@@ -156,7 +165,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 padding: const EdgeInsets.all(AppSizes.md),
                 child: Row(
                   children: [
-                    const Icon(Icons.precision_manufacturing_rounded, color: AppColors.cobalt),
+                    const Icon(
+                      Icons.precision_manufacturing_rounded,
+                      color: AppColors.cobalt,
+                    ),
                     const SizedBox(width: AppSizes.md),
                     Expanded(
                       child: Column(
@@ -164,23 +176,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         children: [
                           Text(
                             'Active Booking',
-                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: AppColors.cobalt),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.cobalt,
+                            ),
                           ),
                           Text(
                             'Machine usage until ${booking.slotEnd.toLocal().toString().substring(11, 16)}',
-                            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.cobalt),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: AppColors.cobalt,
+                    ),
                   ],
                 ),
               ),
               onTap: () => context.push('/tools'),
             );
           },
-          loading: () => const ShimmerSkeleton(width: double.infinity, height: 70),
+          loading: () =>
+              const ShimmerSkeleton(width: double.infinity, height: 70),
           error: (_, __) => const SizedBox.shrink(),
         ),
       ],
@@ -239,23 +262,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   color: AppColors.navy,
                   onPressed: () => context.push('/notifications'),
                 ),
-                ref.watch(unreadNotificationCountProvider) > 0 ? Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle),
-                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                    child: Text(
-                      '${ref.watch(unreadNotificationCountProvider)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ) : const SizedBox.shrink(),
+                ref.watch(unreadNotificationCountProvider) > 0
+                    ? Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${ref.watch(unreadNotificationCountProvider)}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ],
             ),
-            if (['admin', 'operation_head', 'machine_head'].contains(user.systemRole))
+            if ([
+              'admin',
+              'operation_head',
+              'machine_head',
+            ].contains(user.systemRole))
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
                 color: AppColors.cobalt,
@@ -354,7 +393,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title, {VoidCallback? onAction, String? actionLabel}) {
+  Widget _buildSectionHeader(
+    String title, {
+    VoidCallback? onAction,
+    String? actionLabel,
+  }) {
     return Row(
       children: [
         Container(
@@ -402,35 +445,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             final upcomingEvents = events.take(2).toList();
             if (upcomingEvents.isEmpty) return const SizedBox.shrink();
             return Column(
-              children: upcomingEvents.map((e) => _ScheduleItem(
-                title: e.title,
-                time: e.startTime.toLocal().toString().substring(5, 16),
-                icon: Icons.event_available_rounded,
-                color: AppColors.yellow,
-                onTap: () => context.push('/events/${e.id}'),
-              )).toList(),
+              children: upcomingEvents
+                  .map(
+                    (e) => _ScheduleItem(
+                      title: e.title,
+                      time: e.startTime.toLocal().toString().substring(5, 16),
+                      icon: Icons.event_available_rounded,
+                      color: AppColors.yellow,
+                      onTap: () => context.push('/events/${e.id}'),
+                    ),
+                  )
+                  .toList(),
             );
           },
-          loading: () => const ShimmerSkeleton(width: double.infinity, height: 60),
+          loading: () =>
+              const ShimmerSkeleton(width: double.infinity, height: 60),
           error: (_, __) => const SizedBox.shrink(),
         ),
         bookingsAsync.when(
           data: (bookings) {
             final now = DateTime.now().toUtc();
-            final futureBookings = bookings.where((b) => b.slotStart.isAfter(now) && b.status == 'approved').take(2).toList();
+            final futureBookings = bookings
+                .where(
+                  (b) => b.slotStart.isAfter(now) && b.status == 'approved',
+                )
+                .take(2)
+                .toList();
             if (futureBookings.isEmpty) return const SizedBox.shrink();
             return Column(
-              children: futureBookings.map((b) => _ScheduleItem(
-                title: 'Equipment Booking',
-                time: b.slotStart.toLocal().toString().substring(5, 16),
-                icon: Icons.precision_manufacturing_rounded,
-                color: AppColors.cobalt,
-                iconColor: Colors.white,
-                onTap: () => context.push('/tools'),
-              )).toList(),
+              children: futureBookings
+                  .map(
+                    (b) => _ScheduleItem(
+                      title: 'Equipment Booking',
+                      time: b.slotStart.toLocal().toString().substring(5, 16),
+                      icon: Icons.precision_manufacturing_rounded,
+                      color: AppColors.cobalt,
+                      iconColor: Colors.white,
+                      onTap: () => context.push('/tools'),
+                    ),
+                  )
+                  .toList(),
             );
           },
-          loading: () => const ShimmerSkeleton(width: double.infinity, height: 60),
+          loading: () =>
+              const ShimmerSkeleton(width: double.infinity, height: 60),
           error: (_, __) => const SizedBox.shrink(),
         ),
       ],
@@ -449,8 +507,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               padding: const EdgeInsets.all(AppSizes.lg),
               child: Row(
                 children: [
-                  const Icon(Icons.folder_open_rounded,
-                      color: AppColors.textSecondary, size: 32),
+                  const Icon(
+                    Icons.folder_open_rounded,
+                    color: AppColors.textSecondary,
+                    size: 32,
+                  ),
                   const SizedBox(width: AppSizes.md),
                   Expanded(
                     child: Text(
@@ -491,10 +552,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ? CachedNetworkImage(
                               imageUrl: project.coverImageUrl!,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => const ShimmerSkeleton(width: 60, height: 60),
-                              errorWidget: (context, url, error) => const Icon(Icons.broken_image_rounded, size: 20),
+                              placeholder: (context, url) =>
+                                  const ShimmerSkeleton(width: 60, height: 60),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.broken_image_rounded,
+                                size: 20,
+                              ),
                             )
-                          : const Icon(Icons.architecture_rounded, color: AppColors.textSecondary),
+                          : const Icon(
+                              Icons.architecture_rounded,
+                              color: AppColors.textSecondary,
+                            ),
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -514,7 +582,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(height: AppSizes.xs),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.yellow,
                             borderRadius: BorderRadius.circular(4),
@@ -534,8 +604,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded,
-                      size: 14, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ],
               ),
               onTap: () => context.push('/projects/${project.id}'),
@@ -561,8 +634,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               const Icon(Icons.error_outline, color: AppColors.red),
               const SizedBox(width: AppSizes.sm),
               const Expanded(
-                child: Text('Something went wrong',
-                    style: TextStyle(color: AppColors.red)),
+                child: Text(
+                  'Something went wrong',
+                  style: TextStyle(color: AppColors.red),
+                ),
               ),
             ],
           ),
@@ -570,7 +645,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
   }
-
 }
 
 /// Animated action tile with scale-on-press effect.
@@ -634,10 +708,7 @@ class _ActionTileState extends State<_ActionTile>
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          );
+          return Transform.scale(scale: _scaleAnimation.value, child: child);
         },
         child: NeoCard(
           color: widget.color,
@@ -712,22 +783,31 @@ class _ScheduleItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     time,
-                    style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 12,
+              color: AppColors.textSecondary,
+            ),
           ],
         ),
       ),
     );
   }
 }
-

@@ -32,7 +32,10 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text('QR Simulator (Web)', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+          title: Text(
+            'QR Simulator (Web)',
+            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: AppColors.background,
           elevation: 0,
         ),
@@ -42,7 +45,11 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.bug_report_rounded, size: 64, color: AppColors.yellow),
+                const Icon(
+                  Icons.bug_report_rounded,
+                  size: 64,
+                  color: AppColors.yellow,
+                ),
                 const SizedBox(height: AppSizes.lg),
                 Text(
                   'Simulation Mode',
@@ -57,9 +64,15 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                   style: GoogleFonts.dmSans(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSizes.xl),
-                _buildSimulationButton('Visitor Check-In', 'GROWLAB-USER-test-id'),
+                _buildSimulationButton(
+                  'Visitor Check-In',
+                  'GROWLAB-USER-test-id',
+                ),
                 const SizedBox(height: AppSizes.md),
-                _buildSimulationButton('Tool: 3D Printer', 'GROWLAB-TOOL-test-tool-id'),
+                _buildSimulationButton(
+                  'Tool: 3D Printer',
+                  'GROWLAB-TOOL-test-tool-id',
+                ),
                 const SizedBox(height: AppSizes.xl),
                 NeoButton(
                   label: 'Cancel',
@@ -86,7 +99,11 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.white, size: 64),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.white,
+                      size: 64,
+                    ),
                     const SizedBox(height: AppSizes.md),
                     Text(
                       'Camera Error: ${error.errorCode}',
@@ -135,10 +152,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
   }
 
   Widget _buildSimulationButton(String label, String value) {
-    return NeoButton(
-      label: label,
-      onPressed: () => _processScan(value),
-    );
+    return NeoButton(label: label, onPressed: () => _processScan(value));
   }
 
   Widget _buildOverlay() {
@@ -219,7 +233,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
       } else {
         throw Exception('Invalid QR code');
       }
-      
+
       setState(() {
         _isSuccess = true;
       });
@@ -254,14 +268,16 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     final toolId = value.replaceFirst('GROWLAB-TOOL-', '');
     final toolRepo = ref.read(toolRepositoryProvider);
     final user = ref.read(currentUserProvider).valueOrNull;
-    
+
     if (user == null) throw Exception('User not logged in');
 
     // Fetch user bookings for this tool
     final bookings = await toolRepo.getMyBookings(user.id);
-    
+
     // 1. Check for Active booking (Return Flow)
-    final activeBooking = bookings.where((b) => b.toolId == toolId && b.status == 'active').firstOrNull;
+    final activeBooking = bookings
+        .where((b) => b.toolId == toolId && b.status == 'active')
+        .firstOrNull;
     if (activeBooking != null) {
       await toolRepo.returnTool(activeBooking.id);
       ref.invalidate(myBookingsProvider);
@@ -270,7 +286,9 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     }
 
     // 2. Check for Approved booking (Checkout Flow)
-    final approvedBooking = bookings.where((b) => b.toolId == toolId && b.status == 'approved').firstOrNull;
+    final approvedBooking = bookings
+        .where((b) => b.toolId == toolId && b.status == 'approved')
+        .firstOrNull;
     if (approvedBooking != null) {
       await toolRepo.checkoutTool(approvedBooking.id);
       ref.invalidate(myBookingsProvider);

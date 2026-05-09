@@ -35,8 +35,8 @@ class EventModel {
 
   bool get isFull => capacity != null && rsvpCount >= capacity!;
   bool get isCancelled => status == 'cancelled';
-  bool get isPast => endTime != null 
-      ? DateTime.now().toUtc().isAfter(endTime!) 
+  bool get isPast => endTime != null
+      ? DateTime.now().toUtc().isAfter(endTime!)
       : DateTime.now().toUtc().isAfter(startTime.add(const Duration(hours: 3)));
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
@@ -48,8 +48,8 @@ class EventModel {
       organizationName: json['organization_name'] as String?,
       clubId: json['club_id'] as String?,
       startTime: DateTime.parse(json['start_time'] as String).toUtc(),
-      endTime: json['end_time'] != null 
-          ? DateTime.parse(json['end_time'] as String).toUtc() 
+      endTime: json['end_time'] != null
+          ? DateTime.parse(json['end_time'] as String).toUtc()
           : null,
       locationName: json['location_name'] as String?,
       capacity: json['capacity'] as int?,
@@ -57,8 +57,8 @@ class EventModel {
       imageUrl: json['image_url'] as String?,
       createdBy: json['created_by'] as String,
       status: json['status'] as String? ?? 'active',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String).toUtc() 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
     );
   }

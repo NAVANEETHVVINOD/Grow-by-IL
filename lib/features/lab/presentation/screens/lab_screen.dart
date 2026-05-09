@@ -34,7 +34,11 @@ class LabScreen extends ConsumerWidget {
         child: activeSession.when(
           data: (session) {
             if (session != null && session.checkinTime != null) {
-              return _CheckedInView(sessionId: session.id, checkinTime: session.checkinTime!, purpose: session.purpose);
+              return _CheckedInView(
+                sessionId: session.id,
+                checkinTime: session.checkinTime!,
+                purpose: session.purpose,
+              );
             }
             return const _NotCheckedInView();
           },
@@ -141,7 +145,8 @@ class _NotCheckedInView extends ConsumerWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      loading: () => const ShimmerSkeleton(width: 180, height: 18),
+                      loading: () =>
+                          const ShimmerSkeleton(width: 180, height: 18),
                       error: (err, stack) => Text(
                         'Unable to load count',
                         style: GoogleFonts.dmSans(
@@ -182,7 +187,10 @@ class _NotCheckedInView extends ConsumerWidget {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: Text('Check-in (Web)', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+          title: Text(
+            'Check-in (Web)',
+            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,19 +207,39 @@ class _NotCheckedInView extends ConsumerWidget {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(0),
-                        borderSide: const BorderSide(color: AppColors.navy, width: 2),
+                        borderSide: const BorderSide(
+                          color: AppColors.navy,
+                          width: 2,
+                        ),
                       ),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'General visit', child: Text('General visit')),
-                      DropdownMenuItem(value: 'Project work', child: Text('Project work')),
-                      DropdownMenuItem(value: '3D Printing', child: Text('3D Printing')),
-                      DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
-                      DropdownMenuItem(value: 'Woodwork', child: Text('Woodwork')),
+                      DropdownMenuItem(
+                        value: 'General visit',
+                        child: Text('General visit'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Project work',
+                        child: Text('Project work'),
+                      ),
+                      DropdownMenuItem(
+                        value: '3D Printing',
+                        child: Text('3D Printing'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Electronics',
+                        child: Text('Electronics'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Woodwork',
+                        child: Text('Woodwork'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) {
-                        setDialogState(() { purpose = val; });
+                        setDialogState(() {
+                          purpose = val;
+                        });
                       }
                     },
                   );
@@ -239,7 +267,11 @@ class _NotCheckedInView extends ConsumerWidget {
     );
   }
 
-  Future<void> _doCheckIn(BuildContext context, WidgetRef ref, String purpose) async {
+  Future<void> _doCheckIn(
+    BuildContext context,
+    WidgetRef ref,
+    String purpose,
+  ) async {
     // Guard against double-tap
     if (ref.read(_isCheckingInProvider)) return;
     ref.read(_isCheckingInProvider.notifier).state = true;
@@ -339,7 +371,11 @@ class _CheckedInView extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.science_rounded, size: 28, color: AppColors.navy),
+              const Icon(
+                Icons.science_rounded,
+                size: 28,
+                color: AppColors.navy,
+              ),
               const SizedBox(width: AppSizes.sm),
               Text(
                 'Grow~',
@@ -361,7 +397,11 @@ class _CheckedInView extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.check_circle_outline, color: AppColors.green, size: 32),
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: AppColors.green,
+                      size: 32,
+                    ),
                     const SizedBox(width: AppSizes.md),
                     Text(
                       "You're checked in",
@@ -430,10 +470,16 @@ class _CheckedInView extends ConsumerWidget {
                 child: NeoCard(
                   color: Colors.white,
                   padding: const EdgeInsets.all(AppSizes.md),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ToolsScreen())),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ToolsScreen()),
+                  ),
                   child: Column(
                     children: [
-                      const Icon(Icons.build_rounded, size: 28, color: AppColors.cobalt),
+                      const Icon(
+                        Icons.build_rounded,
+                        size: 28,
+                        color: AppColors.cobalt,
+                      ),
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'Book a Tool',
@@ -454,7 +500,11 @@ class _CheckedInView extends ConsumerWidget {
                   onTap: () => _showReportIssueSheet(context),
                   child: Column(
                     children: [
-                      const Icon(Icons.report_outlined, size: 28, color: AppColors.orange),
+                      const Icon(
+                        Icons.report_outlined,
+                        size: 28,
+                        color: AppColors.orange,
+                      ),
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'Report Issue',
@@ -542,7 +592,10 @@ class _CheckedInView extends ConsumerWidget {
                   hintText: 'Describe the issue...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(0),
-                    borderSide: const BorderSide(color: AppColors.navy, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppColors.navy,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -550,7 +603,9 @@ class _CheckedInView extends ConsumerWidget {
               NeoButton(
                 label: 'Submit',
                 onPressed: () {
-                  AppLogger.action(LogCategory.lab, 'Issue reported', {'issue': controller.text});
+                  AppLogger.action(LogCategory.lab, 'Issue reported', {
+                    'issue': controller.text,
+                  });
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Issue reported. Thank you!')),
@@ -704,11 +759,17 @@ class _SessionHistorySection extends ConsumerWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      const Icon(Icons.history, size: 40, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.history,
+                        size: 40,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'No sessions yet. Check in to get started.',
-                        style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                        style: GoogleFonts.dmSans(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -801,9 +862,8 @@ class _SessionHistorySection extends ConsumerWidget {
               ),
             ),
           ),
-          error: (err, stack) => const Center(
-            child: Text('Failed to load sessions'),
-          ),
+          error: (err, stack) =>
+              const Center(child: Text('Failed to load sessions')),
         ),
       ],
     );

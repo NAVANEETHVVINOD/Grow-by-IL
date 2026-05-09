@@ -15,10 +15,7 @@ import '../../features/lab/domain/lab_providers.dart';
 
 /// Persistent shell that wraps the 5 main tabs with a neobrutalist bottom nav.
 class MainShell extends ConsumerStatefulWidget {
-  const MainShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
@@ -33,7 +30,10 @@ class _MainShellState extends ConsumerState<MainShell> {
   void initState() {
     super.initState();
     _heartbeatTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      AppLogger.info(LogCategory.system, 'Heartbeat tick — checking session freshness');
+      AppLogger.info(
+        LogCategory.system,
+        'Heartbeat tick — checking session freshness',
+      );
       ref.read(labRepositoryProvider).refreshSession();
     });
   }
@@ -64,13 +64,18 @@ class _MainShellState extends ConsumerState<MainShell> {
                 borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                 side: const BorderSide(color: AppColors.navy, width: 2),
               ),
-              title: const Text('Exit Grow~?',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text(
+                'Exit Grow~?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               content: const Text('Are you sure you want to exit?'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
                 ),
                 NeoButton(
                   label: 'Exit',

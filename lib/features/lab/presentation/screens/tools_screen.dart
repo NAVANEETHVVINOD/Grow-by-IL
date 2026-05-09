@@ -48,7 +48,10 @@ class ToolsScreen extends ConsumerWidget {
                     children: [
                       _buildSearchBar(),
                       const SizedBox(height: AppSizes.md),
-                      _buildFilterChips(ref, ref.watch(toolCategoryFilterProvider)),
+                      _buildFilterChips(
+                        ref,
+                        ref.watch(toolCategoryFilterProvider),
+                      ),
                     ],
                   ),
                 ),
@@ -66,11 +69,17 @@ class ToolsScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.build_outlined, size: 64, color: AppColors.textSecondary),
+                              const Icon(
+                                Icons.build_outlined,
+                                size: 64,
+                                color: AppColors.textSecondary,
+                              ),
                               const SizedBox(height: AppSizes.md),
                               Text(
                                 'No tools found in this category',
-                                style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                                style: GoogleFonts.dmSans(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -78,33 +87,34 @@ class ToolsScreen extends ConsumerWidget {
                       );
                     }
                     return SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: AppSizes.md,
-                        crossAxisSpacing: AppSizes.md,
-                        childAspectRatio: 0.75,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final tool = tools[index];
-                          final isSelected = selectedTool?.id == tool.id;
-                          return _ToolCard(
-                            tool: tool,
-                            isSelected: isSelected,
-                            onTap: () => ref.read(selectedToolProvider.notifier).state = tool,
-                          );
-                        },
-                        childCount: tools.length,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: AppSizes.md,
+                            crossAxisSpacing: AppSizes.md,
+                            childAspectRatio: 0.75,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final tool = tools[index];
+                        final isSelected = selectedTool?.id == tool.id;
+                        return _ToolCard(
+                          tool: tool,
+                          isSelected: isSelected,
+                          onTap: () =>
+                              ref.read(selectedToolProvider.notifier).state =
+                                  tool,
+                        );
+                      }, childCount: tools.length),
                     );
                   },
                   loading: () => SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: AppSizes.md,
-                      crossAxisSpacing: AppSizes.md,
-                      childAspectRatio: 0.75,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: AppSizes.md,
+                          crossAxisSpacing: AppSizes.md,
+                          childAspectRatio: 0.75,
+                        ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => const ShimmerSkeleton(
                         width: double.infinity,
@@ -137,7 +147,8 @@ class ToolsScreen extends ConsumerWidget {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => BookingBottomSheet(tool: selectedTool),
+                    builder: (context) =>
+                        BookingBottomSheet(tool: selectedTool),
                   );
                 },
               ),
@@ -167,18 +178,27 @@ class ToolsScreen extends ConsumerWidget {
   }
 
   Widget _buildFilterChips(WidgetRef ref, String selected) {
-    final categories = ['All', '3D Printer', 'Laser', 'Electronics', 'Woodwork', 'Fabrication'];
+    final categories = [
+      'All',
+      '3D Printer',
+      'Laser',
+      'Electronics',
+      'Woodwork',
+      'Fabrication',
+    ];
     return SizedBox(
       height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: AppSizes.sm),
+        separatorBuilder: (context, index) =>
+            const SizedBox(width: AppSizes.sm),
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selected;
           return GestureDetector(
-            onTap: () => ref.read(toolCategoryFilterProvider.notifier).state = category,
+            onTap: () =>
+                ref.read(toolCategoryFilterProvider.notifier).state = category,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.center,
@@ -235,14 +255,20 @@ class _ToolCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.navy.withValues(alpha: 0.1)),
+                  border: Border.all(
+                    color: AppColors.navy.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: tool.imageUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(tool.imageUrl!, fit: BoxFit.cover),
                       )
-                    : const Icon(Icons.build_rounded, size: 40, color: AppColors.navy),
+                    : const Icon(
+                        Icons.build_rounded,
+                        size: 40,
+                        color: AppColors.navy,
+                      ),
               ),
             ),
             const SizedBox(height: AppSizes.sm),

@@ -25,8 +25,8 @@ class ProjectMemberModel {
       projectId: json['project_id'] as String,
       userId: json['user_id'] as String,
       role: json['role'] as String? ?? 'member',
-      joinedAt: json['joined_at'] != null 
-          ? DateTime.parse(json['joined_at'] as String).toUtc() 
+      joinedAt: json['joined_at'] != null
+          ? DateTime.parse(json['joined_at'] as String).toUtc()
           : null,
       userName: json['users']?['name'] as String?,
       userAvatar: json['users']?['avatar_url'] as String?,
@@ -34,11 +34,6 @@ class ProjectMemberModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'project_id': projectId,
-      'user_id': userId,
-      'role': role,
-    };
+    return {'id': id, 'project_id': projectId, 'user_id': userId, 'role': role};
   }
 }

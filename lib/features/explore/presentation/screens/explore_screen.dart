@@ -28,19 +28,21 @@ class ExploreScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.xl),
-              
+
               _buildSectionHeader('Our Services'),
               const SizedBox(height: AppSizes.md),
               _buildServiceCard(
                 title: 'Innovation Lab',
-                desc: 'Access state-of-the-art tools and a collaborative workspace to build your dreams.',
+                desc:
+                    'Access state-of-the-art tools and a collaborative workspace to build your dreams.',
                 icon: Icons.science_rounded,
                 color: AppColors.yellow,
                 onTap: () => context.go('/lab'),
               ),
               _buildServiceCard(
                 title: 'Tool Catalog',
-                desc: 'Browse and book precision equipment from 3D printers to laser cutters.',
+                desc:
+                    'Browse and book precision equipment from 3D printers to laser cutters.',
                 icon: Icons.build_rounded,
                 color: AppColors.cobalt,
                 iconColor: Colors.white,
@@ -48,12 +50,13 @@ class ExploreScreen extends ConsumerWidget {
               ),
               _buildServiceCard(
                 title: 'Project Support',
-                desc: 'Get mentorship, find teammates, and showcase your builds to the community.',
+                desc:
+                    'Get mentorship, find teammates, and showcase your builds to the community.',
                 icon: Icons.rocket_launch_rounded,
                 color: AppColors.green,
                 onTap: () {}, // Future projects overview
               ),
-              
+
               const SizedBox(height: AppSizes.xl),
               _buildSectionHeader('Knowledge Base'),
               const SizedBox(height: AppSizes.md),
@@ -63,7 +66,10 @@ class ExploreScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSizes.md),
                   child: Row(
                     children: [
-                      const Icon(Icons.menu_book_rounded, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.menu_book_rounded,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: AppSizes.md),
                       Expanded(
                         child: Column(
@@ -71,11 +77,17 @@ class ExploreScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Maker Wiki',
-                              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
                             Text(
                               'SOPs, tutorials, and guides coming soon.',
-                              style: GoogleFonts.dmSans(fontSize: 14, color: AppColors.textSecondary),
+                              style: GoogleFonts.dmSans(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -84,18 +96,26 @@ class ExploreScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: AppSizes.xxl),
               _buildSectionHeader('About IdeaLab'),
               const SizedBox(height: AppSizes.md),
               Text(
                 'IdeaLab is the heart of innovation at our campus. We provide the tools, the space, and the community for students to transition from consumers to creators.',
-                style: GoogleFonts.dmSans(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+                style: GoogleFonts.dmSans(
+                  fontSize: 15,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: AppSizes.md),
               Text(
                 'Grow~ by IdeaLab',
-                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.navy),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.navy,
+                ),
               ),
               const SizedBox(height: 100),
             ],
@@ -164,13 +184,19 @@ class ExploreScreen extends ConsumerWidget {
                       desc,
                       style: GoogleFonts.dmSans(
                         fontSize: 13,
-                        color: (iconColor ?? AppColors.navy).withValues(alpha: 0.7),
+                        color: (iconColor ?? AppColors.navy).withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: iconColor ?? AppColors.navy),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: iconColor ?? AppColors.navy,
+              ),
             ],
           ),
         ),

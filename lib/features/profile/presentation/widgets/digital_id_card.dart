@@ -7,7 +7,12 @@ import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 
 class DigitalIdCard extends StatefulWidget {
-  const DigitalIdCard({super.key, required this.user, this.onAvatarTap, this.isUploading = false});
+  const DigitalIdCard({
+    super.key,
+    required this.user,
+    this.onAvatarTap,
+    this.isUploading = false,
+  });
   final UserModel user;
   final VoidCallback? onAvatarTap;
   final bool isUploading;
@@ -16,14 +21,18 @@ class DigitalIdCard extends StatefulWidget {
   State<DigitalIdCard> createState() => _DigitalIdCardState();
 }
 
-class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProviderStateMixin {
+class _DigitalIdCardState extends State<DigitalIdCard>
+    with SingleTickerProviderStateMixin {
   bool _isBack = false;
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
   }
 
   @override
@@ -101,18 +110,24 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
                       CircleAvatar(
                         radius: 35,
                         backgroundColor: AppColors.yellow,
-                        backgroundImage: widget.user.avatarUrl != null 
-                          ? NetworkImage(widget.user.avatarUrl!) 
-                          : null,
-                        child: widget.user.avatarUrl == null 
-                          ? const Icon(Icons.person, size: 40, color: AppColors.navy) 
-                          : null,
+                        backgroundImage: widget.user.avatarUrl != null
+                            ? NetworkImage(widget.user.avatarUrl!)
+                            : null,
+                        child: widget.user.avatarUrl == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: AppColors.navy,
+                              )
+                            : null,
                       ),
                       if (widget.isUploading)
                         const CircleAvatar(
                           radius: 35,
                           backgroundColor: Colors.black54,
-                          child: CircularProgressIndicator(color: AppColors.yellow),
+                          child: CircularProgressIndicator(
+                            color: AppColors.yellow,
+                          ),
                         ),
                       Positioned(
                         bottom: 0,
@@ -123,7 +138,11 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
                             color: AppColors.yellow,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.camera_alt, size: 12, color: AppColors.navy),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 12,
+                            color: AppColors.navy,
+                          ),
                         ),
                       ),
                     ],
@@ -163,11 +182,18 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
               children: [
                 Text(
                   'EST. 2024',
-                  style: GoogleFonts.dmSans(color: Colors.white38, fontSize: 10),
+                  style: GoogleFonts.dmSans(
+                    color: Colors.white38,
+                    fontSize: 10,
+                  ),
                 ),
                 const Text(
                   'VERIFIED MAKER',
-                  style: TextStyle(color: AppColors.yellow, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: AppColors.yellow,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -193,12 +219,18 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
                 children: [
                   Text(
                     'SCAN TO IDENTIFY',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 12),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Use this QR for lab access, tool checkout, and event attendance.',
-                    style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.textSecondary),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 10,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -208,7 +240,10 @@ class _DigitalIdCardState extends State<DigitalIdCard> with SingleTickerProvider
               data: widget.user.qrCodeData ?? widget.user.id,
               version: QrVersions.auto,
               size: 100,
-              eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: AppColors.navy),
+              eyeStyle: const QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: AppColors.navy,
+              ),
             ),
           ],
         ),

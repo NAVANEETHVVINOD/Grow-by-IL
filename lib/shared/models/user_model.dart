@@ -56,8 +56,16 @@ class UserModel {
       username: json['username'] as String?,
       role: json['role'] as String? ?? 'student',
       systemRole: json['system_role'] as String? ?? 'user',
-      skills: (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-      interests: (json['interests'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      skills:
+          (json['skills'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      interests:
+          (json['interests'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       profileCompleted: json['profile_completed'] as bool? ?? false,
       clubId: json['club_id'] as String?,
       xp: json['xp'] as int? ?? 0,

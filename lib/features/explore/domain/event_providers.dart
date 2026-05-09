@@ -14,15 +14,21 @@ final activeEventsProvider = FutureProvider<List<EventModel>>((ref) async {
   return repo.getEvents();
 });
 
-final eventDetailProvider = FutureProvider.family<EventModel, String>((ref, id) async {
+final eventDetailProvider = FutureProvider.family<EventModel, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(eventRepositoryProvider);
   return repo.getEventById(id);
 });
 
-final userRsvpProvider = FutureProvider.family<RsvpModel?, String>((ref, eventId) async {
+final userRsvpProvider = FutureProvider.family<RsvpModel?, String>((
+  ref,
+  eventId,
+) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return null;
-  
+
   final repo = ref.watch(eventRepositoryProvider);
   return repo.getUserRsvp(eventId, user.id);
 });

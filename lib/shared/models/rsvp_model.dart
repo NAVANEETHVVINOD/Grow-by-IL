@@ -24,11 +24,11 @@ class RsvpModel {
       userId: json['user_id'] as String,
       qrTicketData: json['qr_ticket_data'] as String?,
       status: json['status'] as String? ?? 'going',
-      checkedInAt: json['checked_in_at'] != null 
-          ? DateTime.parse(json['checked_in_at'] as String).toUtc() 
+      checkedInAt: json['checked_in_at'] != null
+          ? DateTime.parse(json['checked_in_at'] as String).toUtc()
           : null,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String).toUtc() 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
     );
   }

@@ -39,7 +39,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authRepositoryProvider).signIn(
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -61,14 +63,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
-      final response = await ref.read(authRepositoryProvider).signInWithGoogle();
+      final response = await ref
+          .read(authRepositoryProvider)
+          .signInWithGoogle();
       if (response == null) return; // user cancelled
       if (!mounted) return;
-      
+
       // Check profile completion
       final user = await ref.read(authRepositoryProvider).getCurrentUser();
       if (!mounted) return;
-      
+
       if (user?.profileCompleted == true) {
         context.go('/home');
       } else {
@@ -87,6 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -107,8 +112,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Sign in to access Grow~',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSizes.xxl),
                 NeoCard(
@@ -145,7 +150,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Divider with "or" text
                 Row(
                   children: [
-                    const Expanded(child: Divider(color: AppColors.textSecondary)),
+                    const Expanded(
+                      child: Divider(color: AppColors.textSecondary),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
@@ -156,7 +163,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    const Expanded(child: Divider(color: AppColors.textSecondary)),
+                    const Expanded(
+                      child: Divider(color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSizes.lg),

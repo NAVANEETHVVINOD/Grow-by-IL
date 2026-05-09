@@ -46,8 +46,12 @@ class InventoryItemModel {
       storageLocation: json['storage_location'] as String?,
       imageUrl: json['image_url'] as String?,
       projectId: json['project_id'] as String?,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String).toUtc() : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String).toUtc() : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String).toUtc()
+          : null,
     );
   }
 

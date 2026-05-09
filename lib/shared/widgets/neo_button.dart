@@ -47,9 +47,7 @@ class _NeoButtonState extends State<NeoButton> {
         ? const Offset(1, 1)
         : const Offset(AppSizes.shadowX, AppSizes.shadowY);
 
-    final translationOffset = _isPressed
-        ? const Offset(3, 3)
-        : Offset.zero;
+    final translationOffset = _isPressed ? const Offset(3, 3) : Offset.zero;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -92,7 +90,9 @@ class _NeoButtonState extends State<NeoButton> {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(widget.textColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        widget.textColor,
+                      ),
                     ),
                   )
                 : Row(

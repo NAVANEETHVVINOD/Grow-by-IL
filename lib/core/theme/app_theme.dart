@@ -86,15 +86,9 @@ class AppTheme {
         ),
 
         // Body
-        bodyLarge: bodyFont.bodyLarge?.copyWith(
-          color: AppColors.textPrimary,
-        ),
-        bodyMedium: bodyFont.bodyMedium?.copyWith(
-          color: AppColors.textPrimary,
-        ),
-        bodySmall: bodyFont.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+        bodyLarge: bodyFont.bodyLarge?.copyWith(color: AppColors.textPrimary),
+        bodyMedium: bodyFont.bodyMedium?.copyWith(color: AppColors.textPrimary),
+        bodySmall: bodyFont.bodySmall?.copyWith(color: AppColors.textSecondary),
 
         // Label
         labelLarge: bodyFont.labelLarge?.copyWith(
@@ -118,35 +112,21 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.navy,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.navy, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.navy,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.navy, width: 2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.yellow,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.yellow, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.red,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.red, width: 2),
         ),
-        labelStyle: GoogleFonts.dmSans(
-          color: AppColors.textSecondary,
-        ),
+        labelStyle: GoogleFonts.dmSans(color: AppColors.textSecondary),
       ),
 
       // ── Divider ────────────────────────────────────────────

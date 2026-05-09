@@ -8,13 +8,14 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(supabase);
 });
 
-final notificationsProvider = FutureProvider.autoDispose<List<NotificationModel>>((ref) async {
-  final user = ref.watch(currentUserProvider).valueOrNull;
-  if (user == null) return [];
+final notificationsProvider =
+    FutureProvider.autoDispose<List<NotificationModel>>((ref) async {
+      final user = ref.watch(currentUserProvider).valueOrNull;
+      if (user == null) return [];
 
-  final repo = ref.watch(notificationRepositoryProvider);
-  return repo.getNotifications(user.id);
-});
+      final repo = ref.watch(notificationRepositoryProvider);
+      return repo.getNotifications(user.id);
+    });
 
 final unreadNotificationCountProvider = Provider.autoDispose<int>((ref) {
   final notifications = ref.watch(notificationsProvider).valueOrNull ?? [];

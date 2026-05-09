@@ -41,10 +41,7 @@ class NeoTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
-          style: GoogleFonts.dmSans(
-            fontSize: 16,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.dmSans(fontSize: 16, color: AppColors.textPrimary),
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.surface,

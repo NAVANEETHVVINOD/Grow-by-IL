@@ -16,7 +16,8 @@ class EventsScreen extends ConsumerStatefulWidget {
   ConsumerState<EventsScreen> createState() => _EventsScreenState();
 }
 
-class _EventsScreenState extends ConsumerState<EventsScreen> with SingleTickerProviderStateMixin {
+class _EventsScreenState extends ConsumerState<EventsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -56,7 +57,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen> with SingleTickerPr
               unselectedLabelColor: AppColors.textSecondary,
               indicatorColor: AppColors.yellow,
               indicatorWeight: 4,
-              labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 14),
+              labelStyle: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
               tabs: const [
                 Tab(text: 'UPCOMING'),
                 Tab(text: 'MY RSVPS'),
@@ -100,13 +104,17 @@ class _EventsListTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  statusFilter == 'upcoming' ? Icons.event_busy_rounded : Icons.history_rounded,
+                  statusFilter == 'upcoming'
+                      ? Icons.event_busy_rounded
+                      : Icons.history_rounded,
                   size: 48,
                   color: AppColors.textSecondary,
                 ),
                 const SizedBox(height: AppSizes.md),
                 Text(
-                  statusFilter == 'upcoming' ? 'No upcoming events' : 'No past events',
+                  statusFilter == 'upcoming'
+                      ? 'No upcoming events'
+                      : 'No past events',
                   style: GoogleFonts.dmSans(color: AppColors.textSecondary),
                 ),
               ],
@@ -153,9 +161,16 @@ class _MyRsvpsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.bookmark_border_rounded, size: 48, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.bookmark_border_rounded,
+                  size: 48,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(height: AppSizes.md),
-                Text('You haven\'t RSVP\'d to any events', style: GoogleFonts.dmSans(color: AppColors.textSecondary)),
+                Text(
+                  'You haven\'t RSVP\'d to any events',
+                  style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                ),
               ],
             ),
           );
@@ -169,7 +184,9 @@ class _MyRsvpsTab extends ConsumerWidget {
             itemBuilder: (context, index) {
               final rsvp = rsvps[index];
               return FutureBuilder(
-                future: ref.read(eventRepositoryProvider).getEventById(rsvp.eventId),
+                future: ref
+                    .read(eventRepositoryProvider)
+                    .getEventById(rsvp.eventId),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return _EventCard(event: snapshot.data!);
@@ -205,7 +222,9 @@ class _EventCard extends StatelessWidget {
             children: [
               if (event.imageUrl != null)
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusMd)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radiusMd),
+                  ),
                   child: Image.network(
                     event.imageUrl!,
                     height: 120,
@@ -224,23 +243,37 @@ class _EventCard extends StatelessWidget {
                         const Spacer(),
                         Text(
                           '${event.rsvpCount} attending',
-                          style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       event.title,
-                      style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondary),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           event.startTime.toLocal().toString().substring(5, 16),
-                          style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.textSecondary),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -263,10 +296,17 @@ class _TypeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: AppColors.yellow, borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(
+        color: AppColors.yellow,
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: Text(
         type.toUpperCase(),
-        style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.navy),
+        style: GoogleFonts.dmSans(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: AppColors.navy,
+        ),
       ),
     );
   }
