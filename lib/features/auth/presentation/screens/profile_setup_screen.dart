@@ -24,7 +24,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _usernameController = TextEditingController();
   final _skillController = TextEditingController();
   final _interestController = TextEditingController();
-  
+
   String _selectedBaseRole = 'student';
   final List<String> _skills = [];
   final List<String> _interests = [];
@@ -75,7 +75,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         context.go('/home');
       }
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'Profile setup failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'Profile setup failed',
+        error: e,
+        stack: st,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -140,7 +145,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             padding: const EdgeInsets.only(bottom: AppSizes.md),
                             child: Row(
                               children: [
-                                const Icon(Icons.person, color: AppColors.textSecondary),
+                                const Icon(
+                                  Icons.person,
+                                  color: AppColors.textSecondary,
+                                ),
                                 const SizedBox(width: AppSizes.sm),
                                 Text(
                                   'Welcome, ${user?.name ?? ''}!',
@@ -200,11 +208,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           items: const [
                             DropdownMenuItem(
                               value: 'student',
-                              child: Text('Student', style: TextStyle(fontFamily: 'DM Sans')),
+                              child: Text(
+                                'Student',
+                                style: TextStyle(fontFamily: 'DM Sans'),
+                              ),
                             ),
                             DropdownMenuItem(
                               value: 'faculty',
-                              child: Text('Faculty', style: TextStyle(fontFamily: 'DM Sans')),
+                              child: Text(
+                                'Faculty',
+                                style: TextStyle(fontFamily: 'DM Sans'),
+                              ),
                             ),
                           ],
                           onChanged: (value) {
@@ -231,7 +245,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           runSpacing: 8,
                           children: _skills.map((skill) {
                             return Chip(
-                              label: Text(skill, style: const TextStyle(fontFamily: 'DM Sans')),
+                              label: Text(
+                                skill,
+                                style: const TextStyle(fontFamily: 'DM Sans'),
+                              ),
                               backgroundColor: AppColors.yellow,
                               deleteIconColor: AppColors.navy,
                               onDeleted: () {
@@ -241,7 +258,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                               },
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0),
-                                side: const BorderSide(color: AppColors.navy, width: 2),
+                                side: const BorderSide(
+                                  color: AppColors.navy,
+                                  width: 2,
+                                ),
                               ),
                             );
                           }).toList(),
@@ -263,7 +283,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                               onPressed: () {
                                 if (_skillController.text.trim().isNotEmpty) {
                                   setState(() {
-                                    if (!_skills.contains(_skillController.text.trim())) {
+                                    if (!_skills.contains(
+                                      _skillController.text.trim(),
+                                    )) {
                                       _skills.add(_skillController.text.trim());
                                     }
                                     _skillController.clear();
@@ -289,8 +311,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           runSpacing: 8,
                           children: _interests.map((interest) {
                             return Chip(
-                              label: Text(interest, style: const TextStyle(fontFamily: 'DM Sans')),
-                              backgroundColor: AppColors.cobalt.withValues(alpha: 0.2),
+                              label: Text(
+                                interest,
+                                style: const TextStyle(fontFamily: 'DM Sans'),
+                              ),
+                              backgroundColor: AppColors.cobalt.withValues(
+                                alpha: 0.2,
+                              ),
                               deleteIconColor: AppColors.navy,
                               onDeleted: () {
                                 setState(() {
@@ -299,7 +326,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                               },
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0),
-                                side: const BorderSide(color: AppColors.navy, width: 2),
+                                side: const BorderSide(
+                                  color: AppColors.navy,
+                                  width: 2,
+                                ),
                               ),
                             );
                           }).toList(),
@@ -319,10 +349,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                               label: 'Add',
                               width: 80,
                               onPressed: () {
-                                if (_interestController.text.trim().isNotEmpty) {
+                                if (_interestController.text
+                                    .trim()
+                                    .isNotEmpty) {
                                   setState(() {
-                                    if (!_interests.contains(_interestController.text.trim())) {
-                                      _interests.add(_interestController.text.trim());
+                                    if (!_interests.contains(
+                                      _interestController.text.trim(),
+                                    )) {
+                                      _interests.add(
+                                        _interestController.text.trim(),
+                                      );
                                     }
                                     _interestController.clear();
                                   });

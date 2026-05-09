@@ -20,7 +20,12 @@ class ProjectRepository {
           .order('updated_at', ascending: false);
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'getPublicProjects failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'getPublicProjects failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -37,7 +42,12 @@ class ProjectRepository {
           .order('updated_at', ascending: false);
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'getMyProjects failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'getMyProjects failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -45,10 +55,16 @@ class ProjectRepository {
   /// Fetch project details by ID.
   Future<ProjectModel> getProjectById(String id) async {
     try {
-      final data = await _client.from('projects').select().eq('id', id).single();
+      final data =
+          await _client.from('projects').select().eq('id', id).single();
       return ProjectModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'getProjectById failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'getProjectById failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -60,9 +76,16 @@ class ProjectRepository {
           .from('project_members')
           .select('*, users(name, avatar_url)')
           .eq('project_id', projectId);
-      return (data as List).map((row) => ProjectMemberModel.fromJson(row)).toList();
+      return (data as List)
+          .map((row) => ProjectMemberModel.fromJson(row))
+          .toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'getProjectMembers failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'getProjectMembers failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -72,7 +95,8 @@ class ProjectRepository {
     AppLogger.action(LogCategory.projects, 'createProject');
     try {
       // 1. Insert Project
-      final data = await _client.from('projects').insert(projectData).select().single();
+      final data =
+          await _client.from('projects').insert(projectData).select().single();
       final project = ProjectModel.fromJson(data);
 
       // 2. Add creator as Owner
@@ -82,17 +106,28 @@ class ProjectRepository {
         'role': 'owner',
       });
 
-      AppLogger.info(LogCategory.projects, 'Project created successfully: ${project.id}');
+      AppLogger.info(
+        LogCategory.projects,
+        'Project created successfully: ${project.id}',
+      );
       return project;
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'createProject failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'createProject failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
 
   /// Join a project instantly as a 'member'.
   Future<void> joinProject(String projectId, String userId) async {
-    AppLogger.action(LogCategory.projects, 'joinProject', {'projectId': projectId, 'userId': userId});
+    AppLogger.action(LogCategory.projects, 'joinProject', {
+      'projectId': projectId,
+      'userId': userId,
+    });
     try {
       await _client.from('project_members').insert({
         'project_id': projectId,
@@ -110,68 +145,115 @@ class ProjectRepository {
         'related_id': projectId,
       });
 
-      AppLogger.info(LogCategory.projects, 'User $userId joined project $projectId');
+      AppLogger.info(
+        LogCategory.projects,
+        'User $userId joined project $projectId',
+      );
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'joinProject failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'joinProject failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
 
   /// Leave a project.
   Future<void> leaveProject(String projectId, String userId) async {
-    AppLogger.action(LogCategory.projects, 'leaveProject', {'projectId': projectId, 'userId': userId});
+    AppLogger.action(LogCategory.projects, 'leaveProject', {
+      'projectId': projectId,
+      'userId': userId,
+    });
     try {
-      await _client
-          .from('project_members')
-          .delete()
-          .match({'project_id': projectId, 'user_id': userId});
-      AppLogger.info(LogCategory.projects, 'User $userId left project $projectId');
+      await _client.from('project_members').delete().match({
+        'project_id': projectId,
+        'user_id': userId,
+      });
+      AppLogger.info(
+        LogCategory.projects,
+        'User $userId left project $projectId',
+      );
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'leaveProject failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'leaveProject failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
 
   /// Update project settings (Restricted to owner/admin).
-  Future<void> updateProject(String projectId, Map<String, dynamic> updates) async {
-    AppLogger.action(LogCategory.projects, 'updateProject', {'projectId': projectId});
+  Future<void> updateProject(
+    String projectId,
+    Map<String, dynamic> updates,
+  ) async {
+    AppLogger.action(LogCategory.projects, 'updateProject', {
+      'projectId': projectId,
+    });
     try {
       await _client.from('projects').update(updates).eq('id', projectId);
       AppLogger.info(LogCategory.projects, 'Project $projectId updated');
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'updateProject failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'updateProject failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
 
   /// Transfer ownership of a project.
   Future<void> transferOwnership(String projectId, String newOwnerId) async {
-    AppLogger.action(LogCategory.projects, 'transferOwnership', {'projectId': projectId, 'newOwnerId': newOwnerId});
+    AppLogger.action(LogCategory.projects, 'transferOwnership', {
+      'projectId': projectId,
+      'newOwnerId': newOwnerId,
+    });
     try {
       final project = await getProjectById(projectId);
       final oldOwnerId = project.createdBy;
 
       // 1. Update Project Creator
-      await _client.from('projects').update({'created_by': newOwnerId}).eq('id', projectId);
+      await _client
+          .from('projects')
+          .update({'created_by': newOwnerId}).eq('id', projectId);
 
       // 2. Swap Roles in project_members
-      await _client.from('project_members').update({'role': 'admin'}).match({'project_id': projectId, 'user_id': oldOwnerId});
+      await _client.from('project_members').update({'role': 'admin'}).match({
+        'project_id': projectId,
+        'user_id': oldOwnerId,
+      });
       await _client.from('project_members').upsert({
         'project_id': projectId,
         'user_id': newOwnerId,
         'role': 'owner',
       }, onConflict: 'project_id, user_id');
 
-      AppLogger.info(LogCategory.projects, 'Ownership of $projectId transferred to $newOwnerId');
+      AppLogger.info(
+        LogCategory.projects,
+        'Ownership of $projectId transferred to $newOwnerId',
+      );
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'transferOwnership failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'transferOwnership failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
 
   /// Archive a project.
   Future<void> archiveProject(String projectId) async {
-    AppLogger.action(LogCategory.projects, 'archiveProject', {'projectId': projectId});
+    AppLogger.action(LogCategory.projects, 'archiveProject', {
+      'projectId': projectId,
+    });
     try {
       await _client.from('projects').update({
         'status': 'archived',
@@ -179,7 +261,12 @@ class ProjectRepository {
       }).eq('id', projectId);
       AppLogger.info(LogCategory.projects, 'Project $projectId archived');
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'archiveProject failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'archiveProject failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -188,25 +275,45 @@ class ProjectRepository {
   Future<List<ProjectUpdateModel>> getProjectUpdates(String projectId) async {
     try {
       // Stubbed for RC1: project_updates table not yet in schema
-      AppLogger.info(LogCategory.projects, 'getProjectUpdates | Returning empty (Table pending)');
+      AppLogger.info(
+        LogCategory.projects,
+        'getProjectUpdates | Returning empty (Table pending)',
+      );
       return [];
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'getProjectUpdates failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'getProjectUpdates failed',
+        error: e,
+        stack: st,
+      );
       return [];
     }
   }
 
   /// Add an update to a project.
-  Future<void> addProjectUpdate(String projectId, String userId, String content) async {
+  Future<void> addProjectUpdate(
+    String projectId,
+    String userId,
+    String content,
+  ) async {
     try {
       await _client.from('project_updates').insert({
         'project_id': projectId,
         'user_id': userId,
         'content': content,
       });
-      AppLogger.info(LogCategory.projects, 'Project update added for $projectId');
+      AppLogger.info(
+        LogCategory.projects,
+        'Project update added for $projectId',
+      );
     } catch (e, st) {
-      AppLogger.error(LogCategory.projects, 'addProjectUpdate failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.projects,
+        'addProjectUpdate failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }

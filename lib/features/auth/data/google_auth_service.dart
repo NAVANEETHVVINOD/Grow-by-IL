@@ -8,7 +8,8 @@ import '../../../shared/repositories/supabase_client.dart';
 class GoogleAuthService {
   static const _webClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '296487965900-aaerodr4oepoe36jtadeqc8hqgljm405.apps.googleusercontent.com',
+    defaultValue:
+        '296487965900-aaerodr4oepoe36jtadeqc8hqgljm405.apps.googleusercontent.com',
   );
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -23,30 +24,44 @@ class GoogleAuthService {
   Future<AuthResponse?> signInWithGoogle() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      
-      AppLogger.info(LogCategory.auth, 'GOOGLE_SIGN_IN_START | '
+
+      AppLogger.info(
+        LogCategory.auth,
+        'GOOGLE_SIGN_IN_START | '
         'platform=${kIsWeb ? 'web' : 'android'} '
         'package=${packageInfo.packageName} '
         'clientIdSetting=${kIsWeb ? 'explicit' : 'auto'} '
-        'serverClientIdSetting=${!kIsWeb ? 'explicit' : 'none'}');
+        'serverClientIdSetting=${!kIsWeb ? 'explicit' : 'none'}',
+      );
 
       final googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
-        AppLogger.warn(LogCategory.auth, 'GOOGLE_SIGN_IN_CANCELLED | User closed popup');
+        AppLogger.warn(
+          LogCategory.auth,
+          'GOOGLE_SIGN_IN_CANCELLED | User closed popup',
+        );
         return null;
       }
 
-      AppLogger.info(LogCategory.auth, 'GOOGLE_USER_SELECTED | email=${googleUser.email}');
+      AppLogger.info(
+        LogCategory.auth,
+        'GOOGLE_USER_SELECTED | email=${googleUser.email}',
+      );
 
       final googleAuth = await googleUser.authentication;
-      
-      AppLogger.info(LogCategory.auth, 'GOOGLE_TOKENS_RECEIVED | '
+
+      AppLogger.info(
+        LogCategory.auth,
+        'GOOGLE_TOKENS_RECEIVED | '
         'idToken=${googleAuth.idToken != null ? 'PRESENT' : 'MISSING'} '
-        'accessToken=${googleAuth.accessToken != null ? 'PRESENT' : 'MISSING'}');
+        'accessToken=${googleAuth.accessToken != null ? 'PRESENT' : 'MISSING'}',
+      );
 
       if (googleAuth.idToken == null) {
-        throw Exception('Google Auth failed: idToken is null. Check Cloud Console Android Client SHA-1.');
+        throw Exception(
+          'Google Auth failed: idToken is null. Check Cloud Console Android Client SHA-1.',
+        );
       }
 
       final response = await supabase.auth.signInWithIdToken(
@@ -63,7 +78,10 @@ class GoogleAuthService {
             .maybeSingle();
 
         if (existing == null) {
-          AppLogger.info(LogCategory.auth, 'GOOGLE_NEW_USER_DETECTED | creating profile row');
+          AppLogger.info(
+            LogCategory.auth,
+            'GOOGLE_NEW_USER_DETECTED | creating profile row',
+          );
           await supabase.from('users').insert({
             'id': response.user!.id,
             'name': googleUser.displayName ?? 'Maker',
@@ -78,11 +96,18 @@ class GoogleAuthService {
         }
       }
 
-      AppLogger.info(LogCategory.auth, 'GOOGLE_SIGN_IN_COMPLETE | userId=${response.user?.id}');
+      AppLogger.info(
+        LogCategory.auth,
+        'GOOGLE_SIGN_IN_COMPLETE | userId=${response.user?.id}',
+      );
       return response;
-
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'GOOGLE_SIGN_IN_FATAL', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'GOOGLE_SIGN_IN_FATAL',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -92,7 +117,12 @@ class GoogleAuthService {
       await _googleSignIn.signOut();
       AppLogger.info(LogCategory.auth, 'GOOGLE_SIGN_OUT_COMPLETE');
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'GOOGLE_SIGN_OUT_FAILED', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'GOOGLE_SIGN_OUT_FAILED',
+        error: e,
+        stack: st,
+      );
     }
   }
 }

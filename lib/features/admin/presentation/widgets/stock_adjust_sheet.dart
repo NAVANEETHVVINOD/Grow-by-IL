@@ -32,7 +32,9 @@ class _StockAdjustSheetState extends ConsumerState<StockAdjustSheet> {
       ),
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSizes.radiusLg),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -40,7 +42,11 @@ class _StockAdjustSheetState extends ConsumerState<StockAdjustSheet> {
         children: [
           Text(
             'Adjust Stock: ${widget.item.name}',
-            style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy,
+            ),
           ),
           const SizedBox(height: AppSizes.lg),
           Row(
@@ -50,7 +56,11 @@ class _StockAdjustSheetState extends ConsumerState<StockAdjustSheet> {
               const SizedBox(width: AppSizes.xl),
               Text(
                 _change > 0 ? '+$_change' : '$_change',
-                style: GoogleFonts.spaceGrotesk(fontSize: 32, fontWeight: FontWeight.bold, color: _change >= 0 ? AppColors.green : AppColors.red),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: _change >= 0 ? AppColors.green : AppColors.red,
+                ),
               ),
               const SizedBox(width: AppSizes.xl),
               _buildAdjustButton(Icons.add, () => setState(() => _change++)),
@@ -109,21 +119,24 @@ class _StockAdjustSheetState extends ConsumerState<StockAdjustSheet> {
     setState(() => _isLoading = true);
     try {
       await ref.read(inventoryRepositoryProvider).adjustStock(
-        itemId: widget.item.id,
-        userId: user.id,
-        change: _change,
-        transactionType: _change >= 0 ? 'stock_in' : 'stock_out',
-        notes: _notesController.text.trim(),
-      );
-      
+            itemId: widget.item.id,
+            userId: user.id,
+            change: _change,
+            transactionType: _change >= 0 ? 'stock_in' : 'stock_out',
+            notes: _notesController.text.trim(),
+          );
+
       ref.invalidate(inventoryItemsProvider(null));
       ref.invalidate(lowStockItemsProvider);
-      
+
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to adjust stock: $e'), backgroundColor: AppColors.red),
+          SnackBar(
+            content: Text('Failed to adjust stock: $e'),
+            backgroundColor: AppColors.red,
+          ),
         );
       }
     } finally {

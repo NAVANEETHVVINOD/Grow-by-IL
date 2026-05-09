@@ -34,7 +34,9 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final projectsAsync = ref.watch(userProjectsProvider);
-    final bookingsAsync = ref.watch(toolBookingsForDayProvider((toolId: widget.tool.id, date: _selectedDate)));
+    final bookingsAsync = ref.watch(
+      toolBookingsForDayProvider((toolId: widget.tool.id, date: _selectedDate)),
+    );
 
     return Container(
       padding: EdgeInsets.only(
@@ -42,10 +44,10 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       ),
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
-        border: Border(
-          top: BorderSide(color: AppColors.navy, width: 3),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSizes.radiusLg),
         ),
+        border: Border(top: BorderSide(color: AppColors.navy, width: 3)),
       ),
       child: SingleChildScrollView(
         child: Padding(
@@ -56,17 +58,14 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             children: [
               _buildHeader(),
               const SizedBox(height: AppSizes.lg),
-              
               _buildSectionTitle('Select Date'),
               const SizedBox(height: AppSizes.sm),
               _buildDateSelector(),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Duration'),
               const SizedBox(height: AppSizes.sm),
               _buildDurationSelector(),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Available Slots'),
               const SizedBox(height: AppSizes.sm),
               bookingsAsync.when(
@@ -75,7 +74,6 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 error: (e, st) => Text('Error: $e'),
               ),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Link to Project (Optional)'),
               const SizedBox(height: AppSizes.sm),
               projectsAsync.when(
@@ -84,9 +82,10 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 error: (e, st) => const SizedBox.shrink(),
               ),
               const SizedBox(height: AppSizes.xl),
-
               NeoButton(
-                label: widget.tool.requiresApproval ? 'Request Booking' : 'Book Now',
+                label: widget.tool.requiresApproval
+                    ? 'Request Booking'
+                    : 'Book Now',
                 isLoading: _isLoading,
                 onPressed: _selectedStartTime == null ? null : _handleBooking,
               ),
@@ -157,12 +156,13 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: 7,
-        separatorBuilder: (context, index) => const SizedBox(width: AppSizes.sm),
+        separatorBuilder: (context, index) =>
+            const SizedBox(width: AppSizes.sm),
         itemBuilder: (context, index) {
           final date = DateTime.now().add(Duration(days: index));
-          final isSelected = DateFormat('yyyy-MM-dd').format(date) == 
-                             DateFormat('yyyy-MM-dd').format(_selectedDate);
-          
+          final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
+              DateFormat('yyyy-MM-dd').format(_selectedDate);
+
           return GestureDetector(
             onTap: () => setState(() {
               _selectedDate = date;
@@ -184,7 +184,8 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                     style: GoogleFonts.dmSans(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? AppColors.navy : AppColors.textSecondary,
+                      color:
+                          isSelected ? AppColors.navy : AppColors.textSecondary,
                     ),
                   ),
                   Text(
@@ -251,8 +252,20 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
   Widget _buildTimeSlotPicker(List<dynamic> bookings) {
     final slots = <DateTime>[];
     // Lab Hours: 9 AM to 6 PM
-    var current = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 9, 0);
-    final endLimit = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 18, 0);
+    var current = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      9,
+      0,
+    );
+    final endLimit = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      18,
+      0,
+    );
 
     while (current.isBefore(endLimit)) {
       // Don't show slots in the past for today
@@ -276,22 +289,27 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       runSpacing: 8,
       children: slots.map((slot) {
         final slotEnd = slot.add(Duration(minutes: _selectedDurationMinutes));
-        
+
         // Conflict check
         final isConflict = bookings.any((b) {
-          return slot.isBefore(b.slotEnd) && slotEnd.isAfter(b.slotStart);
-        }) || slotEnd.isAfter(endLimit);
+              return slot.isBefore(b.slotEnd) && slotEnd.isAfter(b.slotStart);
+            }) ||
+            slotEnd.isAfter(endLimit);
 
         final isSelected = _selectedStartTime == slot;
 
         return GestureDetector(
-          onTap: isConflict ? null : () => setState(() => _selectedStartTime = slot),
+          onTap: isConflict
+              ? null
+              : () => setState(() => _selectedStartTime = slot),
           child: Opacity(
             opacity: isConflict ? 0.4 : 1.0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.yellow : (isConflict ? Colors.grey.shade200 : Colors.white),
+                color: isSelected
+                    ? AppColors.yellow
+                    : (isConflict ? Colors.grey.shade200 : Colors.white),
                 border: Border.all(
                   color: isSelected ? AppColors.navy : Colors.grey.shade300,
                   width: 2,
@@ -326,10 +344,21 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
         child: DropdownButton<String>(
           value: _selectedProjectId,
           isExpanded: true,
-          hint: Text('Select a project...', style: GoogleFonts.dmSans(fontSize: 14)),
+          hint: Text(
+            'Select a project...',
+            style: GoogleFonts.dmSans(fontSize: 14),
+          ),
           items: [
-            const DropdownMenuItem(value: null, child: Text('Personal Booking')),
-            ...projects.map((p) => DropdownMenuItem(value: p.id as String, child: Text(p.title as String))),
+            const DropdownMenuItem(
+              value: null,
+              child: Text('Personal Booking'),
+            ),
+            ...projects.map(
+              (p) => DropdownMenuItem(
+                value: p.id as String,
+                child: Text(p.title as String),
+              ),
+            ),
           ],
           onChanged: (val) => setState(() => _selectedProjectId = val),
         ),
@@ -348,31 +377,35 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final slotEnd = _selectedStartTime!.add(Duration(minutes: _selectedDurationMinutes));
-      
-      await ref.read(toolRepositoryProvider).createBooking(
-        toolId: widget.tool.id,
-        userId: user.id,
-        slotStart: _selectedStartTime!.toUtc(),
-        slotEnd: slotEnd.toUtc(),
-        projectId: _selectedProjectId,
+      final slotEnd = _selectedStartTime!.add(
+        Duration(minutes: _selectedDurationMinutes),
       );
+
+      await ref.read(toolRepositoryProvider).createBooking(
+            toolId: widget.tool.id,
+            userId: user.id,
+            slotStart: _selectedStartTime!.toUtc(),
+            slotEnd: slotEnd.toUtc(),
+            projectId: _selectedProjectId,
+          );
 
       // Invalidate providers to refresh UI
       ref.invalidate(myBookingsProvider);
       ref.invalidate(toolBookingsForDayProvider);
 
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.tool.requiresApproval 
-            ? 'Booking requested! Waiting for approval.' 
-            : 'Tool booked successfully!'),
+          content: Text(
+            widget.tool.requiresApproval
+                ? 'Booking requested! Waiting for approval.'
+                : 'Tool booked successfully!',
+          ),
           backgroundColor: AppColors.green,
         ),
       );
-      
+
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;

@@ -111,7 +111,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           label: 'College Roll Number',
                           controller: _rollController,
                           prefixIcon: Icons.badge_outlined,
-                          validator: (v) => AppValidators.required(v, 'Roll Number'),
+                          validator: (v) =>
+                              AppValidators.required(v, 'Roll Number'),
                         ),
                         const SizedBox(height: AppSizes.lg),
                         NeoTextField(

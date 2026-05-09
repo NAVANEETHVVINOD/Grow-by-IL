@@ -23,7 +23,12 @@ class LabRepository {
       if (data == null) return null;
       return LabSessionModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.lab, 'getActiveSession failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.lab,
+        'getActiveSession failed',
+        error: e,
+        stack: st,
+      );
       return null;
     }
   }
@@ -36,13 +41,17 @@ class LabRepository {
     });
 
     try {
-      final data = await _client.from('lab_sessions').insert({
-        'user_id': userId,
-        'purpose': purpose,
-      }).select().single();
+      final data = await _client
+          .from('lab_sessions')
+          .insert({'user_id': userId, 'purpose': purpose})
+          .select()
+          .single();
 
       final session = LabSessionModel.fromJson(data);
-      AppLogger.info(LogCategory.lab, 'Check-in successful, sessionId: ${session.id}');
+      AppLogger.info(
+        LogCategory.lab,
+        'Check-in successful, sessionId: ${session.id}',
+      );
       return session;
     } catch (e, st) {
       AppLogger.error(LogCategory.lab, 'Check-in failed', error: e, stack: st);
@@ -56,10 +65,13 @@ class LabRepository {
 
     try {
       await _client.from('lab_sessions').update({
-        'checkout_time': DateTime.now().toUtc().toIso8601String(),
+        'checkout_time': DateTime.now().toUtc().toIso8601String()
       }).eq('id', sessionId);
 
-      AppLogger.info(LogCategory.lab, 'Check-out successful, sessionId: $sessionId');
+      AppLogger.info(
+        LogCategory.lab,
+        'Check-out successful, sessionId: $sessionId',
+      );
     } catch (e, st) {
       AppLogger.error(LogCategory.lab, 'Check-out failed', error: e, stack: st);
       rethrow;
@@ -69,15 +81,15 @@ class LabRepository {
   /// Real-time stream of active visitor count.
   Stream<int> getLiveVisitorCount() {
     AppLogger.info(LogCategory.lab, 'Subscribing to live visitor count stream');
-    return _client
-        .from('lab_sessions')
-        .stream(primaryKey: ['id'])
-        .map((rows) => rows.where((r) => r['checkout_time'] == null).length);
+    return _client.from('lab_sessions').stream(primaryKey: ['id']).map(
+        (rows) => rows.where((r) => r['checkout_time'] == null).length);
   }
 
   /// Get the user's session history.
-  Future<List<LabSessionModel>> getMyHistory(String userId,
-      {int limit = 20}) async {
+  Future<List<LabSessionModel>> getMyHistory(
+    String userId, {
+    int limit = 20,
+  }) async {
     AppLogger.action(LogCategory.lab, 'getMyHistory', {'userId': userId});
     final data = await _client
         .from('lab_sessions')
@@ -86,10 +98,9 @@ class LabRepository {
         .order('checkin_time', ascending: false)
         .limit(limit);
 
-    return (data as List)
-        .map((row) => LabSessionModel.fromJson(row))
-        .toList();
+    return (data as List).map((row) => LabSessionModel.fromJson(row)).toList();
   }
+
   /// Refresh Supabase auth session if close to expiry.
   Future<void> refreshSession() async {
     try {
@@ -100,16 +111,24 @@ class LabRepository {
       }
       final expiresAt = session.expiresAt;
       if (expiresAt == null) return;
-      final expiresIn = DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000)
-          .difference(DateTime.now().toUtc());
+      final expiresIn = DateTime.fromMillisecondsSinceEpoch(
+        expiresAt * 1000,
+      ).difference(DateTime.now().toUtc());
       if (expiresIn.inMinutes < 10) {
         AppLogger.info(
-            LogCategory.auth, 'Session expiring in ${expiresIn.inMinutes}m, refreshing...');
+          LogCategory.auth,
+          'Session expiring in ${expiresIn.inMinutes}m, refreshing...',
+        );
         await _client.auth.refreshSession();
         AppLogger.info(LogCategory.auth, 'Session refreshed successfully');
       }
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'Session refresh failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'Session refresh failed',
+        error: e,
+        stack: st,
+      );
     }
   }
 }

@@ -50,14 +50,14 @@ class ProjectModel {
       coverImageUrl: json['cover_image_url'] as String?,
       showcaseUrl: json['showcase_url'] as String?,
       memberLimit: json['member_limit'] as int?,
-      completedAt: json['completed_at'] != null 
-          ? DateTime.parse(json['completed_at'] as String).toUtc() 
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'] as String).toUtc()
           : null,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String).toUtc() 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
-      updatedAt: json['updated_at'] != null 
-          ? DateTime.parse(json['updated_at'] as String).toUtc() 
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String).toUtc()
           : null,
     );
   }

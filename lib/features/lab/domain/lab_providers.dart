@@ -11,7 +11,9 @@ final labRepositoryProvider = Provider<LabRepository>((ref) {
 });
 
 /// The current user's active lab session (null if not checked in).
-final activeSessionProvider = FutureProvider.autoDispose<LabSessionModel?>((ref) async {
+final activeSessionProvider = FutureProvider.autoDispose<LabSessionModel?>((
+  ref,
+) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return null;
 

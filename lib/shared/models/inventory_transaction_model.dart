@@ -15,7 +15,8 @@ class InventoryTransactionModel {
   final String? toolId;
   final String? inventoryItemId;
   final String userId;
-  final String type; // stock_in, stock_out, maintenance, damage_report, adjustment, assignment
+  final String
+      type; // stock_in, stock_out, maintenance, damage_report, adjustment, assignment
   final int quantityChange;
   final String? notes;
   final DateTime? createdAt;
@@ -30,7 +31,9 @@ class InventoryTransactionModel {
       type: json['transaction_type'] as String,
       quantityChange: json['quantity_change'] as int? ?? 0,
       notes: json['notes'] as String?,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String).toUtc() : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : null,
       userName: json['users']?['full_name'] as String?,
     );
   }

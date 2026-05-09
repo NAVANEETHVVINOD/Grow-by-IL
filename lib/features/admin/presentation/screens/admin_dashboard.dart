@@ -32,7 +32,8 @@ class AdminDashboard extends ConsumerStatefulWidget {
   ConsumerState<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends ConsumerState<AdminDashboard> with SingleTickerProviderStateMixin {
+class _AdminDashboardState extends ConsumerState<AdminDashboard>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -50,7 +51,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> with SingleTick
         elevation: 0,
         title: Text(
           'Admin Dashboard',
-          style: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.navy),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -58,7 +63,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> with SingleTick
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.yellow,
           indicatorWeight: 4,
-          labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
+          labelStyle: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(text: 'OVERVIEW'),
             Tab(text: 'EQUIPMENT'),
@@ -92,13 +100,23 @@ class _OverviewTab extends ConsumerWidget {
       children: [
         _buildStatCards(pendingAsync, activeSessionsAsync, toolsAsync),
         const SizedBox(height: AppSizes.xl),
-        Text('Pending Approvals', style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
+        Text(
+          'Pending Approvals',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
+        ),
         const SizedBox(height: AppSizes.md),
         pendingAsync.when(
           data: (bookings) {
-            if (bookings.isEmpty) return const Center(child: Text('No pending bookings.'));
+            if (bookings.isEmpty) {
+              return const Center(child: Text('No pending bookings.'));
+            }
             return Column(
-              children: bookings.map((b) => _PendingBookingCard(booking: b)).toList(),
+              children:
+                  bookings.map((b) => _PendingBookingCard(booking: b)).toList(),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -108,24 +126,37 @@ class _OverviewTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatCards(AsyncValue<List<BookingModel>> pending, AsyncValue<int> active, AsyncValue<List<ToolModel>> tools) {
+  Widget _buildStatCards(
+    AsyncValue<List<BookingModel>> pending,
+    AsyncValue<int> active,
+    AsyncValue<List<ToolModel>> tools,
+  ) {
     return Row(
       children: [
         _QuickStatCard(
           label: 'Pending',
-          value: pending.maybeWhen(data: (d) => d.length.toString(), orElse: () => '...'),
+          value: pending.maybeWhen(
+            data: (d) => d.length.toString(),
+            orElse: () => '...',
+          ),
           color: AppColors.yellow,
         ),
         const SizedBox(width: AppSizes.md),
         _QuickStatCard(
           label: 'In Lab',
-          value: active.maybeWhen(data: (d) => d.toString(), orElse: () => '...'),
+          value: active.maybeWhen(
+            data: (d) => d.toString(),
+            orElse: () => '...',
+          ),
           color: AppColors.green,
         ),
         const SizedBox(width: AppSizes.md),
         _QuickStatCard(
           label: 'Total Tools',
-          value: tools.maybeWhen(data: (d) => d.length.toString(), orElse: () => '...'),
+          value: tools.maybeWhen(
+            data: (d) => d.length.toString(),
+            orElse: () => '...',
+          ),
           color: AppColors.cobalt,
           textColor: Colors.white,
         ),
@@ -135,7 +166,12 @@ class _OverviewTab extends ConsumerWidget {
 }
 
 class _QuickStatCard extends StatelessWidget {
-  const _QuickStatCard({required this.label, required this.value, required this.color, this.textColor});
+  const _QuickStatCard({
+    required this.label,
+    required this.value,
+    required this.color,
+    this.textColor,
+  });
   final String label;
   final String value;
   final Color color;
@@ -149,8 +185,22 @@ class _QuickStatCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSizes.md),
         child: Column(
           children: [
-            Text(value, style: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.bold, color: textColor ?? AppColors.navy)),
-            Text(label, style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.bold, color: (textColor ?? AppColors.navy).withValues(alpha: 0.7))),
+            Text(
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textColor ?? AppColors.navy,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: (textColor ?? AppColors.navy).withValues(alpha: 0.7),
+              ),
+            ),
           ],
         ),
       ),
@@ -178,14 +228,29 @@ class _PendingBookingCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(booking.toolName ?? 'Unknown Tool', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text('By: ${booking.userName ?? 'Unknown User'}', style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(
+                        booking.toolName ?? 'Unknown Tool',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        'By: ${booking.userName ?? 'Unknown User'}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 Text(
                   booking.slotStart.toLocal().toString().substring(5, 16),
-                  style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -198,7 +263,9 @@ class _PendingBookingCard extends ConsumerWidget {
                     onPressed: () async {
                       final actor = ref.read(currentUserProvider).valueOrNull;
                       if (actor == null) return;
-                      await ref.read(toolRepositoryProvider).approveBooking(booking.id, actor);
+                      await ref
+                          .read(toolRepositoryProvider)
+                          .approveBooking(booking.id, actor);
                       ref.invalidate(pendingBookingsProvider);
                     },
                   ),
@@ -227,7 +294,8 @@ class _EquipmentTab extends ConsumerWidget {
             data: (tools) => ListView.builder(
               padding: const EdgeInsets.all(AppSizes.lg),
               itemCount: tools.length,
-              itemBuilder: (context, index) => _ToolAdminCard(tool: tools[index]),
+              itemBuilder: (context, index) =>
+                  _ToolAdminCard(tool: tools[index]),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, __) => Center(child: Text('Error: $e')),
@@ -241,18 +309,33 @@ class _EquipmentTab extends ConsumerWidget {
     final toolsAsync = ref.watch(toolsProvider);
     return toolsAsync.maybeWhen(
       data: (tools) {
-        final needingRepair = tools.where((t) => t.healthStatus == 'maintenance' || t.healthStatus == 'broken').toList();
+        final needingRepair = tools
+            .where(
+              (t) =>
+                  t.healthStatus == 'maintenance' || t.healthStatus == 'broken',
+            )
+            .toList();
         if (needingRepair.isEmpty) return const SizedBox.shrink();
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.all(AppSizes.lg),
           padding: const EdgeInsets.all(AppSizes.md),
-          decoration: BoxDecoration(color: AppColors.red.withValues(alpha: 0.1), border: Border.all(color: AppColors.red, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+          decoration: BoxDecoration(
+            color: AppColors.red.withValues(alpha: 0.1),
+            border: Border.all(color: AppColors.red, width: 2),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
           child: Row(
             children: [
               const Icon(Icons.warning_amber_rounded, color: AppColors.red),
               const SizedBox(width: AppSizes.md),
-              Text('${needingRepair.length} items need attention', style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, color: AppColors.red)),
+              Text(
+                '${needingRepair.length} items need attention',
+                style: GoogleFonts.dmSans(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.red,
+                ),
+              ),
             ],
           ),
         );
@@ -277,7 +360,8 @@ class _InventoryTab extends ConsumerWidget {
             data: (items) => ListView.builder(
               padding: const EdgeInsets.all(AppSizes.lg),
               itemCount: items.length,
-              itemBuilder: (context, index) => _ItemAdminCard(item: items[index]),
+              itemBuilder: (context, index) =>
+                  _ItemAdminCard(item: items[index]),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, __) => Center(child: Text('Error: $e')),
@@ -296,12 +380,22 @@ class _InventoryTab extends ConsumerWidget {
           width: double.infinity,
           margin: const EdgeInsets.all(AppSizes.lg),
           padding: const EdgeInsets.all(AppSizes.md),
-          decoration: BoxDecoration(color: AppColors.orange.withValues(alpha: 0.1), border: Border.all(color: AppColors.orange, width: 2), borderRadius: BorderRadius.circular(AppSizes.radiusMd)),
+          decoration: BoxDecoration(
+            color: AppColors.orange.withValues(alpha: 0.1),
+            border: Border.all(color: AppColors.orange, width: 2),
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
           child: Row(
             children: [
               const Icon(Icons.inventory_2_outlined, color: AppColors.orange),
               const SizedBox(width: AppSizes.md),
-              Text('${items.length} items running low', style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, color: AppColors.orange)),
+              Text(
+                '${items.length} items running low',
+                style: GoogleFonts.dmSans(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.orange,
+                ),
+              ),
             ],
           ),
         );
@@ -326,23 +420,49 @@ class _ToolAdminCard extends StatelessWidget {
             Container(
               width: 50,
               height: 50,
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.navy, width: 1.5)),
-              child: const Icon(Icons.build_circle_outlined, color: AppColors.navy),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.navy, width: 1.5),
+              ),
+              child: const Icon(
+                Icons.build_circle_outlined,
+                color: AppColors.navy,
+              ),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tool.name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(tool.healthStatus.toUpperCase(), style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.bold, color: tool.healthStatus == 'available' ? AppColors.green : AppColors.red)),
+                  Text(
+                    tool.name,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    tool.healthStatus.toUpperCase(),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: tool.healthStatus == 'available'
+                          ? AppColors.green
+                          : AppColors.red,
+                    ),
+                  ),
                 ],
               ),
             ),
             IconButton(
               icon: const Icon(Icons.edit_note_rounded),
               onPressed: () {
-                showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => MaintenanceUpdateSheet(tool: tool));
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => MaintenanceUpdateSheet(tool: tool),
+                );
               },
             ),
           ],
@@ -368,16 +488,41 @@ class _ItemAdminCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    item.name,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Text('Stock: ${item.quantity} ${item.unit}', style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: item.isLowStock ? AppColors.red : AppColors.textSecondary)),
+                      Text(
+                        'Stock: ${item.quantity} ${item.unit}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: item.isLowStock
+                              ? AppColors.red
+                              : AppColors.textSecondary,
+                        ),
+                      ),
                       if (item.storageLocation != null) ...[
                         const SizedBox(width: 12),
-                        const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
                         const SizedBox(width: 4),
-                        Text(item.storageLocation!, style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.textSecondary)),
+                        Text(
+                          item.storageLocation!,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -385,9 +530,16 @@ class _ItemAdminCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.cobalt),
+              icon: const Icon(
+                Icons.add_circle_outline_rounded,
+                color: AppColors.cobalt,
+              ),
               onPressed: () {
-                showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => StockAdjustSheet(item: item));
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => StockAdjustSheet(item: item),
+                );
               },
             ),
           ],

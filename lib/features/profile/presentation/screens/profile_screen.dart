@@ -44,11 +44,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     setState(() => _isUploading = true);
     try {
-      final signedUrl = await ref.read(mediaServiceProvider).uploadAvatar(userId, image);
+      final signedUrl =
+          await ref.read(mediaServiceProvider).uploadAvatar(userId, image);
       if (signedUrl != null) {
         // Update user profile in database
-        await ref.read(authRepositoryProvider).updateProfile(userId, {'avatar_url': signedUrl});
-        
+        await ref.read(authRepositoryProvider).updateProfile(userId, {
+          'avatar_url': signedUrl,
+        });
+
         if (mounted) {
           ref.invalidate(currentUserProvider);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +62,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e'), backgroundColor: AppColors.red),
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: AppColors.red,
+          ),
         );
       }
     } finally {
@@ -81,7 +87,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.person_off_outlined, size: 48, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.person_off_outlined,
+                      size: 48,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(height: 12),
                     const Text('Could not load profile'),
                     const SizedBox(height: 16),
@@ -162,14 +172,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     AppLogger.action(LogCategory.auth, 'signOut');
                     // Auto-checkout if user has active session
                     try {
-                      final activeSession = await ref.read(activeSessionProvider.future);
+                      final activeSession = await ref.read(
+                        activeSessionProvider.future,
+                      );
                       if (activeSession != null) {
-                        AppLogger.info(LogCategory.lab, 'Auto-checking out session: ${activeSession.id}');
+                        AppLogger.info(
+                          LogCategory.lab,
+                          'Auto-checking out session: ${activeSession.id}',
+                        );
                         final repo = ref.read(labRepositoryProvider);
                         await repo.checkOut(activeSession.id);
                       }
                     } catch (e) {
-                      AppLogger.warn(LogCategory.lab, 'Auto-checkout failed, continuing sign-out: $e');
+                      AppLogger.warn(
+                        LogCategory.lab,
+                        'Auto-checkout failed, continuing sign-out: $e',
+                      );
                     }
 
                     await ref.read(authRepositoryProvider).signOut();
@@ -243,7 +261,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, {VoidCallback? onAction, String? actionLabel}) {
+  Widget _buildSectionHeader(
+    String title, {
+    VoidCallback? onAction,
+    String? actionLabel,
+  }) {
     return Row(
       children: [
         Container(
@@ -285,19 +307,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return bookingsAsync.when(
       data: (bookings) {
         if (bookings.isEmpty) return const Text('No equipment used yet.');
-        final uniqueTools = bookings.map((b) => b.toolId).toSet().take(4).toList();
+        final uniqueTools =
+            bookings.map((b) => b.toolId).toSet().take(4).toList();
         return Wrap(
           spacing: 8,
           children: uniqueTools
-              .map((id) => Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: AppColors.navy, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.build_circle_outlined, size: 24),
-                  ))
+              .map(
+                (id) => Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: AppColors.navy, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.build_circle_outlined, size: 24),
+                ),
+              )
               .toList(),
         );
       },
@@ -316,7 +341,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: projects.length,
-            separatorBuilder: (context, index) => const SizedBox(width: AppSizes.md),
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AppSizes.md),
             itemBuilder: (context, index) {
               final project = projects[index];
               return Container(
@@ -325,7 +351,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   color: Colors.white,
                   border: Border.all(color: AppColors.navy, width: 2),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [BoxShadow(color: AppColors.navy, offset: Offset(4, 4))],
+                  boxShadow: const [
+                    BoxShadow(color: AppColors.navy, offset: Offset(4, 4)),
+                  ],
                 ),
                 padding: const EdgeInsets.all(2),
                 child: Column(
@@ -339,12 +367,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ? CachedNetworkImage(
                                 imageUrl: project.coverImageUrl!,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => const ShimmerSkeleton(width: double.infinity, height: double.infinity),
-                                errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image_rounded)),
+                                placeholder: (context, url) =>
+                                    const ShimmerSkeleton(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Center(
+                                  child: Icon(Icons.broken_image_rounded),
+                                ),
                               )
                             : Container(
                                 color: AppColors.surface,
-                                child: const Icon(Icons.architecture_rounded, color: AppColors.textSecondary),
+                                child: const Icon(
+                                  Icons.architecture_rounded,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                       ),
                     ),
@@ -355,13 +393,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         children: [
                           Text(
                             project.title,
-                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             project.type.toUpperCase(),
-                            style: GoogleFonts.dmSans(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                            style: GoogleFonts.dmSans(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -378,7 +423,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildLinkTile({required String label, required IconData icon, required Color color, Color? textColor, required VoidCallback onTap}) {
+  Widget _buildLinkTile({
+    required String label,
+    required IconData icon,
+    required Color color,
+    Color? textColor,
+    required VoidCallback onTap,
+  }) {
     return Expanded(
       child: NeoCard(
         color: color,
@@ -405,10 +456,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildBadges(UserModel user) {
     final badges = <Map<String, dynamic>>[
-      if (user.level >= 2) {'name': 'Tinkerer', 'icon': Icons.auto_awesome_rounded, 'color': AppColors.yellow},
-      if (user.level >= 4) {'name': 'Builder', 'icon': Icons.construction_rounded, 'color': AppColors.orange},
-      if (user.systemRole != 'user') {'name': 'Mentor', 'icon': Icons.school_rounded, 'color': AppColors.cobalt},
-      {'name': 'Verified', 'icon': Icons.verified_user_rounded, 'color': AppColors.green},
+      if (user.level >= 2)
+        {
+          'name': 'Tinkerer',
+          'icon': Icons.auto_awesome_rounded,
+          'color': AppColors.yellow,
+        },
+      if (user.level >= 4)
+        {
+          'name': 'Builder',
+          'icon': Icons.construction_rounded,
+          'color': AppColors.orange,
+        },
+      if (user.systemRole != 'user')
+        {
+          'name': 'Mentor',
+          'icon': Icons.school_rounded,
+          'color': AppColors.cobalt,
+        },
+      {
+        'name': 'Verified',
+        'icon': Icons.verified_user_rounded,
+        'color': AppColors.green,
+      },
     ];
 
     return Wrap(
@@ -416,32 +486,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       runSpacing: 8,
       alignment: WrapAlignment.center,
       children: badges
-          .map((b) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (b['color'] as Color).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: b['color'] as Color, width: 1.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(b['icon'] as IconData, size: 14, color: b['color'] as Color),
-                    const SizedBox(width: 4),
-                    Text(
-                      b['name'] as String,
-                      style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.bold, color: b['color'] as Color),
+          .map(
+            (b) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: (b['color'] as Color).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: b['color'] as Color, width: 1.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    b['icon'] as IconData,
+                    size: 14,
+                    color: b['color'] as Color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    b['name'] as String,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: b['color'] as Color,
                     ),
-                  ],
-                ),
-              ))
+                  ),
+                ],
+              ),
+            ),
+          )
           .toList(),
     );
   }
 }
 
 class _StatItem extends StatelessWidget {
-  const _StatItem({required this.label, required this.countAsync, required this.icon});
+  const _StatItem({
+    required this.label,
+    required this.countAsync,
+    required this.icon,
+  });
   final String label;
   final AsyncValue<int> countAsync;
   final IconData icon;
@@ -455,14 +539,22 @@ class _StatItem extends StatelessWidget {
         countAsync.when(
           data: (count) => Text(
             count.toString(),
-            style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy,
+            ),
           ),
           loading: () => const ShimmerSkeleton(width: 24, height: 20),
           error: (_, __) => const Text('0'),
         ),
         Text(
           label,
-          style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+          style: GoogleFonts.dmSans(
+            fontSize: 10,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

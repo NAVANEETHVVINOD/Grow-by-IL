@@ -41,10 +41,18 @@ class HomeRepository {
           .order('event_date', ascending: true)
           .limit(5);
 
-      AppLogger.info(LogCategory.system, 'Fetched ${(response as List).length} events');
+      AppLogger.info(
+        LogCategory.system,
+        'Fetched ${(response as List).length} events',
+      );
       return response.map((data) => EventModel.fromJson(data)).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.system, 'getUpcomingEvents failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.system,
+        'getUpcomingEvents failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -63,7 +71,12 @@ class HomeRepository {
         return ProjectModel.fromJson(projectData);
       }).toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.system, 'getUserProjects failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.system,
+        'getUserProjects failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }
@@ -82,7 +95,12 @@ class HomeRepository {
           .map((data) => BookingModel.fromJson(data))
           .toList();
     } catch (e, st) {
-      AppLogger.error(LogCategory.system, 'getUserBookings failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.system,
+        'getUserBookings failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }

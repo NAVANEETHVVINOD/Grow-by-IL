@@ -18,30 +18,36 @@ final publicProjectsProvider = FutureProvider<List<ProjectModel>>((ref) async {
 final userProjectsProvider = FutureProvider<List<ProjectModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return [];
-  
+
   final repo = ref.watch(projectRepositoryProvider);
   return repo.getMyProjects(user.id);
 });
 
-final projectDetailProvider = FutureProvider.family<ProjectModel, String>((ref, id) async {
+final projectDetailProvider = FutureProvider.family<ProjectModel, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.getProjectById(id);
 });
 
-final projectMembersProvider = FutureProvider.family<List<ProjectMemberModel>, String>((ref, id) async {
+final projectMembersProvider =
+    FutureProvider.family<List<ProjectMemberModel>, String>((ref, id) async {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.getProjectMembers(id);
 });
 
-final projectUpdatesProvider = FutureProvider.family<List<ProjectUpdateModel>, String>((ref, id) async {
+final projectUpdatesProvider =
+    FutureProvider.family<List<ProjectUpdateModel>, String>((ref, id) async {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.getProjectUpdates(id);
 });
 
-final userMembershipProvider = FutureProvider.family<ProjectMemberModel?, String>((ref, projectId) async {
+final userMembershipProvider =
+    FutureProvider.family<ProjectMemberModel?, String>((ref, projectId) async {
   final members = await ref.watch(projectMembersProvider(projectId).future);
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return null;
-  
+
   return members.where((m) => m.userId == user.id).firstOrNull;
 });

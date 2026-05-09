@@ -76,13 +76,20 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
             : Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.navy.withValues(alpha: 0.8), AppColors.navy],
+                    colors: [
+                      AppColors.navy.withValues(alpha: 0.8),
+                      AppColors.navy,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
                 child: const Center(
-                  child: Icon(Icons.event_rounded, size: 80, color: AppColors.yellow),
+                  child: Icon(
+                    Icons.event_rounded,
+                    size: 80,
+                    color: AppColors.yellow,
+                  ),
                 ),
               ),
       ),
@@ -194,7 +201,10 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                   children: [
                     Text(
                       'Location',
-                      style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, color: AppColors.navy),
+                      style: GoogleFonts.dmSans(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                      ),
                     ),
                     Text(
                       event.locationName ?? 'IdeaLab Main Room',
@@ -253,12 +263,17 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(eventRepositoryProvider).rsvpToEvent(widget.eventId, user.id);
+      await ref
+          .read(eventRepositoryProvider)
+          .rsvpToEvent(widget.eventId, user.id);
       ref.invalidate(userRsvpProvider(widget.eventId));
       ref.invalidate(eventDetailProvider(widget.eventId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('RSVP Confirmed!'), backgroundColor: AppColors.green),
+          const SnackBar(
+            content: Text('RSVP Confirmed!'),
+            backgroundColor: AppColors.green,
+          ),
         );
       }
     } catch (e) {
@@ -282,8 +297,14 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
         title: const Text('Cancel RSVP?'),
         content: const Text('Are you sure you want to cancel your spot?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Yes, Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes, Cancel'),
+          ),
         ],
       ),
     );
@@ -292,7 +313,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(eventRepositoryProvider).cancelRsvp(widget.eventId, user.id);
+      await ref
+          .read(eventRepositoryProvider)
+          .cancelRsvp(widget.eventId, user.id);
       ref.invalidate(userRsvpProvider(widget.eventId));
       ref.invalidate(eventDetailProvider(widget.eventId));
     } catch (e) {
@@ -308,7 +331,11 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.icon, required this.title, required this.subtitle});
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -325,11 +352,18 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             title,
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.textSecondary),
+            style: GoogleFonts.dmSans(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.navy),
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: AppColors.navy,
+            ),
           ),
         ],
       ),

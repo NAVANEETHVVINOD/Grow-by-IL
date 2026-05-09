@@ -16,10 +16,7 @@ class GlobalSearchDelegate extends SearchDelegate {
   List<Widget>? buildActions(BuildContext context) {
     return [
       if (query.isNotEmpty)
-        IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () => query = '',
-        ),
+        IconButton(icon: const Icon(Icons.clear), onPressed: () => query = ''),
     ];
   }
 
@@ -51,11 +48,19 @@ class GlobalSearchDelegate extends SearchDelegate {
     final projects = ref.watch(publicProjectsProvider).valueOrNull ?? [];
     final events = ref.watch(activeEventsProvider).valueOrNull ?? [];
 
-    final filteredTools = tools.where((t) => t.name.toLowerCase().contains(query.toLowerCase())).toList();
-    final filteredProjects = projects.where((p) => p.title.toLowerCase().contains(query.toLowerCase())).toList();
-    final filteredEvents = events.where((e) => e.title.toLowerCase().contains(query.toLowerCase())).toList();
+    final filteredTools = tools
+        .where((t) => t.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    final filteredProjects = projects
+        .where((p) => p.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    final filteredEvents = events
+        .where((e) => e.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
 
-    if (filteredTools.isEmpty && filteredProjects.isEmpty && filteredEvents.isEmpty) {
+    if (filteredTools.isEmpty &&
+        filteredProjects.isEmpty &&
+        filteredEvents.isEmpty) {
       return const Center(child: Text('No results found'));
     }
 
@@ -63,39 +68,45 @@ class GlobalSearchDelegate extends SearchDelegate {
       children: [
         if (filteredTools.isNotEmpty) ...[
           _buildHeader('Tools'),
-          ...filteredTools.map((t) => ListTile(
-                leading: const Icon(Icons.build),
-                title: Text(t.name),
-                subtitle: Text(t.category),
-                onTap: () {
-                  close(context, null);
-                  context.push('/tools'); // Or specific tool detail if available
-                },
-              )),
+          ...filteredTools.map(
+            (t) => ListTile(
+              leading: const Icon(Icons.build),
+              title: Text(t.name),
+              subtitle: Text(t.category),
+              onTap: () {
+                close(context, null);
+                context.push('/tools'); // Or specific tool detail if available
+              },
+            ),
+          ),
         ],
         if (filteredProjects.isNotEmpty) ...[
           _buildHeader('Projects'),
-          ...filteredProjects.map((p) => ListTile(
-                leading: const Icon(Icons.rocket_launch),
-                title: Text(p.title),
-                subtitle: Text(p.type),
-                onTap: () {
-                  close(context, null);
-                  context.push('/projects/${p.id}');
-                },
-              )),
+          ...filteredProjects.map(
+            (p) => ListTile(
+              leading: const Icon(Icons.rocket_launch),
+              title: Text(p.title),
+              subtitle: Text(p.type),
+              onTap: () {
+                close(context, null);
+                context.push('/projects/${p.id}');
+              },
+            ),
+          ),
         ],
         if (filteredEvents.isNotEmpty) ...[
           _buildHeader('Events'),
-          ...filteredEvents.map((e) => ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: Text(e.title),
-                subtitle: Text(e.type),
-                onTap: () {
-                  close(context, null);
-                  context.push('/events/${e.id}');
-                },
-              )),
+          ...filteredEvents.map(
+            (e) => ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: Text(e.title),
+              subtitle: Text(e.type),
+              onTap: () {
+                close(context, null);
+                context.push('/events/${e.id}');
+              },
+            ),
+          ),
         ],
       ],
     );
@@ -106,7 +117,11 @@ class GlobalSearchDelegate extends SearchDelegate {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textSecondary),
+        style: GoogleFonts.spaceGrotesk(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }

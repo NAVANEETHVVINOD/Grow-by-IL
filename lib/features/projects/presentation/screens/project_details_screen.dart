@@ -18,7 +18,8 @@ class ProjectDetailsScreen extends ConsumerStatefulWidget {
   final String projectId;
 
   @override
-  ConsumerState<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
+  ConsumerState<ProjectDetailsScreen> createState() =>
+      _ProjectDetailsScreenState();
 }
 
 class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
@@ -54,7 +55,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
       bottomNavigationBar: projectAsync.when(
-        data: (project) => _buildBottomActions(project, membershipAsync.valueOrNull),
+        data: (project) =>
+            _buildBottomActions(project, membershipAsync.valueOrNull),
         loading: () => const SizedBox.shrink(),
         error: (_, __) => const SizedBox.shrink(),
       ),
@@ -75,19 +77,33 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             ? CachedNetworkImage(
                 imageUrl: project.coverImageUrl!,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const ShimmerSkeleton(width: double.infinity, height: 200),
-                errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white, size: 48)),
+                placeholder: (context, url) =>
+                    const ShimmerSkeleton(width: double.infinity, height: 200),
+                errorWidget: (context, url, error) => const Center(
+                  child: Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                ),
               )
             : Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.navy.withValues(alpha: 0.8), AppColors.navy],
+                    colors: [
+                      AppColors.navy.withValues(alpha: 0.8),
+                      AppColors.navy,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
                 child: const Center(
-                  child: Icon(Icons.architecture_rounded, size: 64, color: AppColors.yellow),
+                  child: Icon(
+                    Icons.architecture_rounded,
+                    size: 64,
+                    color: AppColors.yellow,
+                  ),
                 ),
               ),
       ),
@@ -125,23 +141,38 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     );
   }
 
-  Widget _buildOverview(ProjectModel project, AsyncValue<List<ProjectMemberModel>> membersAsync) {
+  Widget _buildOverview(
+    ProjectModel project,
+    AsyncValue<List<ProjectMemberModel>> membersAsync,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Description',
-          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
         ),
         const SizedBox(height: AppSizes.sm),
         Text(
           project.description ?? 'No description provided.',
-          style: GoogleFonts.dmSans(fontSize: 16, color: AppColors.textSecondary, height: 1.5),
+          style: GoogleFonts.dmSans(
+            fontSize: 16,
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
         ),
         const SizedBox(height: AppSizes.xl),
         Text(
           'Team',
-          style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
         ),
         const SizedBox(height: AppSizes.md),
         membersAsync.when(
@@ -154,7 +185,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           error: (e, __) => Text('Failed to load members: $e'),
         ),
         const SizedBox(height: AppSizes.xl),
-        if (project.externalLink != null) _buildExternalLink(project.externalLink!),
+        if (project.externalLink != null)
+          _buildExternalLink(project.externalLink!),
         const SizedBox(height: 100),
       ],
     );
@@ -176,7 +208,10 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           Expanded(
             child: Text(
               'View External Resources',
-              style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, color: AppColors.navy),
+              style: GoogleFonts.dmSans(
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
             ),
           ),
           const Icon(Icons.arrow_forward_ios_rounded, size: 16),
@@ -185,7 +220,10 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     );
   }
 
-  Widget _buildBottomActions(ProjectModel project, ProjectMemberModel? membership) {
+  Widget _buildBottomActions(
+    ProjectModel project,
+    ProjectMemberModel? membership,
+  ) {
     final isMember = membership != null;
 
     return Container(
@@ -227,13 +265,19 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       ref.invalidate(userProjectsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Joined the team!'), backgroundColor: AppColors.green),
+          const SnackBar(
+            content: Text('Joined the team!'),
+            backgroundColor: AppColors.green,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to join: $e'), backgroundColor: AppColors.red),
+          SnackBar(
+            content: Text('Failed to join: $e'),
+            backgroundColor: AppColors.red,
+          ),
         );
       }
     } finally {
@@ -251,8 +295,14 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         title: const Text('Leave Project?'),
         content: const Text('Are you sure you want to leave this team?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Yes, Leave')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Yes, Leave'),
+          ),
         ],
       ),
     );
@@ -261,7 +311,9 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(projectRepositoryProvider).leaveProject(projectId, user.id);
+      await ref
+          .read(projectRepositoryProvider)
+          .leaveProject(projectId, user.id);
       ref.invalidate(projectMembersProvider(projectId));
       ref.invalidate(userProjectsProvider);
     } catch (e) {
@@ -275,11 +327,18 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     }
   }
 
-  void _showProjectActions(ProjectModel project, ProjectMemberModel membership) {
+  void _showProjectActions(
+    ProjectModel project,
+    ProjectMemberModel membership,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSizes.radiusLg),
+        ),
+      ),
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.lg),
@@ -289,7 +348,11 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             children: [
               Text(
                 'Project Actions',
-                style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navy,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.lg),
@@ -320,7 +383,12 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     );
   }
 
-  Widget _buildActionButton({required String label, required IconData icon, required VoidCallback onTap, Color? color}) {
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
     return NeoCard(
       color: Colors.white,
       onTap: onTap,
@@ -328,7 +396,13 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         children: [
           Icon(icon, color: color ?? AppColors.navy),
           const SizedBox(width: AppSizes.md),
-          Text(label, style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, color: color ?? AppColors.navy)),
+          Text(
+            label,
+            style: GoogleFonts.dmSans(
+              fontWeight: FontWeight.bold,
+              color: color ?? AppColors.navy,
+            ),
+          ),
         ],
       ),
     );
@@ -339,10 +413,18 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Archive Project?'),
-        content: const Text('Archived projects are hidden from Explore but preserved for history.'),
+        content: const Text(
+          'Archived projects are hidden from Explore but preserved for history.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Archive')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Archive'),
+          ),
         ],
       ),
     );
@@ -371,9 +453,14 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ownership Transfer'),
-        content: const Text('Please select a team member to transfer ownership to. (Coming soon)'),
+        content: const Text(
+          'Please select a team member to transfer ownership to. (Coming soon)',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );
@@ -387,8 +474,18 @@ class _TypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: AppColors.navy, borderRadius: BorderRadius.circular(4)),
-      child: Text(type.toUpperCase(), style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white)),
+      decoration: BoxDecoration(
+        color: AppColors.navy,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        type.toUpperCase(),
+        style: GoogleFonts.dmSans(
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
@@ -398,11 +495,23 @@ class _StatusBadge extends StatelessWidget {
   final String status;
   @override
   Widget build(BuildContext context) {
-    final color = status == 'active' ? AppColors.green : AppColors.textSecondary;
+    final color =
+        status == 'active' ? AppColors.green : AppColors.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), border: Border.all(color: color, width: 1.5), borderRadius: BorderRadius.circular(4)),
-      child: Text(status.toUpperCase(), style: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 11, color: color)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        border: Border.all(color: color, width: 1.5),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.dmSans(
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -414,22 +523,41 @@ class _MemberChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppColors.navy, width: 1.5), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.navy, width: 1.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
             radius: 12,
             backgroundColor: AppColors.yellow,
-            child: Text((member.userName ?? '?')[0].toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+            child: Text(
+              (member.userName ?? '?')[0].toUpperCase(),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(width: 6),
-          Text(member.userName ?? 'User', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            member.userName ?? 'User',
+            style: GoogleFonts.dmSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(width: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(4)),
-            child: Text(member.role.toUpperCase(), style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold)),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              member.role.toUpperCase(),
+              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(width: 4),
         ],

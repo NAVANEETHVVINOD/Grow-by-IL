@@ -74,10 +74,7 @@ class AuthRepository {
   }
 
   /// Sign in an existing user
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     AppLogger.action(LogCategory.auth, 'signIn', {'email': email});
 
     try {
@@ -85,12 +82,12 @@ class AuthRepository {
         email: email,
         password: password,
       );
-      
+
       // Auto-sync profile for email users too
       if (response.user != null) {
         await ensureUserProfileExists(response.user!);
       }
-      
+
       AppLogger.info(LogCategory.auth, 'Sign-in successful, email: $email');
     } catch (e, st) {
       AppLogger.error(LogCategory.auth, 'Sign-in failed', error: e, stack: st);
@@ -118,7 +115,10 @@ class AuthRepository {
           .maybeSingle();
 
       if (existing == null) {
-        AppLogger.info(LogCategory.auth, 'SYNC_PROFILE | Creating missing row for ${authUser.id}');
+        AppLogger.info(
+          LogCategory.auth,
+          'SYNC_PROFILE | Creating missing row for ${authUser.id}',
+        );
         await _client.from('users').insert({
           'id': authUser.id,
           'name': authUser.userMetadata?['full_name'] ?? 'Maker',
@@ -129,7 +129,12 @@ class AuthRepository {
         });
       }
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'SYNC_PROFILE_FAILED', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'SYNC_PROFILE_FAILED',
+        error: e,
+        stack: st,
+      );
     }
   }
 
@@ -154,11 +159,16 @@ class AuthRepository {
           .select()
           .eq('id', userId)
           .maybeSingle(); // Use maybeSingle to avoid PGRST116 crash
-      
+
       if (data == null) return null;
       return UserModel.fromJson(data);
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'getUserProfile failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'getUserProfile failed',
+        error: e,
+        stack: st,
+      );
       return null;
     }
   }
@@ -172,7 +182,9 @@ class AuthRepository {
         return null;
       }
 
-      AppLogger.action(LogCategory.auth, 'GET_CURRENT_USER', {'userId': authUser.id});
+      AppLogger.action(LogCategory.auth, 'GET_CURRENT_USER', {
+        'userId': authUser.id,
+      });
 
       final data = await _client
           .from('users')
@@ -181,16 +193,18 @@ class AuthRepository {
           .maybeSingle(); // was .single(), caused PGRST116 crash
 
       if (data == null) {
-        AppLogger.warn(LogCategory.auth, 
-          'USER_PROFILE_MISSING | userId=${authUser.id} | auth row exists but no public.users row');
-        
+        AppLogger.warn(
+          LogCategory.auth,
+          'USER_PROFILE_MISSING | userId=${authUser.id} | auth row exists but no public.users row',
+        );
+
         // Auto-create the missing row so the user is not stuck
         AppLogger.info(LogCategory.auth, 'AUTO_CREATING_PROFILE_ROW');
         await _client.from('users').insert({
           'id': authUser.id,
-          'name': authUser.userMetadata?['full_name'] 
-            ?? authUser.email?.split('@').first 
-            ?? 'Maker',
+          'name': authUser.userMetadata?['full_name'] ??
+              authUser.email?.split('@').first ??
+              'Maker',
           'email': authUser.email ?? '',
           'role': 'student',
           'system_role': 'user',
@@ -202,33 +216,51 @@ class AuthRepository {
         });
 
         // Fetch the newly created row
-        final newData = await _client
-            .from('users')
-            .select()
-            .eq('id', authUser.id)
-            .single();
-        
+        final newData =
+            await _client.from('users').select().eq('id', authUser.id).single();
+
         AppLogger.info(LogCategory.auth, 'PROFILE_ROW_CREATED_AND_FETCHED');
         return UserModel.fromJson(newData);
       }
 
-      AppLogger.info(LogCategory.auth, 'GET_CURRENT_USER_SUCCESS | userId=${authUser.id}');
+      AppLogger.info(
+        LogCategory.auth,
+        'GET_CURRENT_USER_SUCCESS | userId=${authUser.id}',
+      );
       return UserModel.fromJson(data);
-
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'GET_CURRENT_USER_FAILED', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'GET_CURRENT_USER_FAILED',
+        error: e,
+        stack: st,
+      );
       return null;
     }
   }
 
   /// Update user profile in `public.users`
-  Future<void> updateProfile(String userId, Map<String, dynamic> updates) async {
-    AppLogger.action(LogCategory.auth, 'updateProfile', {'userId': userId, 'fields': updates.keys.toList()});
+  Future<void> updateProfile(
+    String userId,
+    Map<String, dynamic> updates,
+  ) async {
+    AppLogger.action(LogCategory.auth, 'updateProfile', {
+      'userId': userId,
+      'fields': updates.keys.toList(),
+    });
     try {
       await _client.from('users').update(updates).eq('id', userId);
-      AppLogger.info(LogCategory.auth, 'Profile updated successfully for $userId');
+      AppLogger.info(
+        LogCategory.auth,
+        'Profile updated successfully for $userId',
+      );
     } catch (e, st) {
-      AppLogger.error(LogCategory.auth, 'updateProfile failed', error: e, stack: st);
+      AppLogger.error(
+        LogCategory.auth,
+        'updateProfile failed',
+        error: e,
+        stack: st,
+      );
       rethrow;
     }
   }

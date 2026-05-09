@@ -16,7 +16,8 @@ class CreateProjectScreen extends ConsumerStatefulWidget {
   const CreateProjectScreen({super.key});
 
   @override
-  ConsumerState<CreateProjectScreen> createState() => _CreateProjectScreenState();
+  ConsumerState<CreateProjectScreen> createState() =>
+      _CreateProjectScreenState();
 }
 
 class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
@@ -24,7 +25,7 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _linkController = TextEditingController();
-  
+
   XFile? _imageFile;
   String _type = 'team';
   String _visibility = 'public';
@@ -79,13 +80,23 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
                 ),
                 child: _imageFile != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd - 2),
-                        child: Image.file(File(_imageFile!.path), fit: BoxFit.cover, width: double.infinity),
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.radiusMd - 2,
+                        ),
+                        child: Image.file(
+                          File(_imageFile!.path),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
                       )
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 40,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             'SELECT COVER PHOTO',
@@ -100,15 +111,17 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               ),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Project Title'),
             _buildTextField(_titleController, 'e.g. Solar Powered Car', true),
             const SizedBox(height: AppSizes.md),
-            
             _buildFieldLabel('Description'),
-            _buildTextField(_descController, 'What are you building?', true, maxLines: 4),
+            _buildTextField(
+              _descController,
+              'What are you building?',
+              true,
+              maxLines: 4,
+            ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Project Type'),
             _buildDropdown<String>(
               value: _type,
@@ -116,7 +129,6 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               onChanged: (val) => setState(() => _type = val!),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Visibility'),
             _buildDropdown<String>(
               value: _visibility,
@@ -124,10 +136,12 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               onChanged: (val) => setState(() => _visibility = val!),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('External Link (Optional)'),
-            _buildTextField(_linkController, 'WhatsApp/GitHub/Discord URL', false),
-            
+            _buildTextField(
+              _linkController,
+              'WhatsApp/GitHub/Discord URL',
+              false,
+            ),
             const SizedBox(height: AppSizes.xl),
             NeoButton(
               label: 'Launch Project',
@@ -153,7 +167,12 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, bool required, {int maxLines = 1}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint,
+    bool required, {
+    int maxLines = 1,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -168,12 +187,17 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
           contentPadding: const EdgeInsets.all(12),
           border: InputBorder.none,
         ),
-        validator: required ? (v) => v?.isEmpty ?? true ? 'Required' : null : null,
+        validator:
+            required ? (v) => v?.isEmpty ?? true ? 'Required' : null : null,
       ),
     );
   }
 
-  Widget _buildDropdown<T>({required T value, required List<T> items, required ValueChanged<T?> onChanged}) {
+  Widget _buildDropdown<T>({
+    required T value,
+    required List<T> items,
+    required ValueChanged<T?> onChanged,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -184,7 +208,20 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: value,
-          items: items.map((i) => DropdownMenuItem(value: i, child: Text(i.toString().toUpperCase(), style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.bold)))).toList(),
+          items: items
+              .map(
+                (i) => DropdownMenuItem(
+                  value: i,
+                  child: Text(
+                    i.toString().toUpperCase(),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: onChanged,
         ),
       ),
@@ -203,12 +240,15 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
       if (_imageFile != null) {
         // We use a temporary project ID or handle it after creation
         // But MediaService.uploadProjectImage expects a projectId.
-        // Let's generate a temporary UUID or just use 'temp' if needed, 
+        // Let's generate a temporary UUID or just use 'temp' if needed,
         // but better to create project first, then update it.
         // Wait, MediaService.uploadProjectImage just uses the ID for the path.
         // I'll use user.id + timestamp as a temporary folder name.
-        final tempPathId = 'temp_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
-        coverUrl = await ref.read(mediaServiceProvider).uploadProjectImage(tempPathId, _imageFile!);
+        final tempPathId =
+            'temp_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
+        coverUrl = await ref
+            .read(mediaServiceProvider)
+            .uploadProjectImage(tempPathId, _imageFile!);
       }
 
       final project = await ref.read(projectRepositoryProvider).createProject({
@@ -216,7 +256,9 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
         'description': _descController.text.trim(),
         'project_type': _type,
         'visibility': _visibility,
-        'external_link': _linkController.text.trim().isEmpty ? null : _linkController.text.trim(),
+        'external_link': _linkController.text.trim().isEmpty
+            ? null
+            : _linkController.text.trim(),
         'created_by': user.id,
         'cover_image_url': coverUrl,
       });
@@ -230,7 +272,10 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to launch project: $e'), backgroundColor: AppColors.red),
+          SnackBar(
+            content: Text('Failed to launch project: $e'),
+            backgroundColor: AppColors.red,
+          ),
         );
       }
     } finally {

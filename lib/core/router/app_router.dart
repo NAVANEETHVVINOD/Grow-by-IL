@@ -36,8 +36,11 @@ final goRouter = GoRouter(
     final publicRoutes = {'/splash', '/onboarding', '/login', '/register'};
     final isPublic = publicRoutes.contains(path);
 
-    AppLogger.info(LogCategory.router, 'REDIRECT_CHECK | '
-      'path=$path authed=${session != null}');
+    AppLogger.info(
+      LogCategory.router,
+      'REDIRECT_CHECK | '
+      'path=$path authed=${session != null}',
+    );
 
     // Unauthenticated trying to access protected route
     if (session == null && !isPublic) {
@@ -47,8 +50,12 @@ final goRouter = GoRouter(
 
     // Authenticated user trying to access auth routes (onboarding/login) → send home
     // We EXCLUDE /splash here so SplashScreen can do its async database check.
-    if (session != null && (path == '/onboarding' || path == '/login' || path == '/register')) {
-      AppLogger.info(LogCategory.router, 'AUTH_USER_REDIRECTED_HOME | from=$path');
+    if (session != null &&
+        (path == '/onboarding' || path == '/login' || path == '/register')) {
+      AppLogger.info(
+        LogCategory.router,
+        'AUTH_USER_REDIRECTED_HOME | from=$path',
+      );
       return '/home';
     }
 
@@ -63,18 +70,12 @@ final goRouter = GoRouter(
   },
   routes: [
     // ── Public routes (no bottom nav) ────────────────────────
-    GoRoute(
-      path: '/splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
     ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
@@ -147,10 +148,7 @@ final goRouter = GoRouter(
       path: '/lab/scan',
       builder: (context, state) => const QrScanScreen(),
     ),
-    GoRoute(
-      path: '/tools',
-      builder: (context, state) => const ToolsScreen(),
-    ),
+    GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
     GoRoute(
       path: '/events/:id',
       builder: (context, state) {

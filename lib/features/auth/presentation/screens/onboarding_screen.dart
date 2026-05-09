@@ -22,20 +22,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, dynamic>> _pages = [
     {
       'title': 'Book Lab Tools Instantly',
-      'subtitle': 'No more paper registers. Reserve 3D printers, laser cutters, and more right from your phone.',
+      'subtitle':
+          'No more paper registers. Reserve 3D printers, laser cutters, and more right from your phone.',
       'icon': Icons.precision_manufacturing_rounded,
       'color': AppColors.yellow,
     },
     {
       'title': 'Join Projects, Build Things',
-      'subtitle': 'Find teammates, join clubs, and showcase your maker projects to the entire college.',
+      'subtitle':
+          'Find teammates, join clubs, and showcase your maker projects to the entire college.',
       'icon': Icons.rocket_launch_rounded,
       'color': AppColors.cobalt,
       'iconColor': Colors.white,
     },
     {
       'title': 'Check In, Level Up',
-      'subtitle': 'Scan the lab QR to check in. Earn XP for every hour spent building and unlock new tools.',
+      'subtitle':
+          'Scan the lab QR to check in. Earn XP for every hour spent building and unlock new tools.',
       'icon': Icons.qr_code_scanner_rounded,
       'color': AppColors.green,
     },
@@ -98,10 +101,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(height: AppSizes.md),
                         Text(
                           page['subtitle'],
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.5,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -132,7 +136,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   NeoButton(
-                    label: _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                    label: _currentPage == _pages.length - 1
+                        ? 'Get Started'
+                        : 'Next',
                     width: 140,
                     onPressed: () {
                       if (_currentPage == _pages.length - 1) {

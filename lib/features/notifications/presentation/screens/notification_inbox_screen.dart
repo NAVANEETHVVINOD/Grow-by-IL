@@ -23,15 +23,26 @@ class NotificationInboxScreen extends ConsumerWidget {
         elevation: 0,
         title: Text(
           'Inbox',
-          style: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.navy),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
         ),
         actions: [
           if (user != null)
             TextButton(
-              onPressed: () => ref.read(notificationRepositoryProvider).markAllAsRead(user.id).then((_) => ref.invalidate(notificationsProvider)),
+              onPressed: () => ref
+                  .read(notificationRepositoryProvider)
+                  .markAllAsRead(user.id)
+                  .then((_) => ref.invalidate(notificationsProvider)),
               child: Text(
                 'MARK ALL READ',
-                style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.cobalt),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.cobalt,
+                ),
               ),
             ),
         ],
@@ -43,9 +54,16 @@ class NotificationInboxScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.notifications_none_rounded, size: 48, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.notifications_none_rounded,
+                    size: 48,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(height: AppSizes.md),
-                  Text('Your inbox is empty', style: GoogleFonts.dmSans(color: AppColors.textSecondary)),
+                  Text(
+                    'Your inbox is empty',
+                    style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                  ),
                 ],
               ),
             );
@@ -80,7 +98,11 @@ class NotificationInboxScreen extends ConsumerWidget {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textSecondary,
+      ),
     );
   }
 }
@@ -94,11 +116,16 @@ class _NotificationTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: NeoCard(
-        color: notification.isRead ? Colors.white : AppColors.yellow.withValues(alpha: 0.05),
+        color: notification.isRead
+            ? Colors.white
+            : AppColors.yellow.withValues(alpha: 0.05),
         borderColor: notification.isRead ? AppColors.navy : AppColors.yellow,
         onTap: () {
           if (!notification.isRead) {
-            ref.read(notificationRepositoryProvider).markAsRead(notification.id).then((_) => ref.invalidate(notificationsProvider));
+            ref
+                .read(notificationRepositoryProvider)
+                .markAsRead(notification.id)
+                .then((_) => ref.invalidate(notificationsProvider));
           }
           // TODO: Handle action_url navigation
         },
@@ -115,23 +142,38 @@ class _NotificationTile extends ConsumerWidget {
                   children: [
                     Text(
                       notification.title,
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       notification.message,
-                      style: GoogleFonts.dmSans(fontSize: 14, color: AppColors.textSecondary),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      notification.createdAt.toLocal().toString().substring(5, 16),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.textSecondary.withValues(alpha: 0.6)),
+                      notification.createdAt.toLocal().toString().substring(
+                            5,
+                            16,
+                          ),
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11,
+                        color: AppColors.textSecondary.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),
               ),
               if (!notification.isRead)
-                const CircleAvatar(radius: 4, backgroundColor: AppColors.yellow),
+                const CircleAvatar(
+                  radius: 4,
+                  backgroundColor: AppColors.yellow,
+                ),
             ],
           ),
         ),
@@ -165,9 +207,11 @@ class _NotificationTile extends ConsumerWidget {
     }
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Icon(icon, size: 20, color: color),
     );
   }
 }
-

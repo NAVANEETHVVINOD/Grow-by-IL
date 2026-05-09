@@ -14,10 +14,12 @@ class MaintenanceUpdateSheet extends ConsumerStatefulWidget {
   final ToolModel tool;
 
   @override
-  ConsumerState<MaintenanceUpdateSheet> createState() => _MaintenanceUpdateSheetState();
+  ConsumerState<MaintenanceUpdateSheet> createState() =>
+      _MaintenanceUpdateSheetState();
 }
 
-class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet> {
+class _MaintenanceUpdateSheetState
+    extends ConsumerState<MaintenanceUpdateSheet> {
   final _notesController = TextEditingController();
   late String _status;
   bool _isLoading = false;
@@ -39,7 +41,9 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
       ),
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusLg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSizes.radiusLg),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -47,12 +51,19 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
         children: [
           Text(
             'Update Status: ${widget.tool.name}',
-            style: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy,
+            ),
           ),
           const SizedBox(height: AppSizes.lg),
           _buildDropdown(),
           const SizedBox(height: AppSizes.lg),
-          _buildTextField(_notesController, 'Describe the maintenance or damage...'),
+          _buildTextField(
+            _notesController,
+            'Describe the maintenance or damage...',
+          ),
           const SizedBox(height: AppSizes.xl),
           NeoButton(
             label: 'Save Status',
@@ -75,7 +86,11 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _status,
-          items: ['available', 'maintenance', 'disabled', 'broken'].map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase()))).toList(),
+          items: ['available', 'maintenance', 'disabled', 'broken']
+              .map(
+                (s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase())),
+              )
+              .toList(),
           onChanged: (val) => setState(() => _status = val!),
         ),
       ),
@@ -108,21 +123,26 @@ class _MaintenanceUpdateSheetState extends ConsumerState<MaintenanceUpdateSheet>
     setState(() => _isLoading = true);
     try {
       await ref.read(inventoryRepositoryProvider).logToolStatus(
-        toolId: widget.tool.id,
-        userId: user.id,
-        transactionType: _status == 'available' || _status == 'maintenance' ? 'maintenance' : 'damage_report',
-        newStatus: _status,
-        notes: _notesController.text.trim(),
-      );
-      
+            toolId: widget.tool.id,
+            userId: user.id,
+            transactionType: _status == 'available' || _status == 'maintenance'
+                ? 'maintenance'
+                : 'damage_report',
+            newStatus: _status,
+            notes: _notesController.text.trim(),
+          );
+
       // Refresh tools list
       ref.invalidate(toolsProvider);
-      
+
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update status: $e'), backgroundColor: AppColors.red),
+          SnackBar(
+            content: Text('Failed to update status: $e'),
+            backgroundColor: AppColors.red,
+          ),
         );
       }
     } finally {
