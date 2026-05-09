@@ -29,5 +29,5 @@ jobs:
         run: flutter test
 
       - name: Build APK (Check)
-        run: flutter build apk --release --no-codesign
+        run: flutter build apk --release
         # Note: We don't sign or upload here, just verify it builds in a clean environment.
