@@ -36,7 +36,7 @@ dependencies:
   cached_network_image: ^3.4.1
 
   # Notifications — updated to 21.x (required for AGP 8.x)
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^21.0.0
 
   # Utilities
   intl: ^0.20.2
