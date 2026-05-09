@@ -57,7 +57,7 @@ dev_dependencies:
 
   riverpod_generator: ^2.6.5
   build_runner: ^2.4.15
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   riverpod_lint: ^2.6.5
 
 flutter:
