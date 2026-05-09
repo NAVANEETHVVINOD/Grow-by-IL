@@ -1,94 +1,82 @@
-# Grow~ by IdeaLab 🚀
-[![Grow~ CI](https://github.com/NAVANEETHVVINOD/Grow-by-IL/actions/workflows/ci.yml/badge.svg)](https://github.com/NAVANEETHVVINOD/Grow-by-IL/actions/workflows/ci.yml)
-[![RC1 Status](https://img.shields.io/badge/Release-RC1--Stable-green.svg)](docs/rc1-release.md)
+# Grow~ by IdeaLab
+[![Grow~ CI/CD](https://github.com/NAVANEETHVVINOD/Grow-by-IL/actions/workflows/ci.yml/badge.svg)](https://github.com/NAVANEETHVVINOD/Grow-by-IL/actions/workflows/ci.yml)
 
-**Grow~** is a production-grade Innovation Lab Management System designed for colleges. It streamlines lab access, tool booking, project collaboration, and inventory tracking with a secure, role-based architecture.
+Grow~ is a production-grade Innovation Lab Management System designed for educational institutions. It provides a structured environment for lab access control, tool reservation, project collaboration, and inventory management through a secure, role-based governance model.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
-### Frontend (Mobile-First)
-Built with **Flutter**, following a feature-first clean architecture with **Riverpod** for reactive state management.
+### Frontend
+Developed using the Flutter framework, utilizing a feature-first architecture and Riverpod for reactive state management. The application is optimized for Android deployment.
 
-### Backend (Serverless)
-Powered by **Supabase**, utilizing PostgreSQL for data, GoTrue for Auth, and S3-compatible Storage for media.
+### Backend
+Powered by Supabase (PostgreSQL), leveraging GoTrue for authentication, Row Level Security (RLS) for data governance, and S3-compatible storage for asset management.
 
-### Infrastructure
+### Infrastructure Overview
 ```mermaid
 graph TD
-    User([Student/Admin]) -->|Flutter App| App[Grow~ Mobile App]
-    App -->|Auth| SupabaseAuth[Supabase Auth]
-    App -->|Data| SupabaseDB[(PostgreSQL)]
-    App -->|Storage| SupabaseStorage[Cloud Storage]
+    User([Student/Admin]) -->|Flutter App| App[Grow~ Mobile Application]
+    App -->|Authentication| SupabaseAuth[Supabase Auth]
+    App -->|Data Persistence| SupabaseDB[(PostgreSQL)]
+    App -->|Object Storage| SupabaseStorage[Cloud Storage]
     SupabaseDB -->|RLS| PolicyEngine{Security Engine}
-    PolicyEngine -->|Deny/Allow| Resource[Tools/Events/Projects]
+    PolicyEngine -->|Access Control| Resource[Tools/Events/Projects]
 ```
 
 ---
 
-## 🔐 Governance & Operations (RC2)
+## Governance and Operations
 
-The system is governed by a strict **Role-Based Access Control (RBAC)** model enforced at the database level via Row Level Security (RLS).
+The platform implements a strict Role-Based Access Control (RBAC) model enforced at the database level.
 
 | Role | Responsibility |
 | :--- | :--- |
-| **student** | Default access to lab resources. |
-| **lab_admin** | Manages tools and inventory. |
-| **event_manager** | Manages workshop schedules. |
-| **super_admin** | Global governance and role assignment. |
+| **student** | Standard user access to lab resources and project collaboration. |
+| **lab_admin** | Operational management of tools, maintenance logs, and inventory. |
+| **event_manager** | Logistics and scheduling for lab workshops and events. |
+| **super_admin** | Global system governance, role assignment, and moderation. |
 
-### Security Model
-- **Frontend**: Protected routes and UI degradation.
-- **Backend**: Every query is filtered by the user's role stored in `public.users`.
+### Security Implementation
+- **Database Layer**: Row Level Security (RLS) ensures data isolation.
+- **Application Layer**: Route guards and dynamic UI components based on authenticated roles.
+- **Auditability**: Automated logging of administrative actions for system transparency.
 
 ---
 
-## 🔄 User & Control Flows
+## Operational Flows
 
-### Lab Check-in Flow
+### Laboratory Access Control
 ```mermaid
 sequenceDiagram
     participant User
     participant App
     participant DB
-    User->>App: Scans Lab QR Code
-    App->>DB: Start Session Request
-    DB->>DB: Verify user is not blocked
-    DB-->>App: Session Started
-    App->>User: Show Active Timer
+    User->>App: Scan Laboratory QR Code
+    App->>DB: Initiate Session Request
+    DB->>DB: Validate User Status
+    DB-->>App: Session Initialized
+    App->>User: Display Active Session Interface
 ```
 
-### Tool Booking Lifecycle
-1. **Request**: Student selects tool and time slot.
-2. **Validation**: System checks for overlaps in real-time.
-3. **Fulfillment**: `lab_admin` verifies tool health.
-4. **Completion**: System logs usage for audit.
+### Resource Management Lifecycle
+1. **Request**: Users submit reservations for specific lab tools.
+2. **Validation**: The system performs real-time overlap and availability checks.
+3. **Fulfillment**: Administrators verify tool status and facilitate the booking.
+4. **Conclusion**: Usage metrics are recorded for operational auditing.
 
 ---
 
-## 🛠️ Technical Stack
+## Technical Specifications
 
-- **Framework**: Flutter 3.41.9
-- **State Management**: Riverpod 2.6
+- **Framework**: Flutter 3.41.9 (Stable)
+- **Primary Language**: Dart
 - **Database**: PostgreSQL (Supabase)
-- **CI/CD**: GitHub Actions
-- **Design**: Neo-Brutalism Design System
+- **CI/CD**: GitHub Actions (Linting, Testing, Automated Release)
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Flutter SDK `^3.6.0`
-- Supabase Project
-
-### Environment Setup
-Create a `.env` file or use `--dart-define`:
-```bash
---dart-define=SUPABASE_URL=YOUR_URL
---dart-define=SUPABASE_ANON_KEY=YOUR_KEY
-```
+## Development and Deployment
 
 ### Installation
 ```bash
@@ -98,10 +86,16 @@ flutter pub get
 flutter run
 ```
 
+### CI/CD Workflow
+The project utilizes a multi-stage CI/CD pipeline for quality assurance:
+1. **Quality Gate**: Static analysis, formatting verification, and dependency integrity.
+2. **Build Verification**: Automated release-mode compilation checks.
+3. **Release Automation**: Tagged versions automatically generate installable APK artifacts.
+
 ---
 
-## 🤝 Contributing
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for our professional branching and PR workflow.
+## Contribution Guidelines
+Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on the branching strategy and pull request process.
 
 ---
-*Developed by IdeaLab. Empowering the next generation of makers.*
+*Developed by IdeaLab. Professional Innovation Lab Management.*
