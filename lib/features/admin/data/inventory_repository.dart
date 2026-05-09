@@ -18,9 +18,12 @@ class InventoryRepository {
     });
     try {
       var query = _client.from('inventory_items').select();
-      if (category != null && category != 'All')
+      if (category != null && category != 'All') {
         query = query.eq('category', category);
-      if (type != null) query = query.eq('item_type', type);
+      }
+      if (type != null) {
+        query = query.eq('item_type', type);
+      }
 
       final data = await query.order('name', ascending: true);
       return (data as List)

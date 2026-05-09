@@ -111,8 +111,9 @@ class _OverviewTab extends ConsumerWidget {
         const SizedBox(height: AppSizes.md),
         pendingAsync.when(
           data: (bookings) {
-            if (bookings.isEmpty)
+            if (bookings.isEmpty) {
               return const Center(child: Text('No pending bookings.'));
+            }
             return Column(
               children: bookings
                   .map((b) => _PendingBookingCard(booking: b))
