@@ -39,9 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .signIn(
+      await ref.read(authRepositoryProvider).signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -63,9 +61,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
-      final response = await ref
-          .read(authRepositoryProvider)
-          .signInWithGoogle();
+      final response =
+          await ref.read(authRepositoryProvider).signInWithGoogle();
       if (response == null) return; // user cancelled
       if (!mounted) return;
 
@@ -112,8 +109,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Sign in to access Grow~',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: AppSizes.xxl),
                 NeoCard(

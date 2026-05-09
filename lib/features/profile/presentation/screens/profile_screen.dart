@@ -44,9 +44,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     setState(() => _isUploading = true);
     try {
-      final signedUrl = await ref
-          .read(mediaServiceProvider)
-          .uploadAvatar(userId, image);
+      final signedUrl =
+          await ref.read(mediaServiceProvider).uploadAvatar(userId, image);
       if (signedUrl != null) {
         // Update user profile in database
         await ref.read(authRepositoryProvider).updateProfile(userId, {
@@ -308,11 +307,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return bookingsAsync.when(
       data: (bookings) {
         if (bookings.isEmpty) return const Text('No equipment used yet.');
-        final uniqueTools = bookings
-            .map((b) => b.toolId)
-            .toSet()
-            .take(4)
-            .toList();
+        final uniqueTools =
+            bookings.map((b) => b.toolId).toSet().take(4).toList();
         return Wrap(
           spacing: 8,
           children: uniqueTools
@@ -373,13 +369,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) =>
                                     const ShimmerSkeleton(
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
                                 errorWidget: (context, url, error) =>
                                     const Center(
-                                      child: Icon(Icons.broken_image_rounded),
-                                    ),
+                                  child: Icon(Icons.broken_image_rounded),
+                                ),
                               )
                             : Container(
                                 color: AppColors.surface,

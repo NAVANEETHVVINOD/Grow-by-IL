@@ -44,9 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .signUp(
+      await ref.read(authRepositoryProvider).signUp(
             name: _nameController.text.trim(),
             collegeRoll: _rollController.text.trim(),
             phone: _phoneController.text.trim(),
@@ -93,8 +91,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   'Join the Grow~ maker community',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: AppSizes.xl),
                 NeoCard(

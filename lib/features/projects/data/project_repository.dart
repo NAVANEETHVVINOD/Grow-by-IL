@@ -55,11 +55,8 @@ class ProjectRepository {
   /// Fetch project details by ID.
   Future<ProjectModel> getProjectById(String id) async {
     try {
-      final data = await _client
-          .from('projects')
-          .select()
-          .eq('id', id)
-          .single();
+      final data =
+          await _client.from('projects').select().eq('id', id).single();
       return ProjectModel.fromJson(data);
     } catch (e, st) {
       AppLogger.error(
@@ -98,11 +95,8 @@ class ProjectRepository {
     AppLogger.action(LogCategory.projects, 'createProject');
     try {
       // 1. Insert Project
-      final data = await _client
-          .from('projects')
-          .insert(projectData)
-          .select()
-          .single();
+      final data =
+          await _client.from('projects').insert(projectData).select().single();
       final project = ProjectModel.fromJson(data);
 
       // 2. Add creator as Owner
@@ -227,8 +221,7 @@ class ProjectRepository {
       // 1. Update Project Creator
       await _client
           .from('projects')
-          .update({'created_by': newOwnerId})
-          .eq('id', projectId);
+          .update({'created_by': newOwnerId}).eq('id', projectId);
 
       // 2. Swap Roles in project_members
       await _client.from('project_members').update({'role': 'admin'}).match({
@@ -262,13 +255,10 @@ class ProjectRepository {
       'projectId': projectId,
     });
     try {
-      await _client
-          .from('projects')
-          .update({
-            'status': 'archived',
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', projectId);
+      await _client.from('projects').update({
+        'status': 'archived',
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', projectId);
       AppLogger.info(LogCategory.projects, 'Project $projectId archived');
     } catch (e, st) {
       AppLogger.error(

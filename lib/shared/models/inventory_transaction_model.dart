@@ -16,7 +16,7 @@ class InventoryTransactionModel {
   final String? inventoryItemId;
   final String userId;
   final String
-  type; // stock_in, stock_out, maintenance, damage_report, adjustment, assignment
+      type; // stock_in, stock_out, maintenance, damage_report, adjustment, assignment
   final int quantityChange;
   final String? notes;
   final DateTime? createdAt;

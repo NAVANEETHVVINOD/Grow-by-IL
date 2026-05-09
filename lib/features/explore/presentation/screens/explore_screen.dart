@@ -28,7 +28,6 @@ class ExploreScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.xl),
-
               _buildSectionHeader('Our Services'),
               const SizedBox(height: AppSizes.md),
               _buildServiceCard(
@@ -56,7 +55,6 @@ class ExploreScreen extends ConsumerWidget {
                 color: AppColors.green,
                 onTap: () {}, // Future projects overview
               ),
-
               const SizedBox(height: AppSizes.xl),
               _buildSectionHeader('Knowledge Base'),
               const SizedBox(height: AppSizes.md),
@@ -96,7 +94,6 @@ class ExploreScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: AppSizes.xxl),
               _buildSectionHeader('About IdeaLab'),
               const SizedBox(height: AppSizes.md),

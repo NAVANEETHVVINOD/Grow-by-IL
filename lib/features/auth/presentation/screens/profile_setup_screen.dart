@@ -60,16 +60,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         throw Exception('Username is already taken');
       }
 
-      await supabase
-          .from('users')
-          .update({
-            'username': _usernameController.text.trim(),
-            'base_role': _selectedBaseRole,
-            'skills': _skills,
-            'interests': _interests,
-            'profile_completed': true,
-          })
-          .eq('id', user.id);
+      await supabase.from('users').update({
+        'username': _usernameController.text.trim(),
+        'base_role': _selectedBaseRole,
+        'skills': _skills,
+        'interests': _interests,
+        'profile_completed': true,
+      }).eq('id', user.id);
 
       // Invalidate the current user provider so it re-fetches the updated profile
       ref.invalidate(currentUserProvider);

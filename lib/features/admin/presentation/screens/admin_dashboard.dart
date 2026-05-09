@@ -115,9 +115,8 @@ class _OverviewTab extends ConsumerWidget {
               return const Center(child: Text('No pending bookings.'));
             }
             return Column(
-              children: bookings
-                  .map((b) => _PendingBookingCard(booking: b))
-                  .toList(),
+              children:
+                  bookings.map((b) => _PendingBookingCard(booking: b)).toList(),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),

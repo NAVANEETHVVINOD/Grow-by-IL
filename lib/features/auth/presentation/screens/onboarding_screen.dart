@@ -101,11 +101,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(height: AppSizes.md),
                         Text(
                           page['subtitle'],
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.5,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],

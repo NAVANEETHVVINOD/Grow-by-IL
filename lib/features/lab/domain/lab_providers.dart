@@ -30,9 +30,9 @@ final liveLabVisitorCountProvider = StreamProvider.autoDispose<int>((ref) {
 /// The current user's past sessions (most recent first).
 final mySessionHistoryProvider =
     FutureProvider.autoDispose<List<LabSessionModel>>((ref) async {
-      final user = ref.watch(currentUserProvider).valueOrNull;
-      if (user == null) return [];
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  if (user == null) return [];
 
-      final repo = ref.watch(labRepositoryProvider);
-      return repo.getMyHistory(user.id, limit: 10);
-    });
+  final repo = ref.watch(labRepositoryProvider);
+  return repo.getMyHistory(user.id, limit: 10);
+});

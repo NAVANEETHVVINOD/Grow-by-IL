@@ -111,11 +111,9 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               ),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Project Title'),
             _buildTextField(_titleController, 'e.g. Solar Powered Car', true),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Description'),
             _buildTextField(
               _descController,
@@ -124,7 +122,6 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               maxLines: 4,
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Project Type'),
             _buildDropdown<String>(
               value: _type,
@@ -132,7 +129,6 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               onChanged: (val) => setState(() => _type = val!),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('Visibility'),
             _buildDropdown<String>(
               value: _visibility,
@@ -140,14 +136,12 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               onChanged: (val) => setState(() => _visibility = val!),
             ),
             const SizedBox(height: AppSizes.md),
-
             _buildFieldLabel('External Link (Optional)'),
             _buildTextField(
               _linkController,
               'WhatsApp/GitHub/Discord URL',
               false,
             ),
-
             const SizedBox(height: AppSizes.xl),
             NeoButton(
               label: 'Launch Project',
@@ -193,9 +187,8 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
           contentPadding: const EdgeInsets.all(12),
           border: InputBorder.none,
         ),
-        validator: required
-            ? (v) => v?.isEmpty ?? true ? 'Required' : null
-            : null,
+        validator:
+            required ? (v) => v?.isEmpty ?? true ? 'Required' : null : null,
       ),
     );
   }

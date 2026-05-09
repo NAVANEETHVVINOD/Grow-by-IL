@@ -64,10 +64,9 @@ class LabRepository {
     AppLogger.action(LogCategory.lab, 'checkOut', {'sessionId': sessionId});
 
     try {
-      await _client
-          .from('lab_sessions')
-          .update({'checkout_time': DateTime.now().toUtc().toIso8601String()})
-          .eq('id', sessionId);
+      await _client.from('lab_sessions').update({
+        'checkout_time': DateTime.now().toUtc().toIso8601String()
+      }).eq('id', sessionId);
 
       AppLogger.info(
         LogCategory.lab,
@@ -82,10 +81,8 @@ class LabRepository {
   /// Real-time stream of active visitor count.
   Stream<int> getLiveVisitorCount() {
     AppLogger.info(LogCategory.lab, 'Subscribing to live visitor count stream');
-    return _client
-        .from('lab_sessions')
-        .stream(primaryKey: ['id'])
-        .map((rows) => rows.where((r) => r['checkout_time'] == null).length);
+    return _client.from('lab_sessions').stream(primaryKey: ['id']).map(
+        (rows) => rows.where((r) => r['checkout_time'] == null).length);
   }
 
   /// Get the user's session history.

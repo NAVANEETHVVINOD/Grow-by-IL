@@ -122,9 +122,7 @@ class _MaintenanceUpdateSheetState
 
     setState(() => _isLoading = true);
     try {
-      await ref
-          .read(inventoryRepositoryProvider)
-          .logToolStatus(
+      await ref.read(inventoryRepositoryProvider).logToolStatus(
             toolId: widget.tool.id,
             userId: user.id,
             transactionType: _status == 'available' || _status == 'maintenance'

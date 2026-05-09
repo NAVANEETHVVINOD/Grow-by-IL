@@ -67,9 +67,8 @@ class BookingModel {
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
       toolName: json['tools'] is Map ? json['tools']['name'] as String? : null,
-      userName: json['users'] is Map
-          ? json['users']['full_name'] as String?
-          : null,
+      userName:
+          json['users'] is Map ? json['users']['full_name'] as String? : null,
     );
   }
 

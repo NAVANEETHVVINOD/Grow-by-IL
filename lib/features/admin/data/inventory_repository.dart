@@ -63,13 +63,10 @@ class InventoryRepository {
       if (newQty < 0) throw Exception('Insufficient stock.');
 
       // 2. Update Inventory Item
-      await _client
-          .from('inventory_items')
-          .update({
-            'quantity': newQty,
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', itemId);
+      await _client.from('inventory_items').update({
+        'quantity': newQty,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', itemId);
 
       // 3. Log Transaction
       await _client.from('inventory_transactions').insert({
@@ -109,15 +106,12 @@ class InventoryRepository {
     });
     try {
       // 1. Update Tool Status
-      await _client
-          .from('tools')
-          .update({
-            'health_status': newStatus,
-            'last_maintained': transactionType == 'maintenance'
-                ? DateTime.now().toUtc().toIso8601String()
-                : null,
-          })
-          .eq('id', toolId);
+      await _client.from('tools').update({
+        'health_status': newStatus,
+        'last_maintained': transactionType == 'maintenance'
+            ? DateTime.now().toUtc().toIso8601String()
+            : null,
+      }).eq('id', toolId);
 
       // 2. Log Transaction
       await _client.from('inventory_transactions').insert({
@@ -148,9 +142,8 @@ class InventoryRepository {
     String? itemId,
   }) async {
     try {
-      var query = _client
-          .from('inventory_transactions')
-          .select('*, users(full_name)');
+      var query =
+          _client.from('inventory_transactions').select('*, users(full_name)');
       if (toolId != null) query = query.eq('tool_id', toolId);
       if (itemId != null) query = query.eq('inventory_item_id', itemId);
 

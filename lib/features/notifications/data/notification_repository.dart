@@ -31,8 +31,7 @@ class NotificationRepository {
     try {
       await _client
           .from('notifications')
-          .update({'is_read': true})
-          .eq('id', notificationId);
+          .update({'is_read': true}).eq('id', notificationId);
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,
@@ -47,8 +46,7 @@ class NotificationRepository {
     try {
       await _client
           .from('notifications')
-          .update({'is_read': true})
-          .eq('user_id', userId);
+          .update({'is_read': true}).eq('user_id', userId);
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,

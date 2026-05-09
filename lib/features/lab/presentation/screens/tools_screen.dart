@@ -89,20 +89,20 @@ class ToolsScreen extends ConsumerWidget {
                     return SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: AppSizes.md,
-                            crossAxisSpacing: AppSizes.md,
-                            childAspectRatio: 0.75,
-                          ),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: AppSizes.md,
+                        crossAxisSpacing: AppSizes.md,
+                        childAspectRatio: 0.75,
+                      ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final tool = tools[index];
                         final isSelected = selectedTool?.id == tool.id;
                         return _ToolCard(
                           tool: tool,
                           isSelected: isSelected,
-                          onTap: () =>
-                              ref.read(selectedToolProvider.notifier).state =
-                                  tool,
+                          onTap: () => ref
+                              .read(selectedToolProvider.notifier)
+                              .state = tool,
                         );
                       }, childCount: tools.length),
                     );
@@ -110,11 +110,11 @@ class ToolsScreen extends ConsumerWidget {
                   loading: () => SliverGrid(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: AppSizes.md,
-                          crossAxisSpacing: AppSizes.md,
-                          childAspectRatio: 0.75,
-                        ),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: AppSizes.md,
+                      crossAxisSpacing: AppSizes.md,
+                      childAspectRatio: 0.75,
+                    ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => const ShimmerSkeleton(
                         width: double.infinity,

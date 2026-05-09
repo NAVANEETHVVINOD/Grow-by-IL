@@ -56,13 +56,11 @@ class UserModel {
       username: json['username'] as String?,
       role: json['role'] as String? ?? 'student',
       systemRole: json['system_role'] as String? ?? 'user',
-      skills:
-          (json['skills'] as List<dynamic>?)
+      skills: (json['skills'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      interests:
-          (json['interests'] as List<dynamic>?)
+      interests: (json['interests'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],

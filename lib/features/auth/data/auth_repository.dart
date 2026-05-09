@@ -202,8 +202,7 @@ class AuthRepository {
         AppLogger.info(LogCategory.auth, 'AUTO_CREATING_PROFILE_ROW');
         await _client.from('users').insert({
           'id': authUser.id,
-          'name':
-              authUser.userMetadata?['full_name'] ??
+          'name': authUser.userMetadata?['full_name'] ??
               authUser.email?.split('@').first ??
               'Maker',
           'email': authUser.email ?? '',
@@ -217,11 +216,8 @@ class AuthRepository {
         });
 
         // Fetch the newly created row
-        final newData = await _client
-            .from('users')
-            .select()
-            .eq('id', authUser.id)
-            .single();
+        final newData =
+            await _client.from('users').select().eq('id', authUser.id).single();
 
         AppLogger.info(LogCategory.auth, 'PROFILE_ROW_CREATED_AND_FETCHED');
         return UserModel.fromJson(newData);

@@ -15,9 +15,7 @@ class MediaService {
       final compressed = await _compress(imageFile, quality: 75, maxDim: 400);
       final path = '$userId/avatar.jpg';
 
-      await supabase.storage
-          .from('profiles')
-          .uploadBinary(
+      await supabase.storage.from('profiles').uploadBinary(
             path,
             compressed,
             fileOptions: const FileOptions(
@@ -52,9 +50,7 @@ class MediaService {
       AppLogger.action(LogCategory.system, 'PROJECT_IMAGE_UPLOAD_START');
       final compressed = await _compress(imageFile, quality: 70, maxDim: 1080);
       final path = '$projectId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      await supabase.storage
-          .from('projects')
-          .uploadBinary(
+      await supabase.storage.from('projects').uploadBinary(
             path,
             compressed,
             fileOptions: const FileOptions(

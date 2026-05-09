@@ -495,9 +495,8 @@ class _StatusBadge extends StatelessWidget {
   final String status;
   @override
   Widget build(BuildContext context) {
-    final color = status == 'active'
-        ? AppColors.green
-        : AppColors.textSecondary;
+    final color =
+        status == 'active' ? AppColors.green : AppColors.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

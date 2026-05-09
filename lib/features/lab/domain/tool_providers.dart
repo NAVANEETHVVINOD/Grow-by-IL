@@ -57,31 +57,29 @@ final activeBookingProvider = Provider<AsyncValue<BookingModel?>>((ref) {
 
 /// Future provider for tool bookings on a specific day
 final toolBookingsForDayProvider =
-    FutureProvider.family<
-      List<BookingModel>,
-      ({String toolId, DateTime date})
-    >((ref, arg) async {
-      final supabase = ref.watch(
-        toolRepositoryProvider,
-      ); // Actually it's better to just use the client or repo
-      // We can query bookings where slot_start is between date.startOfDay and date.endOfDay
-      final start = DateTime(
-        arg.date.year,
-        arg.date.month,
-        arg.date.day,
-      ).toUtc();
-      final end = start.add(const Duration(days: 1));
+    FutureProvider.family<List<BookingModel>, ({String toolId, DateTime date})>(
+        (ref, arg) async {
+  final supabase = ref.watch(
+    toolRepositoryProvider,
+  ); // Actually it's better to just use the client or repo
+  // We can query bookings where slot_start is between date.startOfDay and date.endOfDay
+  final start = DateTime(
+    arg.date.year,
+    arg.date.month,
+    arg.date.day,
+  ).toUtc();
+  final end = start.add(const Duration(days: 1));
 
-      final data = await supabase.client
-          .from('tool_bookings')
-          .select()
-          .eq('tool_id', arg.toolId)
-          .inFilter('status', ['approved', 'active'])
-          .filter('slot_start', 'lt', end.toIso8601String())
-          .filter('slot_end', 'gt', start.toIso8601String());
+  final data = await supabase.client
+      .from('tool_bookings')
+      .select()
+      .eq('tool_id', arg.toolId)
+      .inFilter('status', ['approved', 'active'])
+      .filter('slot_start', 'lt', end.toIso8601String())
+      .filter('slot_end', 'gt', start.toIso8601String());
 
-      return (data as List).map((row) => BookingModel.fromJson(row)).toList();
-    });
+  return (data as List).map((row) => BookingModel.fromJson(row)).toList();
+});
 
 /// Extension on ToolRepository to expose the client if needed (or just use repo methods)
 extension ToolRepoExt on ToolRepository {

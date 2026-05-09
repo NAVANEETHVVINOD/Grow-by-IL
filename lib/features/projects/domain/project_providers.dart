@@ -33,21 +33,21 @@ final projectDetailProvider = FutureProvider.family<ProjectModel, String>((
 
 final projectMembersProvider =
     FutureProvider.family<List<ProjectMemberModel>, String>((ref, id) async {
-      final repo = ref.watch(projectRepositoryProvider);
-      return repo.getProjectMembers(id);
-    });
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.getProjectMembers(id);
+});
 
 final projectUpdatesProvider =
     FutureProvider.family<List<ProjectUpdateModel>, String>((ref, id) async {
-      final repo = ref.watch(projectRepositoryProvider);
-      return repo.getProjectUpdates(id);
-    });
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.getProjectUpdates(id);
+});
 
 final userMembershipProvider =
     FutureProvider.family<ProjectMemberModel?, String>((ref, projectId) async {
-      final members = await ref.watch(projectMembersProvider(projectId).future);
-      final user = ref.watch(currentUserProvider).valueOrNull;
-      if (user == null) return null;
+  final members = await ref.watch(projectMembersProvider(projectId).future);
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  if (user == null) return null;
 
-      return members.where((m) => m.userId == user.id).firstOrNull;
-    });
+  return members.where((m) => m.userId == user.id).firstOrNull;
+});

@@ -58,17 +58,14 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             children: [
               _buildHeader(),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Select Date'),
               const SizedBox(height: AppSizes.sm),
               _buildDateSelector(),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Duration'),
               const SizedBox(height: AppSizes.sm),
               _buildDurationSelector(),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Available Slots'),
               const SizedBox(height: AppSizes.sm),
               bookingsAsync.when(
@@ -77,7 +74,6 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 error: (e, st) => Text('Error: $e'),
               ),
               const SizedBox(height: AppSizes.lg),
-
               _buildSectionTitle('Link to Project (Optional)'),
               const SizedBox(height: AppSizes.sm),
               projectsAsync.when(
@@ -86,7 +82,6 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 error: (e, st) => const SizedBox.shrink(),
               ),
               const SizedBox(height: AppSizes.xl),
-
               NeoButton(
                 label: widget.tool.requiresApproval
                     ? 'Request Booking'
@@ -165,8 +160,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             const SizedBox(width: AppSizes.sm),
         itemBuilder: (context, index) {
           final date = DateTime.now().add(Duration(days: index));
-          final isSelected =
-              DateFormat('yyyy-MM-dd').format(date) ==
+          final isSelected = DateFormat('yyyy-MM-dd').format(date) ==
               DateFormat('yyyy-MM-dd').format(_selectedDate);
 
           return GestureDetector(
@@ -190,9 +184,8 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                     style: GoogleFonts.dmSans(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? AppColors.navy
-                          : AppColors.textSecondary,
+                      color:
+                          isSelected ? AppColors.navy : AppColors.textSecondary,
                     ),
                   ),
                   Text(
@@ -298,8 +291,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
         final slotEnd = slot.add(Duration(minutes: _selectedDurationMinutes));
 
         // Conflict check
-        final isConflict =
-            bookings.any((b) {
+        final isConflict = bookings.any((b) {
               return slot.isBefore(b.slotEnd) && slotEnd.isAfter(b.slotStart);
             }) ||
             slotEnd.isAfter(endLimit);
@@ -389,9 +381,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
         Duration(minutes: _selectedDurationMinutes),
       );
 
-      await ref
-          .read(toolRepositoryProvider)
-          .createBooking(
+      await ref.read(toolRepositoryProvider).createBooking(
             toolId: widget.tool.id,
             userId: user.id,
             slotStart: _selectedStartTime!.toUtc(),

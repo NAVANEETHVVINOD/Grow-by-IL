@@ -118,9 +118,7 @@ class _StockAdjustSheetState extends ConsumerState<StockAdjustSheet> {
 
     setState(() => _isLoading = true);
     try {
-      await ref
-          .read(inventoryRepositoryProvider)
-          .adjustStock(
+      await ref.read(inventoryRepositoryProvider).adjustStock(
             itemId: widget.item.id,
             userId: user.id,
             change: _change,

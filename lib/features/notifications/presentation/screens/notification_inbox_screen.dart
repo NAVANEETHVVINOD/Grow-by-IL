@@ -158,9 +158,9 @@ class _NotificationTile extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       notification.createdAt.toLocal().toString().substring(
-                        5,
-                        16,
-                      ),
+                            5,
+                            16,
+                          ),
                       style: GoogleFonts.dmSans(
                         fontSize: 11,
                         color: AppColors.textSecondary.withValues(alpha: 0.6),

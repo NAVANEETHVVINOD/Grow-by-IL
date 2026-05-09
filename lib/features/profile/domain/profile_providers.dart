@@ -7,10 +7,8 @@ final userLabVisitsCountProvider = FutureProvider<int>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return 0;
 
-  final response = await supabase
-      .from('lab_sessions')
-      .select('id')
-      .eq('user_id', user.id);
+  final response =
+      await supabase.from('lab_sessions').select('id').eq('user_id', user.id);
 
   return (response as List).length;
 });
@@ -26,9 +24,8 @@ final userToolsUsedCountProvider = FutureProvider<int>((ref) async {
       .eq('user_id', user.id)
       .eq('status', 'returned');
 
-  final toolIds = (response as List)
-      .map((row) => row['tool_id'] as String)
-      .toSet();
+  final toolIds =
+      (response as List).map((row) => row['tool_id'] as String).toSet();
   return toolIds.length;
 });
 
@@ -37,10 +34,8 @@ final userEventsCountProvider = FutureProvider<int>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return 0;
 
-  final response = await supabase
-      .from('rsvps')
-      .select('id')
-      .eq('user_id', user.id);
+  final response =
+      await supabase.from('rsvps').select('id').eq('user_id', user.id);
 
   return (response as List).length;
 });

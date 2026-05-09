@@ -147,14 +147,11 @@ class ToolRepository {
     }
 
     try {
-      await _client
-          .from('tool_bookings')
-          .update({
-            'status': 'approved',
-            'approved_by': actor.id,
-            'approved_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', bookingId);
+      await _client.from('tool_bookings').update({
+        'status': 'approved',
+        'approved_by': actor.id,
+        'approved_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', bookingId);
 
       // 3. Create Notification for user
       final bookingData = await _client
@@ -191,13 +188,10 @@ class ToolRepository {
       'bookingId': bookingId,
     });
     try {
-      await _client
-          .from('tool_bookings')
-          .update({
-            'status': 'active',
-            'checkout_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', bookingId);
+      await _client.from('tool_bookings').update({
+        'status': 'active',
+        'checkout_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', bookingId);
       AppLogger.info(
         LogCategory.tools,
         'Tool checkout successful for booking $bookingId',
@@ -217,13 +211,10 @@ class ToolRepository {
   Future<void> returnTool(String bookingId) async {
     AppLogger.action(LogCategory.tools, 'returnTool', {'bookingId': bookingId});
     try {
-      await _client
-          .from('tool_bookings')
-          .update({
-            'status': 'returned',
-            'returned_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', bookingId);
+      await _client.from('tool_bookings').update({
+        'status': 'returned',
+        'returned_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', bookingId);
       AppLogger.info(
         LogCategory.tools,
         'Tool return successful for booking $bookingId',
@@ -248,9 +239,8 @@ class ToolRepository {
           .select('project_id')
           .eq('user_id', userId);
 
-      final projectIds = (projectData as List)
-          .map((p) => p['project_id'] as String)
-          .toList();
+      final projectIds =
+          (projectData as List).map((p) => p['project_id'] as String).toList();
 
       // 2. Query bookings for user OR user's projects
       var query = _client.from('tool_bookings').select();
