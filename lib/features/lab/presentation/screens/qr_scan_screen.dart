@@ -94,7 +94,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
           // Camera
           MobileScanner(
             onDetect: _onDetect,
-            errorBuilder: (context, error, child) {
+            errorBuilder: (context, error) {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
