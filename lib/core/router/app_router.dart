@@ -142,6 +142,37 @@ final goRouter = GoRouter(
     // ── Detail routes (pushed on top, no bottom nav) ─────────
     GoRoute(
       path: '/admin',
+      redirect: (context, state) async {
+        // Admin route guard — check role from DB, not just auth
+        final session = supabase.auth.currentSession;
+        if (session == null) return '/login';
+
+        try {
+          final userData = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', session.user.id)
+              .single();
+          final role = userData['role'] as String? ?? 'student';
+
+          if (role != 'lab_admin' && role != 'super_admin') {
+            AppLogger.warn(
+              LogCategory.router,
+              'ADMIN_ACCESS_BLOCKED | role=$role | path=${state.uri.path}',
+            );
+            return '/home';
+          }
+        } catch (e) {
+          AppLogger.error(
+            LogCategory.router,
+            'ADMIN_ROLE_CHECK_FAILED',
+            error: e,
+          );
+          return '/home';
+        }
+
+        return null; // Allow access
+      },
       builder: (context, state) => const AdminDashboard(),
     ),
     GoRoute(

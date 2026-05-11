@@ -152,7 +152,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
           child: _InfoCard(
             icon: Icons.calendar_today_rounded,
             title: 'Date',
-            subtitle: DateFormat('EEE, MMM d').format(event.startTime),
+            subtitle: DateFormat('EEE, MMM d').format(event.eventDate),
           ),
         ),
         const SizedBox(width: AppSizes.md),
@@ -160,7 +160,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
           child: _InfoCard(
             icon: Icons.access_time_rounded,
             title: 'Time',
-            subtitle: DateFormat('h:mm a').format(event.startTime),
+            subtitle: DateFormat('h:mm a').format(event.eventDate),
           ),
         ),
       ],
@@ -207,7 +207,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                       ),
                     ),
                     Text(
-                      event.locationName ?? 'IdeaLab Main Room',
+                      event.venue ?? 'IdeaLab Main Room',
                       style: GoogleFonts.dmSans(color: AppColors.textSecondary),
                     ),
                   ],

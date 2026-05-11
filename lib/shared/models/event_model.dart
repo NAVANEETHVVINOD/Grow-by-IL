@@ -6,14 +6,14 @@ class EventModel {
     required this.type,
     this.organizationName,
     this.clubId,
-    required this.startTime,
-    this.endTime,
-    this.locationName,
+    required this.eventDate,
+    this.endDate,
+    this.venue,
     this.capacity,
     this.rsvpCount = 0,
     this.imageUrl,
     required this.createdBy,
-    this.status = 'active',
+    this.status = 'published',
     this.createdAt,
   });
 
@@ -23,9 +23,9 @@ class EventModel {
   final String type;
   final String? organizationName;
   final String? clubId;
-  final DateTime startTime;
-  final DateTime? endTime;
-  final String? locationName;
+  final DateTime eventDate;
+  final DateTime? endDate;
+  final String? venue;
   final int? capacity;
   final int rsvpCount;
   final String? imageUrl;
@@ -35,9 +35,9 @@ class EventModel {
 
   bool get isFull => capacity != null && rsvpCount >= capacity!;
   bool get isCancelled => status == 'cancelled';
-  bool get isPast => endTime != null
-      ? DateTime.now().toUtc().isAfter(endTime!)
-      : DateTime.now().toUtc().isAfter(startTime.add(const Duration(hours: 3)));
+  bool get isPast => endDate != null
+      ? DateTime.now().toUtc().isAfter(endDate!)
+      : DateTime.now().toUtc().isAfter(eventDate.add(const Duration(hours: 3)));
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
@@ -47,16 +47,16 @@ class EventModel {
       type: json['event_type'] as String? ?? 'workshop',
       organizationName: json['organization_name'] as String?,
       clubId: json['club_id'] as String?,
-      startTime: DateTime.parse(json['start_time'] as String).toUtc(),
-      endTime: json['end_time'] != null
-          ? DateTime.parse(json['end_time'] as String).toUtc()
+      eventDate: DateTime.parse(json['event_date'] as String).toUtc(),
+      endDate: json['end_date'] != null
+          ? DateTime.parse(json['end_date'] as String).toUtc()
           : null,
-      locationName: json['location_name'] as String?,
+      venue: json['venue'] as String?,
       capacity: json['capacity'] as int?,
       rsvpCount: json['rsvp_count'] as int? ?? 0,
       imageUrl: json['image_url'] as String?,
       createdBy: json['created_by'] as String,
-      status: json['status'] as String? ?? 'active',
+      status: json['status'] as String? ?? 'published',
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
@@ -71,9 +71,9 @@ class EventModel {
       'event_type': type,
       'organization_name': organizationName,
       'club_id': clubId,
-      'start_time': startTime.toIso8601String(),
-      'end_time': endTime?.toIso8601String(),
-      'location_name': locationName,
+      'event_date': eventDate.toIso8601String(),
+      'end_date': endDate?.toIso8601String(),
+      'venue': venue,
       'capacity': capacity,
       'rsvp_count': rsvpCount,
       'image_url': imageUrl,
@@ -89,9 +89,9 @@ class EventModel {
     String? type,
     String? organizationName,
     String? clubId,
-    DateTime? startTime,
-    DateTime? endTime,
-    String? locationName,
+    DateTime? eventDate,
+    DateTime? endDate,
+    String? venue,
     int? capacity,
     int? rsvpCount,
     String? imageUrl,
@@ -106,9 +106,9 @@ class EventModel {
       type: type ?? this.type,
       organizationName: organizationName ?? this.organizationName,
       clubId: clubId ?? this.clubId,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      locationName: locationName ?? this.locationName,
+      eventDate: eventDate ?? this.eventDate,
+      endDate: endDate ?? this.endDate,
+      venue: venue ?? this.venue,
       capacity: capacity ?? this.capacity,
       rsvpCount: rsvpCount ?? this.rsvpCount,
       imageUrl: imageUrl ?? this.imageUrl,
