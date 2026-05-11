@@ -134,10 +134,7 @@ class _MaintenanceUpdateSheetState
             DateTime.now().toUtc().toIso8601String();
       }
 
-      await supabase
-          .from('tools')
-          .update(updateData)
-          .eq('id', widget.tool.id);
+      await supabase.from('tools').update(updateData).eq('id', widget.tool.id);
 
       AppLogger.action(LogCategory.tools, 'TOOL_STATUS_UPDATED', {
         'toolId': widget.tool.id,

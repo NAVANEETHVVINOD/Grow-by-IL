@@ -308,7 +308,8 @@ class _EquipmentTab extends ConsumerWidget {
         final needingRepair = tools
             .where(
               (t) =>
-                  t.healthStatus == 'maintenance' || t.healthStatus == 'retired',
+                  t.healthStatus == 'maintenance' ||
+                  t.healthStatus == 'retired',
             )
             .toList();
         if (needingRepair.isEmpty) return const SizedBox.shrink();
