@@ -449,7 +449,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   .map(
                     (e) => _ScheduleItem(
                       title: e.title,
-                      time: e.startTime.toLocal().toString().substring(5, 16),
+                      time: e.eventDate.toLocal().toString().substring(5, 16),
                       icon: Icons.event_available_rounded,
                       color: AppColors.yellow,
                       onTap: () => context.push('/events/${e.id}'),

@@ -13,12 +13,15 @@ class UserModel {
     this.interests = const [],
     this.profileCompleted = false,
     this.clubId,
+    this.clubTitle,
     this.xp = 0,
     this.level = 1,
     this.reputationScore = 100,
     this.qrCodeData,
     this.fcmToken,
-    this.isBlocked = false,
+    this.isActive = true,
+    this.banReason,
+    this.bannedAt,
     this.createdAt,
     this.updatedAt,
     this.avatarUrl,
@@ -36,12 +39,15 @@ class UserModel {
   final List<String> interests;
   final bool profileCompleted;
   final String? clubId;
+  final String? clubTitle;
   final int xp;
   final int level;
   final int reputationScore;
   final String? qrCodeData;
   final String? fcmToken;
-  final bool isBlocked;
+  final bool isActive;
+  final String? banReason;
+  final DateTime? bannedAt;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? avatarUrl;
@@ -66,12 +72,17 @@ class UserModel {
           [],
       profileCompleted: json['profile_completed'] as bool? ?? false,
       clubId: json['club_id'] as String?,
+      clubTitle: json['club_title'] as String?,
       xp: json['xp'] as int? ?? 0,
       level: json['level'] as int? ?? 1,
       reputationScore: json['reputation_score'] as int? ?? 100,
       qrCodeData: json['qr_code_data'] as String?,
       fcmToken: json['fcm_token'] as String?,
-      isBlocked: json['is_blocked'] as bool? ?? false,
+      isActive: json['is_active'] as bool? ?? true,
+      banReason: json['ban_reason'] as String?,
+      bannedAt: json['banned_at'] != null
+          ? DateTime.parse(json['banned_at'] as String)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -96,12 +107,13 @@ class UserModel {
       'interests': interests,
       'profile_completed': profileCompleted,
       'club_id': clubId,
+      'club_title': clubTitle,
       'xp': xp,
       'level': level,
       'reputation_score': reputationScore,
       'qr_code_data': qrCodeData,
       'fcm_token': fcmToken,
-      'is_blocked': isBlocked,
+      'is_active': isActive,
       'avatar_url': avatarUrl,
     };
   }
@@ -119,12 +131,15 @@ class UserModel {
     List<String>? interests,
     bool? profileCompleted,
     String? clubId,
+    String? clubTitle,
     int? xp,
     int? level,
     int? reputationScore,
     String? qrCodeData,
     String? fcmToken,
-    bool? isBlocked,
+    bool? isActive,
+    String? banReason,
+    DateTime? bannedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? avatarUrl,
@@ -142,12 +157,15 @@ class UserModel {
       interests: interests ?? this.interests,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       clubId: clubId ?? this.clubId,
+      clubTitle: clubTitle ?? this.clubTitle,
       xp: xp ?? this.xp,
       level: level ?? this.level,
       reputationScore: reputationScore ?? this.reputationScore,
       qrCodeData: qrCodeData ?? this.qrCodeData,
       fcmToken: fcmToken ?? this.fcmToken,
-      isBlocked: isBlocked ?? this.isBlocked,
+      isActive: isActive ?? this.isActive,
+      banReason: banReason ?? this.banReason,
+      bannedAt: bannedAt ?? this.bannedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,

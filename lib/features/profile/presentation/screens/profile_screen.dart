@@ -20,7 +20,7 @@ import 'package:grow/features/profile/domain/profile_providers.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:grow/core/services/media_providers.dart';
-// import 'package:grow/shared/repositories/supabase_client.dart'; // removed unused import
+import 'package:grow/features/auth/domain/role_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -160,6 +160,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: AppSizes.xxl),
+
+                // ── Admin Panel (visible to lab_admin and super_admin only) ──
+                Consumer(builder: (context, ref, _) {
+                  final isAdmin = ref.watch(isLabAdminProvider);
+                  if (!isAdmin) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSizes.md),
+                    child: NeoButton(
+                      label: 'Admin Panel',
+                      color: AppColors.navy,
+                      textColor: AppColors.yellow,
+                      icon: Icons.admin_panel_settings_outlined,
+                      onPressed: () {
+                        AppLogger.action(
+                          LogCategory.router,
+                          'ADMIN_PANEL_ACCESSED',
+                          {'role': ref.read(currentRoleProvider)},
+                        );
+                        context.go('/admin');
+                      },
+                    ),
+                  );
+                }),
 
                 // ── Sign Out ────────────────────────
                 NeoButton(

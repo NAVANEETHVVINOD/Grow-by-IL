@@ -269,7 +269,7 @@ class _EventCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          event.startTime.toLocal().toString().substring(5, 16),
+                          event.eventDate.toLocal().toString().substring(5, 16),
                           style: GoogleFonts.dmSans(
                             fontSize: 13,
                             color: AppColors.textSecondary,

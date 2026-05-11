@@ -12,7 +12,7 @@ class EventRepository {
     AppLogger.action(LogCategory.events, 'getEvents');
     AppLogger.info(
       LogCategory.events,
-      'QUERY_COLUMNS | id, title, description, event_type, start_time, end_time, status, location_name, created_by, created_at, capacity, rsvp_count',
+      'QUERY_COLUMNS | id, title, description, event_type, event_date, end_date, status, venue, created_by, created_at, capacity, rsvp_count',
     );
 
     try {
@@ -22,9 +22,9 @@ class EventRepository {
           .filter(
             'status',
             'in',
-            '("active","upcoming")',
-          ) // Handle both legacy and new statuses
-          .order('start_time', ascending: true);
+            '("published","completed")',
+          )
+          .order('event_date', ascending: true);
       return (data as List).map((row) => EventModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
