@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
-import 'package:grow/shared/models/inventory_item_model.dart';
 import 'package:grow/shared/models/tool_model.dart';
 import 'package:grow/shared/models/booking_model.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
@@ -11,16 +10,14 @@ import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
-import 'package:grow/features/admin/domain/inventory_providers.dart';
 import 'package:grow/features/admin/presentation/widgets/maintenance_update_sheet.dart';
-import 'package:grow/features/admin/presentation/widgets/stock_adjust_sheet.dart';
+import 'package:grow/shared/repositories/supabase_client.dart';
 
 final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
-  final repo = ref.watch(toolRepositoryProvider);
-  final data = await repo.client
+  final data = await supabase
       .from('tool_bookings')
-      .select('*, tools(name), users(full_name)')
-      .eq('status', 'pending')
+      .select('*, tools(name), users(name)')
+      .eq('status', 'requested')
       .order('created_at', ascending: false);
   return (data as List).map((row) => BookingModel.fromJson(row)).toList();
 });
@@ -39,7 +36,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    // Reduced to 2 tabs as inventory is removed for RC2
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -70,16 +68,14 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
           tabs: const [
             Tab(text: 'OVERVIEW'),
             Tab(text: 'EQUIPMENT'),
-            Tab(text: 'INVENTORY'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          const _OverviewTab(),
-          const _EquipmentTab(),
-          const _InventoryTab(),
+        children: const [
+          _OverviewTab(),
+          _EquipmentTab(),
         ],
       ),
     );
@@ -261,7 +257,7 @@ class _PendingBookingCard extends ConsumerWidget {
                   child: NeoButton(
                     label: 'Approve',
                     onPressed: () async {
-                      final actor = ref.read(currentUserProvider).valueOrNull;
+                      final actor = ref.read(currentUserProvider).value;
                       if (actor == null) return;
                       await ref
                           .read(toolRepositoryProvider)
@@ -312,7 +308,7 @@ class _EquipmentTab extends ConsumerWidget {
         final needingRepair = tools
             .where(
               (t) =>
-                  t.healthStatus == 'maintenance' || t.healthStatus == 'broken',
+                  t.healthStatus == 'maintenance' || t.healthStatus == 'retired',
             )
             .toList();
         if (needingRepair.isEmpty) return const SizedBox.shrink();
@@ -334,66 +330,6 @@ class _EquipmentTab extends ConsumerWidget {
                 style: GoogleFonts.dmSans(
                   fontWeight: FontWeight.bold,
                   color: AppColors.red,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      orElse: () => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _InventoryTab extends ConsumerWidget {
-  const _InventoryTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final itemsAsync = ref.watch(inventoryItemsProvider(null));
-
-    return Column(
-      children: [
-        _buildLowStockSection(ref),
-        Expanded(
-          child: itemsAsync.when(
-            data: (items) => ListView.builder(
-              padding: const EdgeInsets.all(AppSizes.lg),
-              itemCount: items.length,
-              itemBuilder: (context, index) =>
-                  _ItemAdminCard(item: items[index]),
-            ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, __) => Center(child: Text('Error: $e')),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLowStockSection(WidgetRef ref) {
-    final lowStockAsync = ref.watch(lowStockItemsProvider);
-    return lowStockAsync.maybeWhen(
-      data: (items) {
-        if (items.isEmpty) return const SizedBox.shrink();
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.all(AppSizes.lg),
-          padding: const EdgeInsets.all(AppSizes.md),
-          decoration: BoxDecoration(
-            color: AppColors.orange.withValues(alpha: 0.1),
-            border: Border.all(color: AppColors.orange, width: 2),
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.inventory_2_outlined, color: AppColors.orange),
-              const SizedBox(width: AppSizes.md),
-              Text(
-                '${items.length} items running low',
-                style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.orange,
                 ),
               ),
             ],
@@ -462,83 +398,6 @@ class _ToolAdminCard extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   builder: (context) => MaintenanceUpdateSheet(tool: tool),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ItemAdminCard extends StatelessWidget {
-  const _ItemAdminCard({required this.item});
-  final InventoryItemModel item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.md),
-      child: NeoCard(
-        color: Colors.white,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        'Stock: ${item.quantity} ${item.unit}',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: item.isLowStock
-                              ? AppColors.red
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                      if (item.storageLocation != null) ...[
-                        const SizedBox(width: 12),
-                        const Icon(
-                          Icons.location_on_outlined,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          item.storageLocation!,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.add_circle_outline_rounded,
-                color: AppColors.cobalt,
-              ),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => StockAdjustSheet(item: item),
                 );
               },
             ),
