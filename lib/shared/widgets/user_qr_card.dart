@@ -45,7 +45,7 @@ class UserQrCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.xs),
           Text(
-            '@${user.username ?? 'user'}',
+            user.email,
             style: GoogleFonts.dmSans(
               fontSize: 14,
               color: AppColors.textSecondary,

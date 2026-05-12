@@ -61,7 +61,6 @@ class AuthRepository {
         'phone': phone,
         'college_roll': collegeRoll,
         'role': 'student',
-        'system_role': 'user',
         'profile_completed': false,
         'qr_code_data': 'GROWLAB-USER-$userId',
       });
@@ -207,7 +206,6 @@ class AuthRepository {
               'Maker',
           'email': authUser.email ?? '',
           'role': 'student',
-          'system_role': 'user',
           'profile_completed': false,
           'xp': 0,
           'level': 1,

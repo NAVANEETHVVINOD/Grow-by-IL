@@ -21,7 +21,6 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
   final _skillController = TextEditingController();
   final _interestController = TextEditingController();
 
@@ -32,7 +31,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _skillController.dispose();
     _interestController.dispose();
     super.dispose();
@@ -49,19 +47,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       final user = supabase.auth.currentUser;
       if (user == null) throw Exception('No authenticated user found');
 
-      // Check if username is already taken
-      final usernameCheck = await supabase
-          .from('users')
-          .select('id')
-          .eq('username', _usernameController.text.trim())
-          .maybeSingle();
-
-      if (usernameCheck != null) {
-        throw Exception('Username is already taken');
-      }
-
       await supabase.from('users').update({
-        'username': _usernameController.text.trim(),
         'base_role': _selectedBaseRole,
         'skills': _skills,
         'interests': _interests,
@@ -163,23 +149,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           ),
                           loading: () => const CircularProgressIndicator(),
                           error: (error, stack) => const SizedBox(),
-                        ),
-                        NeoTextField(
-                          controller: _usernameController,
-                          label: 'Choose a Username',
-                          prefixIcon: Icons.alternate_email,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Username is required';
-                            }
-                            if (value.length < 3) {
-                              return 'Username must be at least 3 characters';
-                            }
-                            if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-                              return 'Only letters, numbers, and underscores allowed';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: AppSizes.lg),
                         const Text(

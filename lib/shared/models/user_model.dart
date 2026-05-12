@@ -6,9 +6,7 @@ class UserModel {
     required this.email,
     this.phone,
     this.collegeRoll,
-    this.username,
     this.role = 'student',
-    this.systemRole = 'user',
     this.skills = const [],
     this.interests = const [],
     this.profileCompleted = false,
@@ -32,9 +30,7 @@ class UserModel {
   final String email;
   final String? phone;
   final String? collegeRoll;
-  final String? username;
   final String role;
-  final String systemRole;
   final List<String> skills;
   final List<String> interests;
   final bool profileCompleted;
@@ -59,9 +55,7 @@ class UserModel {
       email: json['email'] as String,
       phone: json['phone'] as String?,
       collegeRoll: json['college_roll'] as String?,
-      username: json['username'] as String?,
       role: json['role'] as String? ?? 'student',
-      systemRole: json['system_role'] as String? ?? 'user',
       skills: (json['skills'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -100,9 +94,7 @@ class UserModel {
       'email': email,
       'phone': phone,
       'college_roll': collegeRoll,
-      'username': username,
       'role': role,
-      'system_role': systemRole,
       'skills': skills,
       'interests': interests,
       'profile_completed': profileCompleted,
@@ -124,9 +116,7 @@ class UserModel {
     String? email,
     String? phone,
     String? collegeRoll,
-    String? username,
     String? role,
-    String? systemRole,
     List<String>? skills,
     List<String>? interests,
     bool? profileCompleted,
@@ -150,9 +140,7 @@ class UserModel {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       collegeRoll: collegeRoll ?? this.collegeRoll,
-      username: username ?? this.username,
       role: role ?? this.role,
-      systemRole: systemRole ?? this.systemRole,
       skills: skills ?? this.skills,
       interests: interests ?? this.interests,
       profileCompleted: profileCompleted ?? this.profileCompleted,
