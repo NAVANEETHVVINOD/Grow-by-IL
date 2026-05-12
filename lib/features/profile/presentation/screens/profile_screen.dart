@@ -148,14 +148,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.code_rounded,
                       color: AppColors.navy,
                       textColor: Colors.white,
-                      onTap: () {}, // Link to GitHub
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('GitHub integration coming soon!')),
+                        );
+                      },
                     ),
                     const SizedBox(width: AppSizes.md),
                     _buildLinkTile(
                       label: 'Skills',
                       icon: Icons.psychology_outlined,
                       color: AppColors.yellow,
-                      onTap: () {},
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Skills showcase coming soon!')),
+                        );
+                      },
                     ),
                   ],
                 ),
