@@ -21,18 +21,12 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _skillController = TextEditingController();
-  final _interestController = TextEditingController();
-
   String _selectedBaseRole = 'student';
-  final List<String> _skills = [];
-  final List<String> _interests = [];
+
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _skillController.dispose();
-    _interestController.dispose();
     super.dispose();
   }
 
@@ -48,9 +42,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       if (user == null) throw Exception('No authenticated user found');
 
       await supabase.from('users').update({
-        'base_role': _selectedBaseRole,
-        'skills': _skills,
-        'interests': _interests,
+        'role': _selectedBaseRole,
         'profile_completed': true,
       }).eq('id', user.id);
 
@@ -198,144 +190,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             }
                           },
                         ),
-                        const SizedBox(height: AppSizes.lg),
-                        const Text(
-                          'Skills (Optional):',
-                          style: TextStyle(
-                            fontFamily: 'Space Grotesk',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.sm),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _skills.map((skill) {
-                            return Chip(
-                              label: Text(
-                                skill,
-                                style: const TextStyle(fontFamily: 'DM Sans'),
-                              ),
-                              backgroundColor: AppColors.yellow,
-                              deleteIconColor: AppColors.navy,
-                              onDeleted: () {
-                                setState(() {
-                                  _skills.remove(skill);
-                                });
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(0),
-                                side: const BorderSide(
-                                  color: AppColors.navy,
-                                  width: 2,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: AppSizes.sm),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: NeoTextField(
-                                controller: _skillController,
-                                label: 'Add a Skill (e.g. Flutter)',
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.sm),
-                            NeoButton(
-                              label: 'Add',
-                              width: 80,
-                              onPressed: () {
-                                if (_skillController.text.trim().isNotEmpty) {
-                                  setState(() {
-                                    if (!_skills.contains(
-                                      _skillController.text.trim(),
-                                    )) {
-                                      _skills.add(_skillController.text.trim());
-                                    }
-                                    _skillController.clear();
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSizes.lg),
-                        const Text(
-                          'Interests (Optional):',
-                          style: TextStyle(
-                            fontFamily: 'Space Grotesk',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSizes.sm),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _interests.map((interest) {
-                            return Chip(
-                              label: Text(
-                                interest,
-                                style: const TextStyle(fontFamily: 'DM Sans'),
-                              ),
-                              backgroundColor: AppColors.cobalt.withValues(
-                                alpha: 0.2,
-                              ),
-                              deleteIconColor: AppColors.navy,
-                              onDeleted: () {
-                                setState(() {
-                                  _interests.remove(interest);
-                                });
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(0),
-                                side: const BorderSide(
-                                  color: AppColors.navy,
-                                  width: 2,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: AppSizes.sm),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: NeoTextField(
-                                controller: _interestController,
-                                label: 'Add an Interest (e.g. AI)',
-                              ),
-                            ),
-                            const SizedBox(width: AppSizes.sm),
-                            NeoButton(
-                              label: 'Add',
-                              width: 80,
-                              onPressed: () {
-                                if (_interestController.text
-                                    .trim()
-                                    .isNotEmpty) {
-                                  setState(() {
-                                    if (!_interests.contains(
-                                      _interestController.text.trim(),
-                                    )) {
-                                      _interests.add(
-                                        _interestController.text.trim(),
-                                      );
-                                    }
-                                    _interestController.clear();
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
+
                         const SizedBox(height: AppSizes.xl),
                         NeoButton(
                           onPressed: _isLoading ? () {} : _completeProfile,

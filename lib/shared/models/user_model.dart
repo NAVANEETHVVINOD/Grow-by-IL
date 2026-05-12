@@ -7,8 +7,6 @@ class UserModel {
     this.phone,
     this.collegeRoll,
     this.role = 'student',
-    this.skills = const [],
-    this.interests = const [],
     this.profileCompleted = false,
     this.clubId,
     this.clubTitle,
@@ -31,8 +29,6 @@ class UserModel {
   final String? phone;
   final String? collegeRoll;
   final String role;
-  final List<String> skills;
-  final List<String> interests;
   final bool profileCompleted;
   final String? clubId;
   final String? clubTitle;
@@ -56,14 +52,6 @@ class UserModel {
       phone: json['phone'] as String?,
       collegeRoll: json['college_roll'] as String?,
       role: json['role'] as String? ?? 'student',
-      skills: (json['skills'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      interests: (json['interests'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
       profileCompleted: json['profile_completed'] as bool? ?? false,
       clubId: json['club_id'] as String?,
       clubTitle: json['club_title'] as String?,
@@ -95,8 +83,6 @@ class UserModel {
       'phone': phone,
       'college_roll': collegeRoll,
       'role': role,
-      'skills': skills,
-      'interests': interests,
       'profile_completed': profileCompleted,
       'club_id': clubId,
       'club_title': clubTitle,
@@ -117,8 +103,6 @@ class UserModel {
     String? phone,
     String? collegeRoll,
     String? role,
-    List<String>? skills,
-    List<String>? interests,
     bool? profileCompleted,
     String? clubId,
     String? clubTitle,
@@ -141,8 +125,6 @@ class UserModel {
       phone: phone ?? this.phone,
       collegeRoll: collegeRoll ?? this.collegeRoll,
       role: role ?? this.role,
-      skills: skills ?? this.skills,
-      interests: interests ?? this.interests,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       clubId: clubId ?? this.clubId,
       clubTitle: clubTitle ?? this.clubTitle,
