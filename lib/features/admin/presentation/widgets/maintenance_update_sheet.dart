@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/shared/models/tool_model.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/repositories/supabase_client.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
-import 'package:grow/features/admin/domain/inventory_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 
 class MaintenanceUpdateSheet extends ConsumerStatefulWidget {
@@ -62,7 +63,7 @@ class _MaintenanceUpdateSheetState
           const SizedBox(height: AppSizes.lg),
           _buildTextField(
             _notesController,
-            'Describe the maintenance or damage...',
+            'Describe the maintenance or issue...',
           ),
           const SizedBox(height: AppSizes.xl),
           NeoButton(
@@ -86,7 +87,7 @@ class _MaintenanceUpdateSheetState
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _status,
-          items: ['available', 'maintenance', 'disabled', 'broken']
+          items: ['available', 'booked', 'in_use', 'maintenance', 'retired']
               .map(
                 (s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase())),
               )
@@ -117,26 +118,41 @@ class _MaintenanceUpdateSheetState
   }
 
   Future<void> _handleSubmit() async {
-    final user = ref.read(currentUserProvider).valueOrNull;
+    final user = ref.read(currentUserProvider).value;
     if (user == null) return;
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(inventoryRepositoryProvider).logToolStatus(
-            toolId: widget.tool.id,
-            userId: user.id,
-            transactionType: _status == 'available' || _status == 'maintenance'
-                ? 'maintenance'
-                : 'damage_report',
-            newStatus: _status,
-            notes: _notesController.text.trim(),
-          );
+      // Update tool health_status directly in tools table
+      final updateData = <String, dynamic>{
+        'health_status': _status,
+      };
+
+      // Set last_maintained timestamp when marking as available after maintenance
+      if (_status == 'available' || _status == 'maintenance') {
+        updateData['last_maintained'] =
+            DateTime.now().toUtc().toIso8601String();
+      }
+
+      await supabase.from('tools').update(updateData).eq('id', widget.tool.id);
+
+      AppLogger.action(LogCategory.tools, 'TOOL_STATUS_UPDATED', {
+        'toolId': widget.tool.id,
+        'oldStatus': widget.tool.healthStatus,
+        'newStatus': _status,
+        'actorId': user.id,
+      });
 
       // Refresh tools list
       ref.invalidate(toolsProvider);
 
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      AppLogger.error(
+        LogCategory.tools,
+        'TOOL_STATUS_UPDATE_FAILED',
+        error: e,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
