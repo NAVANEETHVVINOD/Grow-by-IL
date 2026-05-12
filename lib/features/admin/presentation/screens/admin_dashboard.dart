@@ -808,7 +808,6 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
               NeoTextField(
                 label: 'Description (Optional)',
                 controller: _descController,
-                maxLines: 3,
               ),
               const SizedBox(height: AppSizes.md),
               NeoTextField(
@@ -988,7 +987,6 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
               NeoTextField(
                 label: 'Description',
                 controller: _descController,
-                maxLines: 3,
               ),
               const SizedBox(height: AppSizes.md),
               NeoTextField(

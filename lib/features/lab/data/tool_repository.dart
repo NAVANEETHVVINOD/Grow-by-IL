@@ -139,8 +139,8 @@ class ToolRepository {
     });
 
     // Repository-level role guard
-    final allowedRoles = ['admin', 'operation_head', 'machine_head'];
-    if (!allowedRoles.contains(actor.systemRole)) {
+    final allowedRoles = ['admin', 'operation_head', 'machine_head', 'super_admin'];
+    if (!allowedRoles.contains(actor.role)) {
       throw Exception(
         'Unauthorized: Only administrators or operation heads can approve bookings.',
       );

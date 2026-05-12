@@ -491,7 +491,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           'icon': Icons.construction_rounded,
           'color': AppColors.orange,
         },
-      if (user.systemRole != 'user')
+      if (user.role != 'student')
         {
           'name': 'Mentor',
           'icon': Icons.school_rounded,

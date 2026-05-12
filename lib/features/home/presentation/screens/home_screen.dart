@@ -294,7 +294,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               'admin',
               'operation_head',
               'machine_head',
-            ].contains(user.systemRole))
+              'super_admin'
+            ].contains(user.role))
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
                 color: AppColors.cobalt,
