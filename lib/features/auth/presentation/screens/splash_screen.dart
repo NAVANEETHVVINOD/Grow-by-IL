@@ -55,6 +55,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           return;
         }
 
+        if (user != null) {
+          AppLogger.info(
+            LogCategory.auth,
+            'PROFILE_CHECK | completed=${user.profileCompleted} | role=${user.role}',
+          );
+        }
+
         if (user?.profileCompleted == true) {
           if (mounted) context.go('/home');
         } else {

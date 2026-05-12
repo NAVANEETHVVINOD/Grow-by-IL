@@ -386,27 +386,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       flex: 2,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: project.coverImageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: project.coverImageUrl!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    const ShimmerSkeleton(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(Icons.broken_image_rounded),
-                                ),
-                              )
-                            : Container(
-                                color: AppColors.surface,
-                                child: const Icon(
-                                  Icons.architecture_rounded,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
+                        child: Container(
+                          color: AppColors.surface,
+                          child: const Icon(
+                            Icons.architecture_rounded,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ),
                     ),
                     Padding(

@@ -20,8 +20,8 @@ import 'package:grow/shared/repositories/supabase_client.dart';
 final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
   final data = await supabase
       .from('tool_bookings')
-      .select('*, tools(name), users(name)')
-      .eq('status', 'requested')
+      .select('*, tools(name), users!tool_bookings_user_id_fkey(name)')
+      .eq('status', 'pending')
       .order('created_at', ascending: false);
   return (data as List).map((row) => BookingModel.fromJson(row)).toList();
 });

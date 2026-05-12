@@ -9,7 +9,6 @@ import '../../../../core/utils/supabase_error_handler.dart';
 import '../../../../shared/repositories/supabase_client.dart';
 import '../../../../shared/widgets/neo_button.dart';
 import '../../../../shared/widgets/neo_card.dart';
-import '../../../../shared/widgets/neo_text_field.dart';
 import '../../data/auth_repository.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
@@ -190,7 +189,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             }
                           },
                         ),
-
                         const SizedBox(height: AppSizes.xl),
                         NeoButton(
                           onPressed: _isLoading ? () {} : _completeProfile,

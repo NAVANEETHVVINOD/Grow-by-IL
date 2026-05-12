@@ -100,20 +100,26 @@ class ToolRepository {
             'project_id': projectId,
             'slot_start': slotStart.toUtc().toIso8601String(),
             'slot_end': slotEnd.toUtc().toIso8601String(),
-            'duration_minutes': slotEnd.difference(slotStart).inMinutes,
             'status': status,
           })
           .select()
           .single();
 
       // 4. Create Notification
-      await _client.from('notifications').insert({
-        'user_id': userId,
-        'type': 'tool_booking',
-        'title': status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
-        'message': 'Your booking for ${tool.name} is $status.',
-        'related_id': data['id'],
-      });
+      try {
+        await _client.from('notifications').insert({
+          'user_id': userId,
+          'type': 'tool_booking',
+          'title': status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
+          'message': 'Your booking for ${tool.name} is $status.',
+          'related_id': data['id'],
+        });
+      } catch (notifErr) {
+        AppLogger.warn(
+          LogCategory.tools,
+          'Notification creation failed (likely RLS): $notifErr',
+        );
+      }
 
       AppLogger.info(
         LogCategory.tools,

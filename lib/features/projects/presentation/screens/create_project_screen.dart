@@ -254,13 +254,9 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
       final project = await ref.read(projectRepositoryProvider).createProject({
         'title': _titleController.text.trim(),
         'description': _descController.text.trim(),
-        'project_type': _type,
+        'type': _type,
         'visibility': _visibility,
-        'external_link': _linkController.text.trim().isEmpty
-            ? null
-            : _linkController.text.trim(),
         'created_by': user.id,
-        'cover_image_url': coverUrl,
       });
 
       ref.invalidate(publicProjectsProvider);

@@ -549,21 +549,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: project.coverImageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: project.coverImageUrl!,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) =>
-                                  const ShimmerSkeleton(width: 60, height: 60),
-                              errorWidget: (context, url, error) => const Icon(
-                                Icons.broken_image_rounded,
-                                size: 20,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.architecture_rounded,
-                              color: AppColors.textSecondary,
-                            ),
+                      child: const Icon(
+                        Icons.architecture_rounded,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),

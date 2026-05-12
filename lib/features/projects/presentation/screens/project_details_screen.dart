@@ -73,39 +73,25 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
-        background: project.coverImageUrl != null
-            ? CachedNetworkImage(
-                imageUrl: project.coverImageUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    const ShimmerSkeleton(width: double.infinity, height: 200),
-                errorWidget: (context, url, error) => const Center(
-                  child: Icon(
-                    Icons.broken_image_rounded,
-                    color: Colors.white,
-                    size: 48,
-                  ),
-                ),
-              )
-            : Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.navy.withValues(alpha: 0.8),
-                      AppColors.navy,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.architecture_rounded,
-                    size: 64,
-                    color: AppColors.yellow,
-                  ),
-                ),
-              ),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.navy.withValues(alpha: 0.8),
+                AppColors.navy,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.architecture_rounded,
+              size: 64,
+              color: AppColors.yellow,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -184,39 +170,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           loading: () => const LinearProgressIndicator(),
           error: (e, __) => Text('Failed to load members: $e'),
         ),
-        const SizedBox(height: AppSizes.xl),
-        if (project.externalLink != null)
-          _buildExternalLink(project.externalLink!),
         const SizedBox(height: 100),
       ],
-    );
-  }
-
-  Widget _buildExternalLink(String url) {
-    return NeoCard(
-      color: Colors.white,
-      onTap: () async {
-        final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-        }
-      },
-      child: Row(
-        children: [
-          const Icon(Icons.link_rounded, color: AppColors.navy),
-          const SizedBox(width: AppSizes.md),
-          Expanded(
-            child: Text(
-              'View External Resources',
-              style: GoogleFonts.dmSans(
-                fontWeight: FontWeight.bold,
-                color: AppColors.navy,
-              ),
-            ),
-          ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-        ],
-      ),
     );
   }
 
