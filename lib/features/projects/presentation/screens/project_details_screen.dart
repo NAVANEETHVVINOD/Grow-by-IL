@@ -102,7 +102,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       children: [
         Row(
           children: [
-            _TypeBadge(type: project.type),
+            _TypeBadge(type: project.visibility),
             const SizedBox(width: AppSizes.sm),
             _StatusBadge(status: project.status),
             const Spacer(),

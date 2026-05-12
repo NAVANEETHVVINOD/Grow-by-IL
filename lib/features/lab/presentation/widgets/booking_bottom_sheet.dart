@@ -9,6 +9,8 @@ import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
+import 'package:grow/shared/providers/toast_provider.dart';
+import 'package:grow/core/utils/app_logger.dart';
 
 class BookingBottomSheet extends ConsumerStatefulWidget {
   const BookingBottomSheet({super.key, required this.tool});
@@ -83,9 +85,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
               ),
               const SizedBox(height: AppSizes.xl),
               NeoButton(
-                label: widget.tool.requiresApproval
-                    ? 'Request Booking'
-                    : 'Book Now',
+                label: 'Request Booking',
                 isLoading: _isLoading,
                 onPressed: _selectedStartTime == null ? null : _handleBooking,
               ),
@@ -392,29 +392,27 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       // Invalidate providers to refresh UI
       ref.invalidate(myBookingsProvider);
       ref.invalidate(toolBookingsForDayProvider);
+      // Clear selection so the confirm button goes away
+      ref.read(selectedToolProvider.notifier).state = null;
 
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.tool.requiresApproval
-                ? 'Booking requested! Waiting for approval.'
-                : 'Tool booked successfully!',
-          ),
-          backgroundColor: AppColors.green,
-        ),
+      // Senior Dev Touch: Global Top Toast
+      ref.read(toastProvider.notifier).show(
+        title: 'Booking Successful! 🌱',
+        message: 'Your tool reservation has been sent for approval.',
+        color: AppColors.green,
+        icon: Icons.check_circle_rounded,
       );
 
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to create booking: $e'),
-          backgroundColor: AppColors.red,
-        ),
+      
+      ref.read(toastProvider.notifier).show(
+        title: 'Booking Failed',
+        message: 'Something went wrong. Please try again.',
+        color: AppColors.red,
+        icon: Icons.error_outline_rounded,
       );
     }
   }

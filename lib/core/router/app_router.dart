@@ -14,6 +14,7 @@ import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
 import '../../features/projects/presentation/screens/create_project_screen.dart';
 import '../../features/projects/presentation/screens/project_details_screen.dart';
+import '../../features/projects/presentation/screens/project_list_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/lab/presentation/screens/lab_screen.dart';
 import '../../features/lab/presentation/screens/qr_scan_screen.dart';
@@ -196,14 +197,15 @@ final goRouter = GoRouter(
       builder: (context, state) => const NotificationInboxScreen(),
     ),
     GoRoute(
+      path: '/projects',
+      builder: (context, state) => const ProjectListScreen(),
+    ),
+    GoRoute(
       path: '/projects/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return ProjectDetailsScreen(projectId: id);
       },
     ),
-    // More detail routes added in later tasks:
-    // /tools/:id, /tools/:id/book,
-    // /notifications
   ],
 );

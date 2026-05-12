@@ -69,4 +69,13 @@ class NotificationRepository {
       rethrow;
     }
   }
+
+  Stream<List<NotificationModel>> subscribeToNotifications(String userId) {
+    return _client
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false)
+        .map((data) => data.map((n) => NotificationModel.fromJson(n)).toList());
+  }
 }

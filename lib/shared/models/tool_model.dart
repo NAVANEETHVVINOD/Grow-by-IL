@@ -12,7 +12,6 @@ class ToolModel {
     this.healthStatus = 'available',
     this.lastMaintained,
     this.qrCodeData,
-    this.requiresApproval = false,
     this.createdAt,
   });
 
@@ -25,7 +24,6 @@ class ToolModel {
   final int totalQty;
   final int availableQty;
   final String healthStatus;
-  final bool requiresApproval;
   final DateTime? lastMaintained;
   final String? qrCodeData;
   final DateTime? createdAt;
@@ -41,7 +39,6 @@ class ToolModel {
       totalQty: json['total_qty'] as int? ?? 1,
       availableQty: json['available_qty'] as int? ?? 1,
       healthStatus: json['health_status'] as String? ?? 'available',
-      requiresApproval: json['requires_approval'] as bool? ?? false,
       lastMaintained: json['last_maintained'] != null
           ? DateTime.parse(json['last_maintained'] as String)
           : null,
@@ -65,7 +62,6 @@ class ToolModel {
       'health_status': healthStatus,
       'last_maintained': lastMaintained?.toIso8601String(),
       'qr_code_data': qrCodeData,
-      'requires_approval': requiresApproval,
     };
   }
 
@@ -81,7 +77,6 @@ class ToolModel {
     String? healthStatus,
     DateTime? lastMaintained,
     String? qrCodeData,
-    bool? requiresApproval,
     DateTime? createdAt,
   }) {
     return ToolModel(
@@ -96,7 +91,6 @@ class ToolModel {
       healthStatus: healthStatus ?? this.healthStatus,
       lastMaintained: lastMaintained ?? this.lastMaintained,
       qrCodeData: qrCodeData ?? this.qrCodeData,
-      requiresApproval: requiresApproval ?? this.requiresApproval,
       createdAt: createdAt ?? this.createdAt,
     );
   }

@@ -4,7 +4,6 @@ class EventModel {
     required this.title,
     required this.description,
     required this.type,
-    this.organizationName,
     this.clubId,
     required this.eventDate,
     this.endDate,
@@ -21,7 +20,6 @@ class EventModel {
   final String title;
   final String? description;
   final String type;
-  final String? organizationName;
   final String? clubId;
   final DateTime eventDate;
   final DateTime? endDate;
@@ -45,7 +43,6 @@ class EventModel {
       title: json['title'] as String,
       description: json['description'] as String?,
       type: json['event_type'] as String? ?? 'workshop',
-      organizationName: json['organization_name'] as String?,
       clubId: json['club_id'] as String?,
       eventDate: DateTime.parse(json['event_date'] as String).toUtc(),
       endDate: json['end_date'] != null
@@ -69,7 +66,6 @@ class EventModel {
       'title': title,
       'description': description,
       'event_type': type,
-      'organization_name': organizationName,
       'club_id': clubId,
       'event_date': eventDate.toIso8601String(),
       'end_date': endDate?.toIso8601String(),
@@ -87,7 +83,6 @@ class EventModel {
     String? title,
     String? description,
     String? type,
-    String? organizationName,
     String? clubId,
     DateTime? eventDate,
     DateTime? endDate,
@@ -104,7 +99,6 @@ class EventModel {
       title: title ?? this.title,
       description: description ?? this.description,
       type: type ?? this.type,
-      organizationName: organizationName ?? this.organizationName,
       clubId: clubId ?? this.clubId,
       eventDate: eventDate ?? this.eventDate,
       endDate: endDate ?? this.endDate,

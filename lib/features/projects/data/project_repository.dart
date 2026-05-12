@@ -99,11 +99,11 @@ class ProjectRepository {
           await _client.from('projects').insert(projectData).select().single();
       final project = ProjectModel.fromJson(data);
 
-      // 2. Add creator as Owner
+      // 2. Add creator as Lead
       await _client.from('project_members').insert({
         'project_id': project.id,
         'user_id': project.createdBy,
-        'role': 'owner',
+        'role': 'lead',
       });
 
       AppLogger.info(

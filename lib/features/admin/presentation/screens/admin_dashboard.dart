@@ -278,15 +278,10 @@ class _PendingBookingCard extends ConsumerWidget {
     if (reason == null) return;
 
     try {
-      await supabase.from('tool_bookings').update({
-        'status': 'rejected',
-        'rejection_reason': reason.trim(),
-      }).eq('id', booking.id);
+      final actor = ref.read(currentUserProvider).value;
+      if (actor == null) return;
 
-      AppLogger.action(LogCategory.admin, 'BOOKING_REJECTED', {
-        'bookingId': booking.id,
-        'reason': reason,
-      });
+      await ref.read(toolRepositoryProvider).rejectBooking(booking.id, actor);
 
       ref.invalidate(pendingBookingsProvider);
       if (context.mounted) {
@@ -683,7 +678,6 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
   final _qtyController = TextEditingController(text: '1');
   final _sopController = TextEditingController();
   String _category = 'other';
-  bool _requiresApproval = false;
   bool _isLoading = false;
 
   final _categories = const {
@@ -728,7 +722,7 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
       await supabase.from('tools').insert(insertData);
 
       AppLogger.info(LogCategory.admin,
-          'TOOL_CREATED | name=${insertData['name']} requiresApproval=$_requiresApproval');
+          'TOOL_CREATED | name=${insertData['name']}');
 
       ref.invalidate(toolsProvider);
       if (mounted) {
@@ -826,14 +820,7 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
                 controller: _sopController,
                 keyboardType: TextInputType.url,
               ),
-              const SizedBox(height: AppSizes.md),
-              SwitchListTile(
-                title: const Text('Requires admin approval to book'),
-                subtitle:
-                    const Text('Enable for high-value tools (laser, CNC)'),
-                value: _requiresApproval,
-                onChanged: (val) => setState(() => _requiresApproval = val),
-              ),
+
               const SizedBox(height: AppSizes.xl),
               NeoButton(
                 label: 'Save Tool',

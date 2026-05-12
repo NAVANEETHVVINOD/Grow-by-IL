@@ -10,7 +10,6 @@ import 'package:grow/features/projects/domain/project_providers.dart';
 
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:grow/core/services/media_providers.dart';
 
 class CreateProjectScreen extends ConsumerStatefulWidget {
   const CreateProjectScreen({super.key});
@@ -24,10 +23,8 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  final _linkController = TextEditingController();
 
   XFile? _imageFile;
-  String _type = 'team';
   String _visibility = 'public';
   bool _isLoading = false;
 
@@ -122,25 +119,11 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
               maxLines: 4,
             ),
             const SizedBox(height: AppSizes.md),
-            _buildFieldLabel('Project Type'),
-            _buildDropdown<String>(
-              value: _type,
-              items: ['personal', 'team', 'club', 'research', 'hackathon'],
-              onChanged: (val) => setState(() => _type = val!),
-            ),
-            const SizedBox(height: AppSizes.md),
             _buildFieldLabel('Visibility'),
             _buildDropdown<String>(
               value: _visibility,
               items: ['public', 'private'],
               onChanged: (val) => setState(() => _visibility = val!),
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildFieldLabel('External Link (Optional)'),
-            _buildTextField(
-              _linkController,
-              'WhatsApp/GitHub/Discord URL',
-              false,
             ),
             const SizedBox(height: AppSizes.xl),
             NeoButton(
@@ -236,25 +219,9 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
 
     setState(() => _isLoading = true);
     try {
-      String? coverUrl;
-      if (_imageFile != null) {
-        // We use a temporary project ID or handle it after creation
-        // But MediaService.uploadProjectImage expects a projectId.
-        // Let's generate a temporary UUID or just use 'temp' if needed,
-        // but better to create project first, then update it.
-        // Wait, MediaService.uploadProjectImage just uses the ID for the path.
-        // I'll use user.id + timestamp as a temporary folder name.
-        final tempPathId =
-            'temp_${user.id}_${DateTime.now().millisecondsSinceEpoch}';
-        coverUrl = await ref
-            .read(mediaServiceProvider)
-            .uploadProjectImage(tempPathId, _imageFile!);
-      }
-
       final project = await ref.read(projectRepositoryProvider).createProject({
         'title': _titleController.text.trim(),
         'description': _descController.text.trim(),
-        'type': _type,
         'visibility': _visibility,
         'created_by': user.id,
       });

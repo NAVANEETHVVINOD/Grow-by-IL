@@ -83,8 +83,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   const SizedBox(height: AppSizes.xxl),
                   _buildSectionHeader(
                     'Active Projects',
-                    onAction: () => context.push('/projects/create'),
-                    actionLabel: 'NEW',
+                    onAction: () => context.go('/profile'),
+                    actionLabel: 'VIEW ALL',
                   ),
                   const SizedBox(height: AppSizes.md),
                   _buildActiveProjects(ref),
@@ -360,20 +360,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           textColor: Colors.white,
           onTap: () => context.push('/tools'),
         ),
-        _ActionTile(
-          title: AppStrings.myProjects,
-          subtitle: Text(
-            'Manage builds',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 12,
-              color: AppColors.navy.withValues(alpha: 0.6),
+        if (ref.watch(userProjectsProvider).valueOrNull?.isNotEmpty ?? false)
+          _ActionTile(
+            title: AppStrings.myProjects,
+            subtitle: Text(
+              'Manage builds',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                color: AppColors.navy.withValues(alpha: 0.6),
+              ),
             ),
+            icon: Icons.rocket_launch_rounded,
+            color: Colors.white,
+            onTap: () => context.push('/projects'), // Go to Projects List
           ),
-          icon: Icons.rocket_launch_rounded,
-          color: Colors.white,
-          onTap: () => context.go('/explore'),
-        ),
       ],
     );
   }
@@ -584,7 +585,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ),
                           ),
                           child: Text(
-                            project.type.toUpperCase(),
+                            project.visibility.toUpperCase(),
                             style: GoogleFonts.dmSans(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
