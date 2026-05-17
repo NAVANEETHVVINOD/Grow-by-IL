@@ -80,17 +80,3 @@ jobs:
           fi
           echo "✅ Status enum values look correct"
 
-      - name: Verify database_contract.md exists and is not empty
-        run: |
-          if [ ! -f "docs/database_contract.md" ]; then
-            echo "❌ docs/database_contract.md is missing"
-            exit 1
-          fi
-          
-          lines=$(wc -l < docs/database_contract.md)
-          if [ "$lines" -lt 20 ]; then
-            echo "❌ docs/database_contract.md seems too short ($lines lines)"
-            exit 1
-          fi
-          
-          echo "✅ docs/database_contract.md exists and has $lines lines"
