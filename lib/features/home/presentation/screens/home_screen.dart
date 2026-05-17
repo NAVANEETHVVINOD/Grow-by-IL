@@ -217,15 +217,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         if (user == null) return const SizedBox.shrink();
         return Row(
           children: [
-            CircleAvatar(
-              backgroundColor: AppColors.yellow,
-              radius: 24,
-              child: Text(
-                user.name.substring(0, 1).toUpperCase(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: AppColors.navy,
+            GestureDetector(
+              onTap: () => context.go('/profile'),
+              child: CircleAvatar(
+                backgroundColor: AppColors.yellow,
+                radius: 24,
+                child: Text(
+                  user.name.substring(0, 1).toUpperCase(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: AppColors.navy,
+                  ),
                 ),
               ),
             ),

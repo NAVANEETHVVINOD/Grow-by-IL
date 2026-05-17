@@ -16,14 +16,17 @@ class NotificationInboxScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsAsync = ref.watch(notificationsProvider);
     final user = ref.watch(currentUserProvider).valueOrNull;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.surfaceDark : AppColors.background;
+    final textColor = isDark ? Colors.white : AppColors.navy;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          icon: Icon(Icons.arrow_back_rounded, color: textColor),
           onPressed: () => context.go('/home'),
         ),
         title: Text(
@@ -31,7 +34,7 @@ class NotificationInboxScreen extends ConsumerWidget {
           style: GoogleFonts.spaceGrotesk(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.navy,
+            color: textColor,
           ),
         ),
         actions: [
@@ -79,7 +82,7 @@ class NotificationInboxScreen extends ConsumerWidget {
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.navy,
+                      color: textColor,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -117,11 +120,15 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: NeoCard(
         color: Theme.of(context).colorScheme.surface,
-        borderColor: notification.isRead ? AppColors.navy : AppColors.yellow,
+        borderColor: notification.isRead
+            ? (isDark ? Colors.white24 : AppColors.navy)
+            : AppColors.yellow,
         onTap: () {
           if (!notification.isRead) {
             ref
@@ -139,7 +146,7 @@ class _NotificationTile extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: notification.isRead
-                      ? AppColors.background
+                      ? (isDark ? Colors.white12 : AppColors.background)
                       : AppColors.yellow.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -150,7 +157,7 @@ class _NotificationTile extends ConsumerWidget {
                   size: 20,
                   color: notification.isRead
                       ? AppColors.textSecondary
-                      : AppColors.navy,
+                      : (isDark ? Colors.white : AppColors.navy),
                 ),
               ),
               const SizedBox(width: AppSizes.md),
@@ -166,7 +173,7 @@ class _NotificationTile extends ConsumerWidget {
                             style: GoogleFonts.spaceGrotesk(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: AppColors.navy,
+                              color: isDark ? Colors.white : AppColors.navy,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -192,7 +199,9 @@ class _NotificationTile extends ConsumerWidget {
                         fontWeight: notification.isRead
                             ? FontWeight.normal
                             : FontWeight.w500,
-                        color: AppColors.navy.withValues(alpha: 0.8),
+                        color: isDark
+                            ? Colors.white70
+                            : AppColors.navy.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -202,7 +211,7 @@ class _NotificationTile extends ConsumerWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       alignment: WrapAlignment.spaceBetween,
                       children: [
-                        _buildTypeTag(notification.type),
+                        _buildTypeTag(context, notification.type),
                         Text(
                           notification.createdAt
                               .toLocal()
@@ -227,7 +236,7 @@ class _NotificationTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildTypeTag(String type) {
+  Widget _buildTypeTag(BuildContext context, String type) {
     IconData icon;
     Color color;
     switch (type) {
@@ -245,7 +254,9 @@ class _NotificationTile extends ConsumerWidget {
         break;
       default:
         icon = Icons.notifications_active_outlined;
-        color = AppColors.navy;
+        color = Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : AppColors.navy;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
