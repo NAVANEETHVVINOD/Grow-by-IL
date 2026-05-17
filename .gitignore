@@ -63,3 +63,11 @@ supabase/.temp/
 .gemini/
 *.pem
 *.key
+
+# Custom excludes
+analyze_output.txt
+analyzer_output.txt
+mcp_output.txt
+*.txt
+docs/
+/docs/
