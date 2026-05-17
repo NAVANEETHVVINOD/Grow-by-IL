@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -21,8 +22,12 @@ class NotificationInboxScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          onPressed: () => context.go('/home'),
+        ),
         title: Text(
-          'Inbox',
+          'Notifications',
           style: GoogleFonts.spaceGrotesk(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -31,19 +36,28 @@ class NotificationInboxScreen extends ConsumerWidget {
         ),
         actions: [
           if (user != null)
-            TextButton(
-              onPressed: () => ref
-                  .read(notificationRepositoryProvider)
-                  .markAllAsRead(user.id)
-                  .then((_) => ref.invalidate(notificationsProvider)),
-              child: Text(
-                'MARK ALL READ',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.cobalt,
-                ),
-              ),
+            notificationsAsync.maybeWhen(
+              data: (list) {
+                final hasUnread = list.any((n) => !n.isRead);
+                if (!hasUnread) return const SizedBox.shrink();
+                return TextButton(
+                  onPressed: () async {
+                    await ref
+                        .read(notificationRepositoryProvider)
+                        .markAllAsRead(user.id);
+                    ref.invalidate(notificationsProvider);
+                  },
+                  child: Text(
+                    'MARK ALL READ',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.cobalt,
+                    ),
+                  ),
+                );
+              },
+              orElse: () => const SizedBox.shrink(),
             ),
         ],
       ),
@@ -56,52 +70,42 @@ class NotificationInboxScreen extends ConsumerWidget {
                 children: [
                   const Icon(
                     Icons.notifications_none_rounded,
-                    size: 48,
+                    size: 64,
                     color: AppColors.textSecondary,
                   ),
                   const SizedBox(height: AppSizes.md),
                   Text(
                     'Your inbox is empty',
-                    style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navy,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'We\'ll notify you when something happens.',
+                    style: GoogleFonts.dmSans(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          final unread = notifications.where((n) => !n.isRead).toList();
-          final earlier = notifications.where((n) => n.isRead).toList();
-
-          return ListView(
+          // Group notifications by date
+          return ListView.builder(
             padding: const EdgeInsets.all(AppSizes.lg),
-            children: [
-              if (unread.isNotEmpty) ...[
-                _buildSectionHeader('NEW'),
-                const SizedBox(height: AppSizes.md),
-                ...unread.map((n) => _NotificationTile(notification: n)),
-                const SizedBox(height: AppSizes.xl),
-              ],
-              if (earlier.isNotEmpty) ...[
-                _buildSectionHeader('EARLIER'),
-                const SizedBox(height: AppSizes.md),
-                ...earlier.map((n) => _NotificationTile(notification: n)),
-              ],
-            ],
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              final notification = notifications[index];
+              return _NotificationTile(notification: notification);
+            },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, __) => Center(child: Text('Error: $e')),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.spaceGrotesk(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textSecondary,
       ),
     );
   }
@@ -116,9 +120,7 @@ class _NotificationTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: NeoCard(
-        color: notification.isRead
-            ? Colors.white
-            : AppColors.yellow.withValues(alpha: 0.05),
+        color: Theme.of(context).colorScheme.surface,
         borderColor: notification.isRead ? AppColors.navy : AppColors.yellow,
         onTap: () {
           if (!notification.isRead) {
@@ -127,53 +129,97 @@ class _NotificationTile extends ConsumerWidget {
                 .markAsRead(notification.id)
                 .then((_) => ref.invalidate(notificationsProvider));
           }
-          // TODO: Handle action_url navigation
         },
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTypeIcon(notification.type),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: notification.isRead
+                      ? AppColors.background
+                      : AppColors.yellow.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  notification.isRead
+                      ? Icons.notifications_none_rounded
+                      : Icons.notifications_active_rounded,
+                  size: 20,
+                  color: notification.isRead
+                      ? AppColors.textSecondary
+                      : AppColors.navy,
+                ),
+              ),
               const SizedBox(width: AppSizes.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      notification.title,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification.title,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: AppColors.navy,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!notification.isRead)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(left: 8),
+                            decoration: const BoxDecoration(
+                              color: AppColors.yellow,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       notification.message,
                       style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                        fontWeight: notification.isRead
+                            ? FontWeight.normal
+                            : FontWeight.w500,
+                        color: AppColors.navy.withValues(alpha: 0.8),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      notification.createdAt.toLocal().toString().substring(
-                            5,
-                            16,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        _buildTypeTag(notification.type),
+                        Text(
+                          notification.createdAt
+                              .toLocal()
+                              .toString()
+                              .substring(5, 16),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                AppColors.textSecondary.withValues(alpha: 0.6),
                           ),
-                      style: GoogleFonts.dmSans(
-                        fontSize: 11,
-                        color: AppColors.textSecondary.withValues(alpha: 0.6),
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              if (!notification.isRead)
-                const CircleAvatar(
-                  radius: 4,
-                  backgroundColor: AppColors.yellow,
-                ),
             ],
           ),
         ),
@@ -181,7 +227,7 @@ class _NotificationTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildTypeIcon(String type) {
+  Widget _buildTypeTag(String type) {
     IconData icon;
     Color color;
     switch (type) {
@@ -197,21 +243,34 @@ class _NotificationTile extends ConsumerWidget {
         icon = Icons.mail_outline_rounded;
         color = AppColors.green;
         break;
-      case 'milestone':
-        icon = Icons.workspace_premium_rounded;
-        color = AppColors.orange;
-        break;
       default:
         icon = Icons.notifications_active_outlined;
         color = AppColors.navy;
     }
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
-      child: Icon(icon, size: 20, color: color),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        children: [
+          Icon(icon, size: 10, color: color),
+          Text(
+            type.toUpperCase(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

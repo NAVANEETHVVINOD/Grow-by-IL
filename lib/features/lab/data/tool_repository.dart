@@ -87,9 +87,9 @@ class ToolRepository {
         throw Exception('This time slot overlaps with an existing booking.');
       }
 
-      // 2. Determine initial status based on tool requirement
+      // 2. Initial status: Default to pending for RC2 safety
       final tool = await getToolById(toolId);
-      final status = tool.requiresApproval ? 'pending' : 'approved';
+      const status = 'pending';
 
       // 3. Insert booking (using UTC)
       final data = await _client
@@ -100,20 +100,27 @@ class ToolRepository {
             'project_id': projectId,
             'slot_start': slotStart.toUtc().toIso8601String(),
             'slot_end': slotEnd.toUtc().toIso8601String(),
-            'duration_minutes': slotEnd.difference(slotStart).inMinutes,
             'status': status,
           })
           .select()
           .single();
 
       // 4. Create Notification
-      await _client.from('notifications').insert({
-        'user_id': userId,
-        'type': 'tool_booking',
-        'title': status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
-        'message': 'Your booking for ${tool.name} is $status.',
-        'related_id': data['id'],
-      });
+      try {
+        await _client.from('notifications').insert({
+          'user_id': userId,
+          'type': 'tool_booking',
+          'title':
+              status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
+          'message': 'Your booking for ${tool.name} is $status.',
+          'related_id': data['id'],
+        });
+      } catch (notifErr) {
+        AppLogger.warn(
+          LogCategory.tools,
+          'Notification creation failed (likely RLS): $notifErr',
+        );
+      }
 
       AppLogger.info(
         LogCategory.tools,
@@ -139,8 +146,8 @@ class ToolRepository {
     });
 
     // Repository-level role guard
-    final allowedRoles = ['admin', 'operation_head', 'machine_head'];
-    if (!allowedRoles.contains(actor.systemRole)) {
+    final allowedRoles = ['lab_admin', 'super_admin'];
+    if (!allowedRoles.contains(actor.role)) {
       throw Exception(
         'Unauthorized: Only administrators or operation heads can approve bookings.',
       );
@@ -153,19 +160,24 @@ class ToolRepository {
         'approved_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', bookingId);
 
-      // 3. Create Notification for user
-      final bookingData = await _client
-          .from('tool_bookings')
-          .select()
-          .eq('id', bookingId)
-          .single();
-      await _client.from('notifications').insert({
-        'user_id': bookingData['user_id'],
-        'type': 'tool_booking_approved',
-        'title': 'Booking Approved!',
-        'message': 'Your equipment reservation has been approved.',
-        'related_id': bookingId,
-      });
+      // 3. Create Notification for user (Safe Catch)
+      try {
+        final bookingData = await _client
+            .from('tool_bookings')
+            .select()
+            .eq('id', bookingId)
+            .single();
+        await _client.from('notifications').insert({
+          'user_id': bookingData['user_id'],
+          'type':
+              'system', // Must be one of: alert, reminder, invite, milestone, system
+          'title': 'Booking Approved!',
+          'message': 'Your equipment reservation has been approved.',
+        });
+      } catch (e) {
+        AppLogger.warn(LogCategory.notifications,
+            'Notification insert failed but booking approved: $e');
+      }
 
       AppLogger.info(
         LogCategory.tools,
@@ -175,6 +187,54 @@ class ToolRepository {
       AppLogger.error(
         LogCategory.tools,
         'approveBooking failed',
+        error: e,
+        stack: st,
+      );
+      rethrow;
+    }
+  }
+
+  /// Reject a pending booking (OpHead/Admin only).
+  Future<void> rejectBooking(String bookingId, UserModel actor) async {
+    AppLogger.action(LogCategory.tools, 'rejectBooking', {
+      'bookingId': bookingId,
+      'actor': actor.email,
+    });
+
+    try {
+      // 1. Update status to rejected
+      await _client.from('tool_bookings').update({
+        'status': 'rejected',
+      }).eq('id', bookingId);
+
+      // 2. Create Notification (Safe Catch)
+      try {
+        final bookingData = await _client
+            .from('tool_bookings')
+            .select()
+            .eq('id', bookingId)
+            .single();
+
+        await _client.from('notifications').insert({
+          'user_id': bookingData['user_id'],
+          'type': 'system',
+          'title': 'Booking Cancelled',
+          'message':
+              'Your equipment reservation was not approved and has been cancelled.',
+        });
+      } catch (e) {
+        AppLogger.warn(LogCategory.notifications,
+            'Notification insert failed but booking cancelled: $e');
+      }
+
+      AppLogger.info(
+        LogCategory.tools,
+        'Booking $bookingId rejected by ${actor.name}',
+      );
+    } catch (e, st) {
+      AppLogger.error(
+        LogCategory.tools,
+        'rejectBooking failed',
         error: e,
         stack: st,
       );

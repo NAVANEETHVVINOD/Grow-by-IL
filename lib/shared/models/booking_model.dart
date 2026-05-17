@@ -7,7 +7,6 @@ class BookingModel {
     this.projectId,
     required this.slotStart,
     required this.slotEnd,
-    required this.durationMinutes,
     this.status = 'pending',
     this.approvedBy,
     this.approvedAt,
@@ -26,7 +25,6 @@ class BookingModel {
   final String? projectId;
   final DateTime slotStart;
   final DateTime slotEnd;
-  final int durationMinutes;
   final String status;
   final String? approvedBy;
   final DateTime? approvedAt;
@@ -49,7 +47,6 @@ class BookingModel {
       projectId: json['project_id'] as String?,
       slotStart: DateTime.parse(json['slot_start'] as String).toUtc(),
       slotEnd: DateTime.parse(json['slot_end'] as String).toUtc(),
-      durationMinutes: json['duration_minutes'] as int? ?? 60,
       status: json['status'] as String? ?? 'pending',
       approvedBy: json['approved_by'] as String?,
       approvedAt: json['approved_at'] != null
@@ -67,8 +64,7 @@ class BookingModel {
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,
       toolName: json['tools'] is Map ? json['tools']['name'] as String? : null,
-      userName:
-          json['users'] is Map ? json['users']['full_name'] as String? : null,
+      userName: json['users'] is Map ? json['users']['name'] as String? : null,
     );
   }
 
@@ -80,7 +76,6 @@ class BookingModel {
       'project_id': projectId,
       'slot_start': slotStart.toIso8601String(),
       'slot_end': slotEnd.toIso8601String(),
-      'duration_minutes': durationMinutes,
       'status': status,
       'approved_by': approvedBy,
       'approved_at': approvedAt?.toIso8601String(),
@@ -98,7 +93,6 @@ class BookingModel {
     String? projectId,
     DateTime? slotStart,
     DateTime? slotEnd,
-    int? durationMinutes,
     String? status,
     String? approvedBy,
     DateTime? approvedAt,
@@ -115,7 +109,6 @@ class BookingModel {
       projectId: projectId ?? this.projectId,
       slotStart: slotStart ?? this.slotStart,
       slotEnd: slotEnd ?? this.slotEnd,
-      durationMinutes: durationMinutes ?? this.durationMinutes,
       status: status ?? this.status,
       approvedBy: approvedBy ?? this.approvedBy,
       approvedAt: approvedAt ?? this.approvedAt,

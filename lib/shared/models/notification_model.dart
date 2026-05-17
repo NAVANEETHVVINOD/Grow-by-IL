@@ -7,7 +7,6 @@ class NotificationModel {
   final String title;
   final String message;
   final String type;
-  final String? actionUrl;
   final bool isRead;
   final DateTime createdAt;
 
@@ -17,7 +16,6 @@ class NotificationModel {
     required this.title,
     required this.message,
     required this.type,
-    this.actionUrl,
     required this.isRead,
     required this.createdAt,
   });
@@ -29,7 +27,6 @@ class NotificationModel {
       title: json['title'] as String,
       message: json['message'] as String,
       type: json['type'] as String,
-      actionUrl: json['action_url'] as String?,
       isRead: json['is_read'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -41,7 +38,6 @@ class NotificationModel {
       'title': title,
       'message': message,
       'type': type,
-      'action_url': actionUrl,
       'is_read': isRead,
     };
   }
@@ -53,7 +49,6 @@ class NotificationModel {
       title: title,
       message: message,
       type: type,
-      actionUrl: actionUrl,
       isRead: isRead ?? this.isRead,
       createdAt: createdAt,
     );

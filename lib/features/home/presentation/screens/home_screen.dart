@@ -14,7 +14,6 @@ import 'package:grow/features/explore/domain/event_providers.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -83,8 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   const SizedBox(height: AppSizes.xxl),
                   _buildSectionHeader(
                     'Active Projects',
-                    onAction: () => context.push('/projects/create'),
-                    actionLabel: 'NEW',
+                    onAction: () => context.go('/profile'),
+                    actionLabel: 'VIEW ALL',
                   ),
                   const SizedBox(height: AppSizes.md),
                   _buildActiveProjects(ref),
@@ -290,11 +289,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     : const SizedBox.shrink(),
               ],
             ),
-            if ([
-              'admin',
-              'operation_head',
-              'machine_head',
-            ].contains(user.systemRole))
+            if (['admin', 'operation_head', 'machine_head', 'super_admin']
+                .contains(user.role))
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
                 color: AppColors.cobalt,
@@ -359,20 +355,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           textColor: Colors.white,
           onTap: () => context.push('/tools'),
         ),
-        _ActionTile(
-          title: AppStrings.myProjects,
-          subtitle: Text(
-            'Manage builds',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 12,
-              color: AppColors.navy.withValues(alpha: 0.6),
+        if (ref.watch(userProjectsProvider).valueOrNull?.isNotEmpty ?? false)
+          _ActionTile(
+            title: AppStrings.myProjects,
+            subtitle: Text(
+              'Manage builds',
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                color: AppColors.navy.withValues(alpha: 0.6),
+              ),
             ),
+            icon: Icons.rocket_launch_rounded,
+            color: Colors.white,
+            onTap: () => context.push('/projects'),
           ),
-          icon: Icons.rocket_launch_rounded,
-          color: Colors.white,
-          onTap: () => context.go('/explore'),
-        ),
       ],
     );
   }
@@ -548,21 +545,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: project.coverImageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: project.coverImageUrl!,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) =>
-                                  const ShimmerSkeleton(width: 60, height: 60),
-                              errorWidget: (context, url, error) => const Icon(
-                                Icons.broken_image_rounded,
-                                size: 20,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.architecture_rounded,
-                              color: AppColors.textSecondary,
-                            ),
+                      child: const Icon(
+                        Icons.architecture_rounded,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSizes.md),
@@ -594,7 +580,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ),
                           ),
                           child: Text(
-                            project.type.toUpperCase(),
+                            project.visibility.toUpperCase(),
                             style: GoogleFonts.dmSans(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,

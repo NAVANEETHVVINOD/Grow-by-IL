@@ -1,17 +1,46 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/providers/toast_provider.dart';
+
+import '../../features/notifications/domain/notification_providers.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/app_logger.dart';
 import '../../features/lab/domain/lab_providers.dart';
+
+IconData _getIconForType(String type) {
+  switch (type) {
+    case 'tool_booking_approved':
+      return Icons.check_circle_rounded;
+    case 'tool_booking_rejected':
+      return Icons.cancel_rounded;
+    case 'lab_checkin':
+      return Icons.login_rounded;
+    default:
+      return Icons.notifications_rounded;
+  }
+}
+
+Color _getColorForType(String type) {
+  switch (type) {
+    case 'tool_booking_approved':
+      return AppColors.green;
+    case 'tool_booking_rejected':
+      return AppColors.red;
+    case 'lab_checkin':
+      return AppColors.yellow;
+    default:
+      return AppColors.navy;
+  }
+}
 
 /// Persistent shell that wraps the 5 main tabs with a neobrutalist bottom nav.
 class MainShell extends ConsumerStatefulWidget {
@@ -46,6 +75,23 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for new notifications to show Top Toasts
+    ref.listen(notificationStreamProvider, (previous, next) {
+      if (next is AsyncData && next.value!.isNotEmpty) {
+        final newest = next.value!.first;
+        // Only show if it's new (created in the last 10 seconds)
+        if (newest.createdAt
+            .isAfter(DateTime.now().subtract(const Duration(seconds: 10)))) {
+          ref.read(toastProvider.notifier).show(
+                title: newest.title,
+                message: newest.message,
+                icon: _getIconForType(newest.type),
+                color: _getColorForType(newest.type),
+              );
+        }
+      }
+    });
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -90,7 +136,30 @@ class _MainShellState extends ConsumerState<MainShell> {
         }
       },
       child: Scaffold(
-        body: widget.navigationShell,
+        body: Stack(
+          children: [
+            GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == null) return;
+                final currentIndex = widget.navigationShell.currentIndex;
+                if (details.primaryVelocity! < 0) {
+                  // Swipe Left → Go Right
+                  if (currentIndex < 4) {
+                    widget.navigationShell.goBranch(currentIndex + 1);
+                  }
+                } else if (details.primaryVelocity! > 0) {
+                  // Swipe Right → Go Left
+                  if (currentIndex > 0) {
+                    widget.navigationShell.goBranch(currentIndex - 1);
+                  }
+                }
+              },
+              child: widget.navigationShell,
+            ),
+            // Top Toast System
+            _TopToastOverlay(),
+          ],
+        ),
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
             color: AppColors.background,
@@ -190,6 +259,81 @@ class _NavItem extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopToastOverlay extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final toast = ref.watch(toastProvider);
+    if (toast == null) return const SizedBox.shrink();
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.md),
+        child: Dismissible(
+          key: ValueKey(
+              toast.title + DateTime.now().millisecondsSinceEpoch.toString()),
+          direction: DismissDirection.horizontal,
+          onDismissed: (_) => ref.read(toastProvider.notifier).dismiss(),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutBack,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, -50 * (1 - value)),
+                child: Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+              );
+            },
+            child: NeoCard(
+              color: Colors.white,
+              borderColor: toast.color,
+              padding: const EdgeInsets.all(AppSizes.md),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: toast.color.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(toast.icon, color: toast.color, size: 20),
+                  ),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          toast.title,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppColors.navy,
+                          ),
+                        ),
+                        Text(
+                          toast.message,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

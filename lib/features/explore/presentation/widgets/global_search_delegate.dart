@@ -86,7 +86,7 @@ class GlobalSearchDelegate extends SearchDelegate {
             (p) => ListTile(
               leading: const Icon(Icons.rocket_launch),
               title: Text(p.title),
-              subtitle: Text(p.type),
+              subtitle: Text(p.visibility),
               onTap: () {
                 close(context, null);
                 context.push('/projects/${p.id}');

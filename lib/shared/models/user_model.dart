@@ -1,3 +1,5 @@
+import 'package:grow/core/utils/app_logger.dart';
+
 /// Represents a Grow~ user profile (maps to public.users table).
 class UserModel {
   const UserModel({
@@ -6,11 +8,7 @@ class UserModel {
     required this.email,
     this.phone,
     this.collegeRoll,
-    this.username,
     this.role = 'student',
-    this.systemRole = 'user',
-    this.skills = const [],
-    this.interests = const [],
     this.profileCompleted = false,
     this.clubId,
     this.clubTitle,
@@ -32,11 +30,7 @@ class UserModel {
   final String email;
   final String? phone;
   final String? collegeRoll;
-  final String? username;
   final String role;
-  final String systemRole;
-  final List<String> skills;
-  final List<String> interests;
   final bool profileCompleted;
   final String? clubId;
   final String? clubTitle;
@@ -53,23 +47,13 @@ class UserModel {
   final String? avatarUrl;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+    final model = UserModel(
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String,
       phone: json['phone'] as String?,
       collegeRoll: json['college_roll'] as String?,
-      username: json['username'] as String?,
       role: json['role'] as String? ?? 'student',
-      systemRole: json['system_role'] as String? ?? 'user',
-      skills: (json['skills'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      interests: (json['interests'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
       profileCompleted: json['profile_completed'] as bool? ?? false,
       clubId: json['club_id'] as String?,
       clubTitle: json['club_title'] as String?,
@@ -91,6 +75,9 @@ class UserModel {
           : null,
       avatarUrl: json['avatar_url'] as String?,
     );
+    AppLogger.info(LogCategory.auth,
+        'USER_MODEL_PARSED | role=${model.role} | rawRole=${json["role"]}');
+    return model;
   }
 
   Map<String, dynamic> toJson() {
@@ -100,11 +87,7 @@ class UserModel {
       'email': email,
       'phone': phone,
       'college_roll': collegeRoll,
-      'username': username,
       'role': role,
-      'system_role': systemRole,
-      'skills': skills,
-      'interests': interests,
       'profile_completed': profileCompleted,
       'club_id': clubId,
       'club_title': clubTitle,
@@ -124,11 +107,7 @@ class UserModel {
     String? email,
     String? phone,
     String? collegeRoll,
-    String? username,
     String? role,
-    String? systemRole,
-    List<String>? skills,
-    List<String>? interests,
     bool? profileCompleted,
     String? clubId,
     String? clubTitle,
@@ -150,11 +129,7 @@ class UserModel {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       collegeRoll: collegeRoll ?? this.collegeRoll,
-      username: username ?? this.username,
       role: role ?? this.role,
-      systemRole: systemRole ?? this.systemRole,
-      skills: skills ?? this.skills,
-      interests: interests ?? this.interests,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       clubId: clubId ?? this.clubId,
       clubTitle: clubTitle ?? this.clubTitle,

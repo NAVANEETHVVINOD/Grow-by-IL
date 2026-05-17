@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/models/project_model.dart';
@@ -10,8 +9,6 @@ import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:grow/shared/widgets/shimmer_skeleton.dart';
 
 class ProjectDetailsScreen extends ConsumerStatefulWidget {
   const ProjectDetailsScreen({super.key, required this.projectId});
@@ -73,39 +70,25 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
-        background: project.coverImageUrl != null
-            ? CachedNetworkImage(
-                imageUrl: project.coverImageUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    const ShimmerSkeleton(width: double.infinity, height: 200),
-                errorWidget: (context, url, error) => const Center(
-                  child: Icon(
-                    Icons.broken_image_rounded,
-                    color: Colors.white,
-                    size: 48,
-                  ),
-                ),
-              )
-            : Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.navy.withValues(alpha: 0.8),
-                      AppColors.navy,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.architecture_rounded,
-                    size: 64,
-                    color: AppColors.yellow,
-                  ),
-                ),
-              ),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.navy.withValues(alpha: 0.8),
+                AppColors.navy,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.architecture_rounded,
+              size: 64,
+              color: AppColors.yellow,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -116,7 +99,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       children: [
         Row(
           children: [
-            _TypeBadge(type: project.type),
+            _TypeBadge(type: project.visibility),
             const SizedBox(width: AppSizes.sm),
             _StatusBadge(status: project.status),
             const Spacer(),
@@ -184,39 +167,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           loading: () => const LinearProgressIndicator(),
           error: (e, __) => Text('Failed to load members: $e'),
         ),
-        const SizedBox(height: AppSizes.xl),
-        if (project.externalLink != null)
-          _buildExternalLink(project.externalLink!),
         const SizedBox(height: 100),
       ],
-    );
-  }
-
-  Widget _buildExternalLink(String url) {
-    return NeoCard(
-      color: Colors.white,
-      onTap: () async {
-        final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-        }
-      },
-      child: Row(
-        children: [
-          const Icon(Icons.link_rounded, color: AppColors.navy),
-          const SizedBox(width: AppSizes.md),
-          Expanded(
-            child: Text(
-              'View External Resources',
-              style: GoogleFonts.dmSans(
-                fontWeight: FontWeight.bold,
-                color: AppColors.navy,
-              ),
-            ),
-          ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-        ],
-      ),
     );
   }
 
@@ -495,8 +447,11 @@ class _StatusBadge extends StatelessWidget {
   final String status;
   @override
   Widget build(BuildContext context) {
-    final color =
-        status == 'active' ? AppColors.green : AppColors.textSecondary;
+    final color = (status == 'in_progress' ||
+            status == 'showcase' ||
+            status == 'completed')
+        ? AppColors.green
+        : AppColors.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

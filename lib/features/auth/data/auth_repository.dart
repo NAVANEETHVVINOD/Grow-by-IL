@@ -61,7 +61,6 @@ class AuthRepository {
         'phone': phone,
         'college_roll': collegeRoll,
         'role': 'student',
-        'system_role': 'user',
         'profile_completed': false,
         'qr_code_data': 'GROWLAB-USER-$userId',
       });
@@ -207,7 +206,6 @@ class AuthRepository {
               'Maker',
           'email': authUser.email ?? '',
           'role': 'student',
-          'system_role': 'user',
           'profile_completed': false,
           'xp': 0,
           'level': 1,
@@ -220,14 +218,24 @@ class AuthRepository {
             await _client.from('users').select().eq('id', authUser.id).single();
 
         AppLogger.info(LogCategory.auth, 'PROFILE_ROW_CREATED_AND_FETCHED');
-        return UserModel.fromJson(newData);
+        final userModel = UserModel.fromJson(newData);
+        AppLogger.info(
+          LogCategory.auth,
+          'USER_MODEL_ROLE | role=${userModel.role} | raw=${newData['role']}',
+        );
+        return userModel;
       }
 
       AppLogger.info(
         LogCategory.auth,
         'GET_CURRENT_USER_SUCCESS | userId=${authUser.id}',
       );
-      return UserModel.fromJson(data);
+      final userModel = UserModel.fromJson(data);
+      AppLogger.info(
+        LogCategory.auth,
+        'USER_MODEL_ROLE | role=${userModel.role} | raw=${data['role']}',
+      );
+      return userModel;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.auth,

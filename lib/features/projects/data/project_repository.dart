@@ -16,7 +16,7 @@ class ProjectRepository {
           .from('projects')
           .select()
           .eq('visibility', 'public')
-          .eq('status', 'active')
+          .neq('status', 'archived')
           .order('updated_at', ascending: false);
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {
@@ -99,11 +99,11 @@ class ProjectRepository {
           await _client.from('projects').insert(projectData).select().single();
       final project = ProjectModel.fromJson(data);
 
-      // 2. Add creator as Owner
+      // 2. Add creator as Lead
       await _client.from('project_members').insert({
         'project_id': project.id,
         'user_id': project.createdBy,
-        'role': 'owner',
+        'role': 'lead',
       });
 
       AppLogger.info(

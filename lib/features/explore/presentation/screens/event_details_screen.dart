@@ -119,16 +119,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
               ),
             ),
             const SizedBox(width: AppSizes.sm),
-            if (event.organizationName != null)
-              Expanded(
-                child: Text(
-                  'by ${event.organizationName}',
-                  style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 4),
           ],
         ),
         const SizedBox(height: AppSizes.md),

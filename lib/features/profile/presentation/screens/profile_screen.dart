@@ -14,7 +14,6 @@ import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/features/profile/domain/profile_providers.dart';
 
@@ -148,14 +147,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.code_rounded,
                       color: AppColors.navy,
                       textColor: Colors.white,
-                      onTap: () {}, // Link to GitHub
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('GitHub integration coming soon!')),
+                        );
+                      },
                     ),
                     const SizedBox(width: AppSizes.md),
                     _buildLinkTile(
                       label: 'Skills',
                       icon: Icons.psychology_outlined,
                       color: AppColors.yellow,
-                      onTap: () {},
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Skills showcase coming soon!')),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -358,16 +367,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final projectsAsync = ref.watch(userProjectsProvider);
     return projectsAsync.when(
       data: (projects) {
-        if (projects.isEmpty) return const Text('No projects started yet.');
         return SizedBox(
           height: 120,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: projects.length,
+            itemCount: projects.length + 1,
             separatorBuilder: (context, index) =>
                 const SizedBox(width: AppSizes.md),
             itemBuilder: (context, index) {
-              final project = projects[index];
+              if (index == 0) {
+                return _buildAddProjectCard();
+              }
+              final project = projects[index - 1];
               return Container(
                 width: 160,
                 decoration: BoxDecoration(
@@ -379,62 +390,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
                 padding: const EdgeInsets.all(2),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: project.coverImageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: project.coverImageUrl!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    const ShimmerSkeleton(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(Icons.broken_image_rounded),
-                                ),
-                              )
-                            : Container(
-                                color: AppColors.surface,
-                                child: const Icon(
-                                  Icons.architecture_rounded,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            project.title,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            project.type.toUpperCase(),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                child: InkWell(
+                  onTap: () => context.push('/projects/${project.id}'),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            color: AppColors.surface,
+                            child: const Icon(
+                              Icons.architecture_rounded,
                               color: AppColors.textSecondary,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              project.title,
+                              style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              project.visibility.toUpperCase(),
+                              style: GoogleFonts.dmSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -443,6 +444,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       },
       loading: () => const ShimmerSkeleton(width: double.infinity, height: 100),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildAddProjectCard() {
+    return Container(
+      width: 160,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(
+            color: AppColors.navy, width: 2, style: BorderStyle.solid),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: AppColors.navy, offset: Offset(4, 4)),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => context.push('/projects/create'),
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add_circle_outline_rounded,
+                size: 40, color: AppColors.navy),
+            const SizedBox(height: 8),
+            Text(
+              'Launch New',
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppColors.navy,
+              ),
+            ),
+            Text(
+              'Project',
+              style: GoogleFonts.dmSans(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -491,7 +534,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           'icon': Icons.construction_rounded,
           'color': AppColors.orange,
         },
-      if (user.systemRole != 'user')
+      if (user.role != 'student')
         {
           'name': 'Mentor',
           'icon': Icons.school_rounded,

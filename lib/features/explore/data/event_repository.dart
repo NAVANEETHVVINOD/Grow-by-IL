@@ -22,7 +22,7 @@ class EventRepository {
           .filter(
             'status',
             'in',
-            '("published","completed")',
+            '("upcoming","ongoing","completed")',
           )
           .order('event_date', ascending: true);
       return (data as List).map((row) => EventModel.fromJson(row)).toList();

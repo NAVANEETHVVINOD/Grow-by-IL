@@ -2,9 +2,6 @@
 -- ║  Grow~ by IdeaLab — Supabase Database Schema                   ║
 -- ║  All tables, indexes, and RLS policies for the app              ║
 -- ╚══════════════════════════════════════════════════════════════════╝
--- WARNING: This file may be out of date.
--- The live Supabase schema is the source of truth.
--- See docs/database_contract.md for verified column list.
 
 -- 1. users (extends Supabase auth.users)
 CREATE TABLE public.users (

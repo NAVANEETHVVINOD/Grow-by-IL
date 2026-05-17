@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -143,39 +144,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSizes.lg),
-                // Divider with "or" text
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(color: AppColors.textSecondary),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        'or',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
+                if (!kIsWeb) ...[
+                  const SizedBox(height: AppSizes.lg),
+                  // Divider with "or" text
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: AppColors.textSecondary),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'or',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                    const Expanded(
-                      child: Divider(color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.lg),
-                // Google button
-                NeoButton(
-                  label: 'Continue with Google',
-                  color: Colors.white,
-                  textColor: AppColors.navy,
-                  icon: Icons.account_circle_outlined,
-                  isLoading: _isGoogleLoading,
-                  onPressed: _handleGoogleSignIn,
-                ),
-                const SizedBox(height: AppSizes.xl),
+                      const Expanded(
+                        child: Divider(color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+                  // Google button
+                  NeoButton(
+                    label: 'Continue with Google',
+                    color: Colors.white,
+                    textColor: AppColors.navy,
+                    icon: Icons.account_circle_outlined,
+                    isLoading: _isGoogleLoading,
+                    onPressed: _handleGoogleSignIn,
+                  ),
+                  const SizedBox(height: AppSizes.xl),
+                ],
                 Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,

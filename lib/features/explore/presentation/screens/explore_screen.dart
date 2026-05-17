@@ -53,13 +53,23 @@ class ExploreScreen extends ConsumerWidget {
                     'Get mentorship, find teammates, and showcase your builds to the community.',
                 icon: Icons.rocket_launch_rounded,
                 color: AppColors.green,
-                onTap: () {}, // Future projects overview
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Project Support hub coming soon!')),
+                  );
+                },
               ),
               const SizedBox(height: AppSizes.xl),
               _buildSectionHeader('Knowledge Base'),
               const SizedBox(height: AppSizes.md),
               NeoCard(
                 color: Colors.white,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Maker Wiki coming soon!')),
+                  );
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.md),
                   child: Row(
