@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/core/utils/app_logger.dart';
@@ -15,16 +16,7 @@ import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/admin/presentation/widgets/maintenance_update_sheet.dart';
-import 'package:grow/shared/repositories/supabase_client.dart';
-
-final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
-  final data = await supabase
-      .from('tool_bookings')
-      .select('*, tools(name), users!tool_bookings_user_id_fkey(name)')
-      .eq('status', 'pending')
-      .order('created_at', ascending: false);
-  return (data as List).map((row) => BookingModel.fromJson(row)).toList();
-});
+import 'package:grow/features/admin/domain/admin_providers.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
@@ -45,41 +37,69 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+    final userAsync = ref.watch(currentUserProvider);
+    return userAsync.when(
+      data: (user) {
+        if (user == null ||
+            (user.role != 'lab_admin' && user.role != 'super_admin')) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) context.go('/home');
+          });
+          return const Scaffold(
+            backgroundColor: AppColors.background,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+              onPressed: () => context.go('/home'),
+            ),
+            title: Text(
+              'Admin Dashboard',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.navy,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.yellow,
+              indicatorWeight: 4,
+              labelStyle: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              tabs: const [
+                Tab(text: 'OVERVIEW'),
+                Tab(text: 'EQUIPMENT'),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            children: const [
+              _OverviewTab(),
+              _EquipmentTab(),
+            ],
+          ),
+        );
+      },
+      loading: () => const Scaffold(
         backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Text(
-          'Admin Dashboard',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.navy,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.yellow,
-          indicatorWeight: 4,
-          labelStyle: GoogleFonts.spaceGrotesk(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          tabs: const [
-            Tab(text: 'OVERVIEW'),
-            Tab(text: 'EQUIPMENT'),
-          ],
-        ),
+        body: Center(child: CircularProgressIndicator()),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          _OverviewTab(),
-          _EquipmentTab(),
-        ],
+      error: (e, __) => const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: Text('Error loading profile')),
       ),
     );
   }
@@ -549,9 +569,9 @@ class _ToolAdminCard extends ConsumerWidget {
     if (confirm != true) return;
 
     try {
-      await supabase.from('tools').update({
-        'health_status': 'retired',
-      }).eq('id', tool.id);
+      await ref
+          .read(adminRepositoryProvider)
+          .updateToolStatus(tool.id, 'retired');
 
       AppLogger.action(LogCategory.admin, 'TOOL_RETIRED', {'toolId': tool.id});
       ref.invalidate(toolsProvider);
@@ -719,7 +739,7 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
             : _sopController.text.trim(),
       };
 
-      await supabase.from('tools').insert(insertData);
+      await ref.read(adminRepositoryProvider).addTool(insertData);
 
       AppLogger.info(
           LogCategory.admin, 'TOOL_CREATED | name=${insertData['name']}');
@@ -895,7 +915,9 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
             : _sopController.text.trim(),
       };
 
-      await supabase.from('tools').update(updateData).eq('id', widget.tool.id);
+      await ref
+          .read(adminRepositoryProvider)
+          .updateTool(widget.tool.id, updateData);
 
       ref.invalidate(toolsProvider);
       if (mounted) {

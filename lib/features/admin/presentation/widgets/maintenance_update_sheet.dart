@@ -6,7 +6,7 @@ import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/shared/models/tool_model.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
-import 'package:grow/shared/repositories/supabase_client.dart';
+import 'package:grow/features/admin/domain/admin_providers.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 
@@ -123,18 +123,15 @@ class _MaintenanceUpdateSheetState
 
     setState(() => _isLoading = true);
     try {
-      // Update tool health_status directly in tools table
-      final updateData = <String, dynamic>{
-        'health_status': _status,
-      };
-
-      // Set last_maintained timestamp when marking as available after maintenance
-      if (_status == 'available' || _status == 'maintenance') {
-        updateData['last_maintained'] =
-            DateTime.now().toUtc().toIso8601String();
-      }
-
-      await supabase.from('tools').update(updateData).eq('id', widget.tool.id);
+      final lastMaintained =
+          (_status == 'available' || _status == 'maintenance')
+              ? DateTime.now()
+              : null;
+      await ref.read(adminRepositoryProvider).updateToolStatus(
+            widget.tool.id,
+            _status,
+            lastMaintained: lastMaintained,
+          );
 
       AppLogger.action(LogCategory.tools, 'TOOL_STATUS_UPDATED', {
         'toolId': widget.tool.id,
