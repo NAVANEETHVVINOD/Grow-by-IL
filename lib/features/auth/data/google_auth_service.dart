@@ -8,8 +8,7 @@ import '../../../shared/repositories/supabase_client.dart';
 class GoogleAuthService {
   static const _webClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue:
-        '296487965900-aaerodr4oepoe36jtadeqc8hqgljm405.apps.googleusercontent.com',
+    defaultValue: '',
   );
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
