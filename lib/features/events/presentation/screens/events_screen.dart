@@ -95,7 +95,9 @@ class _EventsListTab extends ConsumerWidget {
     return eventsAsync.when(
       data: (events) {
         final filteredEvents = statusFilter == 'upcoming'
-            ? events.where((e) => e.status == 'active').toList()
+            ? events
+                .where((e) => e.status == 'upcoming' || e.status == 'ongoing')
+                .toList()
             : events.where((e) => e.status == 'completed').toList();
 
         if (filteredEvents.isEmpty) {

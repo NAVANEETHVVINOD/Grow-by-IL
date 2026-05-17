@@ -16,7 +16,7 @@ class ProjectRepository {
           .from('projects')
           .select()
           .eq('visibility', 'public')
-          .eq('status', 'active')
+          .neq('status', 'archived')
           .order('updated_at', ascending: false);
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {

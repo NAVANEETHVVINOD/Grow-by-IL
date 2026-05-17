@@ -12,7 +12,7 @@ class EventModel {
     this.rsvpCount = 0,
     this.imageUrl,
     required this.createdBy,
-    this.status = 'published',
+    this.status = 'upcoming',
     this.createdAt,
   });
 
@@ -53,7 +53,7 @@ class EventModel {
       rsvpCount: json['rsvp_count'] as int? ?? 0,
       imageUrl: json['image_url'] as String?,
       createdBy: json['created_by'] as String,
-      status: json['status'] as String? ?? 'published',
+      status: json['status'] as String? ?? 'upcoming',
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : null,

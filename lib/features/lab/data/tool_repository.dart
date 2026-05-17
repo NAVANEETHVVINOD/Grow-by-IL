@@ -145,7 +145,7 @@ class ToolRepository {
     });
 
     // Repository-level role guard
-    final allowedRoles = ['admin', 'operation_head', 'machine_head', 'super_admin'];
+    final allowedRoles = ['lab_admin', 'super_admin'];
     if (!allowedRoles.contains(actor.role)) {
       throw Exception(
         'Unauthorized: Only administrators or operation heads can approve bookings.',
@@ -173,7 +173,7 @@ class ToolRepository {
           'message': 'Your equipment reservation has been approved.',
         });
       } catch (e) {
-        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking approved', error: e);
+        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking approved: $e');
       }
 
       AppLogger.info(
@@ -199,9 +199,9 @@ class ToolRepository {
     });
 
     try {
-      // 1. Update status to cancelled (rejected is not allowed in DB constraint)
+      // 1. Update status to rejected
       await _client.from('tool_bookings').update({
-        'status': 'cancelled',
+        'status': 'rejected',
       }).eq('id', bookingId);
 
       // 2. Create Notification (Safe Catch)
@@ -219,7 +219,7 @@ class ToolRepository {
           'message': 'Your equipment reservation was not approved and has been cancelled.',
         });
       } catch (e) {
-        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking cancelled', error: e);
+        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking cancelled: $e');
       }
 
       AppLogger.info(

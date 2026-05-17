@@ -1,3 +1,5 @@
+import 'package:grow/core/utils/app_logger.dart';
+
 /// Represents a Grow~ user profile (maps to public.users table).
 class UserModel {
   const UserModel({
@@ -45,7 +47,7 @@ class UserModel {
   final String? avatarUrl;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+    final model = UserModel(
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String,
@@ -73,6 +75,8 @@ class UserModel {
           : null,
       avatarUrl: json['avatar_url'] as String?,
     );
+    AppLogger.info(LogCategory.auth, 'USER_MODEL_PARSED | role=${model.role} | rawRole=${json["role"]}');
+    return model;
   }
 
   Map<String, dynamic> toJson() {

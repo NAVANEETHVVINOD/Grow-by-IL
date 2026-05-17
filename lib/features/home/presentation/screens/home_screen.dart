@@ -373,7 +373,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
             icon: Icons.rocket_launch_rounded,
             color: Colors.white,
-            onTap: () => context.push('/projects'), // Go to Projects List
+            onTap: () => context.push('/projects'),
           ),
       ],
     );
