@@ -40,7 +40,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
     final userAsync = ref.watch(currentUserProvider);
     return userAsync.when(
       data: (user) {
-        if (user == null || (user.role != 'lab_admin' && user.role != 'super_admin')) {
+        if (user == null ||
+            (user.role != 'lab_admin' && user.role != 'super_admin')) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) context.go('/home');
           });
@@ -568,7 +569,9 @@ class _ToolAdminCard extends ConsumerWidget {
     if (confirm != true) return;
 
     try {
-      await ref.read(adminRepositoryProvider).updateToolStatus(tool.id, 'retired');
+      await ref
+          .read(adminRepositoryProvider)
+          .updateToolStatus(tool.id, 'retired');
 
       AppLogger.action(LogCategory.admin, 'TOOL_RETIRED', {'toolId': tool.id});
       ref.invalidate(toolsProvider);
@@ -912,7 +915,9 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
             : _sopController.text.trim(),
       };
 
-      await ref.read(adminRepositoryProvider).updateTool(widget.tool.id, updateData);
+      await ref
+          .read(adminRepositoryProvider)
+          .updateTool(widget.tool.id, updateData);
 
       ref.invalidate(toolsProvider);
       if (mounted) {

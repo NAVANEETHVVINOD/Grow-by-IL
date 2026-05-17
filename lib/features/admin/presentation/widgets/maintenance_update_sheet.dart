@@ -123,14 +123,15 @@ class _MaintenanceUpdateSheetState
 
     setState(() => _isLoading = true);
     try {
-      final lastMaintained = (_status == 'available' || _status == 'maintenance')
-          ? DateTime.now()
-          : null;
+      final lastMaintained =
+          (_status == 'available' || _status == 'maintenance')
+              ? DateTime.now()
+              : null;
       await ref.read(adminRepositoryProvider).updateToolStatus(
-        widget.tool.id,
-        _status,
-        lastMaintained: lastMaintained,
-      );
+            widget.tool.id,
+            _status,
+            lastMaintained: lastMaintained,
+          );
 
       AppLogger.action(LogCategory.tools, 'TOOL_STATUS_UPDATED', {
         'toolId': widget.tool.id,
