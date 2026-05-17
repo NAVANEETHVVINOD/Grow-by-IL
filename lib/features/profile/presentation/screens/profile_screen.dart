@@ -14,7 +14,6 @@ import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/features/profile/domain/profile_providers.dart';
 

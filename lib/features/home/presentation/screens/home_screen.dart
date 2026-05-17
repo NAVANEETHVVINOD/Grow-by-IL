@@ -14,7 +14,6 @@ import 'package:grow/features/explore/domain/event_providers.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

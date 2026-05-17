@@ -10,7 +10,6 @@ import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/shared/providers/toast_provider.dart';
-import 'package:grow/core/utils/app_logger.dart';
 
 class BookingBottomSheet extends ConsumerStatefulWidget {
   const BookingBottomSheet({super.key, required this.tool});
@@ -403,6 +402,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
         icon: Icons.check_circle_rounded,
       );
 
+      if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;

@@ -786,7 +786,7 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
               ),
               const SizedBox(height: AppSizes.md),
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),
@@ -907,7 +907,7 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
         );
         Navigator.pop(context);
       }
-    } catch (e, st) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -958,7 +958,7 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
               ),
               const SizedBox(height: AppSizes.md),
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),

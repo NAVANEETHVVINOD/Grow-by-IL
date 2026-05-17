@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/models/project_model.dart';
@@ -10,8 +9,6 @@ import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:grow/shared/widgets/shimmer_skeleton.dart';
 
 class ProjectDetailsScreen extends ConsumerStatefulWidget {
   const ProjectDetailsScreen({super.key, required this.projectId});

@@ -112,7 +112,7 @@ class ProjectListScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSizes.lg),
           itemCount: 3,
           itemBuilder: (context, index) => const Padding(
-            padding: const EdgeInsets.only(bottom: AppSizes.md),
+            padding: EdgeInsets.only(bottom: AppSizes.md),
             child: ShimmerSkeleton(width: double.infinity, height: 80),
           ),
         ),
