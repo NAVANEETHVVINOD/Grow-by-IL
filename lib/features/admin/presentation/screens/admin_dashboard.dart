@@ -721,8 +721,8 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
 
       await supabase.from('tools').insert(insertData);
 
-      AppLogger.info(LogCategory.admin,
-          'TOOL_CREATED | name=${insertData['name']}');
+      AppLogger.info(
+          LogCategory.admin, 'TOOL_CREATED | name=${insertData['name']}');
 
       ref.invalidate(toolsProvider);
       if (mounted) {
@@ -820,7 +820,6 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
                 controller: _sopController,
                 keyboardType: TextInputType.url,
               ),
-
               const SizedBox(height: AppSizes.xl),
               NeoButton(
                 label: 'Save Tool',

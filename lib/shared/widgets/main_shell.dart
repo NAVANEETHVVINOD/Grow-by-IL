@@ -80,13 +80,14 @@ class _MainShellState extends ConsumerState<MainShell> {
       if (next is AsyncData && next.value!.isNotEmpty) {
         final newest = next.value!.first;
         // Only show if it's new (created in the last 10 seconds)
-        if (newest.createdAt.isAfter(DateTime.now().subtract(const Duration(seconds: 10)))) {
+        if (newest.createdAt
+            .isAfter(DateTime.now().subtract(const Duration(seconds: 10)))) {
           ref.read(toastProvider.notifier).show(
-            title: newest.title,
-            message: newest.message,
-            icon: _getIconForType(newest.type),
-            color: _getColorForType(newest.type),
-          );
+                title: newest.title,
+                message: newest.message,
+                icon: _getIconForType(newest.type),
+                color: _getColorForType(newest.type),
+              );
         }
       }
     });
@@ -274,7 +275,8 @@ class _TopToastOverlay extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.md),
         child: Dismissible(
-          key: ValueKey(toast.title + DateTime.now().millisecondsSinceEpoch.toString()),
+          key: ValueKey(
+              toast.title + DateTime.now().millisecondsSinceEpoch.toString()),
           direction: DismissDirection.horizontal,
           onDismissed: (_) => ref.read(toastProvider.notifier).dismiss(),
           child: TweenAnimationBuilder<double>(

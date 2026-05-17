@@ -22,9 +22,12 @@ final unreadNotificationCountProvider = Provider.autoDispose<int>((ref) {
   return notifications.where((n) => !n.isRead).length;
 });
 
-final notificationStreamProvider = StreamProvider.autoDispose<List<NotificationModel>>((ref) {
+final notificationStreamProvider =
+    StreamProvider.autoDispose<List<NotificationModel>>((ref) {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return Stream.value([]);
-  
-  return ref.watch(notificationRepositoryProvider).subscribeToNotifications(user.id);
+
+  return ref
+      .watch(notificationRepositoryProvider)
+      .subscribeToNotifications(user.id);
 });

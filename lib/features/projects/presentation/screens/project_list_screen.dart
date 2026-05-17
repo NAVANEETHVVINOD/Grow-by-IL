@@ -40,7 +40,8 @@ class ProjectListScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.rocket_launch_outlined, size: 64, color: AppColors.textSecondary),
+                  const Icon(Icons.rocket_launch_outlined,
+                      size: 64, color: AppColors.textSecondary),
                   const SizedBox(height: AppSizes.md),
                   const Text('No projects found.'),
                   const SizedBox(height: AppSizes.md),
@@ -75,7 +76,8 @@ class ProjectListScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: AppColors.navy, width: 2),
                           ),
-                          child: const Icon(Icons.architecture_rounded, color: AppColors.navy),
+                          child: const Icon(Icons.architecture_rounded,
+                              color: AppColors.navy),
                         ),
                         const SizedBox(width: AppSizes.md),
                         Expanded(
@@ -99,7 +101,8 @@ class ProjectListScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right_rounded, color: AppColors.navy),
+                        const Icon(Icons.chevron_right_rounded,
+                            color: AppColors.navy),
                       ],
                     ),
                   ),

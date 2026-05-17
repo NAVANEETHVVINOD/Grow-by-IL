@@ -75,7 +75,8 @@ class UserModel {
           : null,
       avatarUrl: json['avatar_url'] as String?,
     );
-    AppLogger.info(LogCategory.auth, 'USER_MODEL_PARSED | role=${model.role} | rawRole=${json["role"]}');
+    AppLogger.info(LogCategory.auth,
+        'USER_MODEL_PARSED | role=${model.role} | rawRole=${json["role"]}');
     return model;
   }
 

@@ -396,24 +396,24 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
 
       // Senior Dev Touch: Global Top Toast
       ref.read(toastProvider.notifier).show(
-        title: 'Booking Successful! 🌱',
-        message: 'Your tool reservation has been sent for approval.',
-        color: AppColors.green,
-        icon: Icons.check_circle_rounded,
-      );
+            title: 'Booking Successful! 🌱',
+            message: 'Your tool reservation has been sent for approval.',
+            color: AppColors.green,
+            icon: Icons.check_circle_rounded,
+          );
 
       if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      
+
       ref.read(toastProvider.notifier).show(
-        title: 'Booking Failed',
-        message: 'Something went wrong. Please try again.',
-        color: AppColors.red,
-        icon: Icons.error_outline_rounded,
-      );
+            title: 'Booking Failed',
+            message: 'Something went wrong. Please try again.',
+            color: AppColors.red,
+            icon: Icons.error_outline_rounded,
+          );
     }
   }
 }

@@ -110,7 +110,8 @@ class ToolRepository {
         await _client.from('notifications').insert({
           'user_id': userId,
           'type': 'tool_booking',
-          'title': status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
+          'title':
+              status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
           'message': 'Your booking for ${tool.name} is $status.',
           'related_id': data['id'],
         });
@@ -168,12 +169,14 @@ class ToolRepository {
             .single();
         await _client.from('notifications').insert({
           'user_id': bookingData['user_id'],
-          'type': 'system', // Must be one of: alert, reminder, invite, milestone, system
+          'type':
+              'system', // Must be one of: alert, reminder, invite, milestone, system
           'title': 'Booking Approved!',
           'message': 'Your equipment reservation has been approved.',
         });
       } catch (e) {
-        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking approved: $e');
+        AppLogger.warn(LogCategory.notifications,
+            'Notification insert failed but booking approved: $e');
       }
 
       AppLogger.info(
@@ -216,10 +219,12 @@ class ToolRepository {
           'user_id': bookingData['user_id'],
           'type': 'system',
           'title': 'Booking Cancelled',
-          'message': 'Your equipment reservation was not approved and has been cancelled.',
+          'message':
+              'Your equipment reservation was not approved and has been cancelled.',
         });
       } catch (e) {
-        AppLogger.warn(LogCategory.notifications, 'Notification insert failed but booking cancelled: $e');
+        AppLogger.warn(LogCategory.notifications,
+            'Notification insert failed but booking cancelled: $e');
       }
 
       AppLogger.info(

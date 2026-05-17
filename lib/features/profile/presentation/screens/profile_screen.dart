@@ -149,7 +149,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       textColor: Colors.white,
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('GitHub integration coming soon!')),
+                          const SnackBar(
+                              content: Text('GitHub integration coming soon!')),
                         );
                       },
                     ),
@@ -160,7 +161,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: AppColors.yellow,
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Skills showcase coming soon!')),
+                          const SnackBar(
+                              content: Text('Skills showcase coming soon!')),
                         );
                       },
                     ),
@@ -450,7 +452,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       width: 160,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.navy, width: 2, style: BorderStyle.solid),
+        border: Border.all(
+            color: AppColors.navy, width: 2, style: BorderStyle.solid),
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(color: AppColors.navy, offset: Offset(4, 4)),
@@ -462,7 +465,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add_circle_outline_rounded, size: 40, color: AppColors.navy),
+            const Icon(Icons.add_circle_outline_rounded,
+                size: 40, color: AppColors.navy),
             const SizedBox(height: 8),
             Text(
               'Launch New',

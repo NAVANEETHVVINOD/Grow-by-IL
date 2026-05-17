@@ -55,7 +55,8 @@ class ExploreScreen extends ConsumerWidget {
                 color: AppColors.green,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Project Support hub coming soon!')),
+                    const SnackBar(
+                        content: Text('Project Support hub coming soon!')),
                   );
                 },
               ),

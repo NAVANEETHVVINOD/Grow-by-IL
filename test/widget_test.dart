@@ -14,7 +14,7 @@ void main() {
         'xp': 100,
         'level': 2,
       };
-      
+
       final user = UserModel.fromJson(json);
       expect(user.id, 'd61b34b1-8408-410a-bf4c-c081977e2311');
       expect(user.name, 'Test User');
@@ -29,11 +29,12 @@ void main() {
         'title': 'Test Project',
         'created_by': 'creator-uuid',
       };
-      
+
       final project = ProjectModel.fromJson(json);
       expect(project.id, 'project-id-123');
       expect(project.title, 'Test Project');
-      expect(project.status, 'ideation'); // Default should be ideation per RC2 rules
+      expect(project.status,
+          'ideation'); // Default should be ideation per RC2 rules
     });
   });
 }

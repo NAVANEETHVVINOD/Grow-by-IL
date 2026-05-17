@@ -30,7 +30,7 @@ class ToastNotifier extends StateNotifier<ToastMessage?> {
       color: color,
       icon: icon,
     );
-    
+
     // Auto-dismiss after 4 seconds
     Future.delayed(const Duration(seconds: 4), () {
       if (state?.title == title) {
@@ -44,6 +44,7 @@ class ToastNotifier extends StateNotifier<ToastMessage?> {
   }
 }
 
-final toastProvider = StateNotifierProvider<ToastNotifier, ToastMessage?>((ref) {
+final toastProvider =
+    StateNotifierProvider<ToastNotifier, ToastMessage?>((ref) {
   return ToastNotifier();
 });

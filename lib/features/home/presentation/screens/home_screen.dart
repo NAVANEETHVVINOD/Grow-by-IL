@@ -289,12 +289,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     : const SizedBox.shrink(),
               ],
             ),
-            if ([
-              'admin',
-              'operation_head',
-              'machine_head',
-              'super_admin'
-            ].contains(user.role))
+            if (['admin', 'operation_head', 'machine_head', 'super_admin']
+                .contains(user.role))
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
                 color: AppColors.cobalt,
