@@ -57,8 +57,8 @@ jobs:
       - name: Build APK (Release)
         run: |
           flutter build apk --release --verbose \
-          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL || 'https://placeholder.supabase.co' }}" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY || 'placeholder_anon_key' }}"
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
