@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
+import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/core/utils/supabase_error_handler.dart';
@@ -40,8 +41,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
     final userAsync = ref.watch(currentUserProvider);
     return userAsync.when(
       data: (user) {
-        if (user == null ||
-            (user.role != 'lab_admin' && user.role != 'super_admin')) {
+        if (user == null || !AppRole.isAdminRole(user.role)) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) context.go('/home');
           });

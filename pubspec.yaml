@@ -25,6 +25,7 @@ dependencies:
 
   # Firebase — updated to latest stable (v4/v16 series)
   firebase_core: ^4.7.0
+  firebase_auth: ^6.0.2
   firebase_messaging: ^16.2.0
 
   # QR — updated to 6.x for Android 35 / Gradle 8 compat

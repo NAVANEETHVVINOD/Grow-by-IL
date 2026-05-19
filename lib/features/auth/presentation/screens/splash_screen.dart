@@ -29,6 +29,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
 
     final session = supabase.auth.currentSession;
+    AppLogger.info(
+      LogCategory.auth,
+      'SPLASH_SESSION_CHECK | sessionExists=${session != null} | userId=${session?.user.id} | email=${session?.user.email}',
+    );
+
     if (session != null) {
       try {
         // Calling getCurrentUser() triggers the ensureUserProfileExists() sync

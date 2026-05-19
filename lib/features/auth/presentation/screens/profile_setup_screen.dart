@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_roles.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/supabase_error_handler.dart';
 import '../../../../shared/repositories/supabase_client.dart';
@@ -20,7 +22,7 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _selectedBaseRole = 'student';
+  AppRole _selectedBaseRole = AppRole.student;
 
   bool _isLoading = false;
 
@@ -41,7 +43,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       if (user == null) throw Exception('No authenticated user found');
 
       await supabase.from('users').update({
-        'role': _selectedBaseRole,
+        'role': _selectedBaseRole.value,
         'profile_completed': true,
       }).eq('id', user.id);
 
@@ -92,7 +94,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Complete Your Profile',
+                    AppStrings.completeYourProfile,
                     style: TextStyle(
                       fontFamily: 'Space Grotesk',
                       fontSize: 32,
@@ -103,7 +105,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   ),
                   const SizedBox(height: AppSizes.sm),
                   const Text(
-                    'Just a few more details to get you started.',
+                    AppStrings.profileSetupSubtitle,
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 16,
@@ -143,7 +145,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         ),
                         const SizedBox(height: AppSizes.lg),
                         const Text(
-                          'Select your role:',
+                          AppStrings.selectYourRole,
                           style: TextStyle(
                             fontFamily: 'Space Grotesk',
                             fontSize: 16,
@@ -152,7 +154,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           ),
                         ),
                         const SizedBox(height: AppSizes.sm),
-                        DropdownButtonFormField<String>(
+                        DropdownButtonFormField<AppRole>(
                           initialValue: _selectedBaseRole,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
@@ -165,22 +167,16 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             filled: true,
                             fillColor: AppColors.surface,
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'student',
-                              child: Text(
-                                'Student',
-                                style: TextStyle(fontFamily: 'DM Sans'),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'faculty',
-                              child: Text(
-                                'Faculty',
-                                style: TextStyle(fontFamily: 'DM Sans'),
-                              ),
-                            ),
-                          ],
+                          items: AppRole.selfAssignableRoles
+                              .map((role) => DropdownMenuItem(
+                                    value: role,
+                                    child: Text(
+                                      role.displayName,
+                                      style: const TextStyle(
+                                          fontFamily: 'DM Sans'),
+                                    ),
+                                  ))
+                              .toList(),
                           onChanged: (value) {
                             if (value != null) {
                               setState(() {
@@ -192,7 +188,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         const SizedBox(height: AppSizes.xl),
                         NeoButton(
                           onPressed: _isLoading ? () {} : _completeProfile,
-                          label: _isLoading ? 'Saving...' : 'Complete Setup',
+                          label: _isLoading
+                              ? AppStrings.saving
+                              : AppStrings.completeSetup,
                         ),
                       ],
                     ),

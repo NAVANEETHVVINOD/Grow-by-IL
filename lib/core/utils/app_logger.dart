@@ -19,12 +19,20 @@ class AppLogger {
   AppLogger._();
   static const _tag = 'Grow~';
 
-  static void printStartupBanner() {
+  /// Prints the startup banner with dynamic version info.
+  ///
+  /// [version] and [buildNumber] should come from package_info_plus
+  /// or pubspec.yaml at runtime. Defaults shown for graceful fallback.
+  static void printStartupBanner({
+    String version = '1.0.0',
+    String buildNumber = '1',
+    String buildStage = 'RC3',
+  }) {
     debugPrint('\n${'=' * 50}');
-    debugPrint('   🌱 GROW~ RELEASE CANDIDATE (RC1)');
-    debugPrint('   Build: 2024.12.RC1 | Version: 1.0.0');
+    debugPrint('   🌱 $_tag RELEASE CANDIDATE ($buildStage)');
+    debugPrint('   Build: $buildNumber | Version: $version');
     debugPrint('   Status: PRODUCTION_HARDENED');
-    debugPrint('=' * 50 + '\n');
+    debugPrint('${'=' * 50}\n');
   }
 
   static void info(

@@ -54,6 +54,49 @@ jobs:
       
       - run: flutter pub get
 
+      - name: Create Dummy google-services.json for CI Build
+        run: |
+          mkdir -p android/app
+          echo '{
+            "project_info": {
+              "project_number": "353624899972",
+              "project_id": "grow-2538a",
+              "storage_bucket": "grow-2538a.firebasestorage.app"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:353624899972:android:99ad0ce03ea73efa59ddd1",
+                  "android_client_info": {
+                    "package_name": "com.idealab.mec.grow"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "353624899972-lagg46hbotpkjocdc4psnc53c3tiir19.apps.googleusercontent.com",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyDummyApiKeyPlaceholderForCIBuildOnly"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": [
+                      {
+                        "client_id": "353624899972-lagg46hbotpkjocdc4psnc53c3tiir19.apps.googleusercontent.com",
+                        "client_type": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > android/app/google-services.json
+
       - name: Build APK (Release)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

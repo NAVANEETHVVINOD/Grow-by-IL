@@ -1,4 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/constants/app_roles.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/tool_model.dart';
@@ -146,11 +148,8 @@ class ToolRepository {
     });
 
     // Repository-level role guard
-    final allowedRoles = ['lab_admin', 'super_admin'];
-    if (!allowedRoles.contains(actor.role)) {
-      throw Exception(
-        'Unauthorized: Only administrators or operation heads can approve bookings.',
-      );
+    if (!AppRole.isAdminRole(actor.role)) {
+      throw Exception(AppStrings.unauthorizedAdmin);
     }
 
     try {

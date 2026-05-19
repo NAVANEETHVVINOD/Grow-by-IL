@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/constants/app_strings.dart';
 import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/project_member_model.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
@@ -406,7 +407,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Ownership Transfer'),
         content: const Text(
-          'Please select a team member to transfer ownership to. (Coming soon)',
+          AppStrings.transferOwnershipComingSoon,
         ),
         actions: [
           TextButton(

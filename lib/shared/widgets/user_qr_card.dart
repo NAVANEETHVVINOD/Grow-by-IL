@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_qr.dart';
 import '../../core/constants/app_sizes.dart';
+import '../../core/constants/app_strings.dart';
 import '../models/user_model.dart';
 import 'neo_card.dart';
 
@@ -15,7 +17,7 @@ class UserQrCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qrData = user.qrCodeData ?? 'GROWLAB-USER-${user.id}';
+    final qrData = user.qrCodeData ?? AppQr.generateUserQr(user.id);
 
     return NeoCard(
       padding: const EdgeInsets.all(AppSizes.lg),
@@ -82,7 +84,7 @@ void showUserQrCard(BuildContext context, UserModel user) {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'My QR Card',
+              AppStrings.myQr,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
