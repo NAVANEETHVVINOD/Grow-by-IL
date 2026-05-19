@@ -12,28 +12,39 @@ import 'core/utils/app_logger.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    AppLogger.info(
+  // ── Firebase initialization ──────────────────────────────
+  if (DefaultFirebaseOptions.isConfigured) {
+    try {
+      AppLogger.info(
+        LogCategory.system,
+        'FIREBASE_INITIALIZATION_START | '
+        'projectId=${DefaultFirebaseOptions.android.projectId} '
+        'appId=${DefaultFirebaseOptions.android.appId}',
+      );
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      AppLogger.success(LogCategory.system, 'FIREBASE_INITIALIZATION_SUCCESS');
+    } catch (e, st) {
+      AppLogger.error(
+        LogCategory.system,
+        'FIREBASE_INITIALIZATION_FAILED',
+        error: e,
+        stack: st,
+      );
+    }
+  } else {
+    AppLogger.warn(
       LogCategory.system,
-      'FIREBASE_INITIALIZATION_START | '
-      'projectId=${DefaultFirebaseOptions.android.projectId} '
-      'appId=${DefaultFirebaseOptions.android.appId}',
-    );
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    AppLogger.success(LogCategory.system, 'FIREBASE_INITIALIZATION_SUCCESS');
-  } catch (e, st) {
-    AppLogger.error(
-      LogCategory.system,
-      'FIREBASE_INITIALIZATION_FAILED',
-      error: e,
-      stack: st,
+      'FIREBASE_NOT_CONFIGURED | Firebase keys missing from --dart-define. '
+      'Google Sign-In will not work. '
+      'Pass: --dart-define=FIREBASE_API_KEY=... --dart-define=FIREBASE_APP_ID=... etc.',
     );
   }
 
   AppLogger.printStartupBanner();
 
+  // ── Supabase initialization ──────────────────────────────
   if (!SupabaseKeys.isConfigured) {
     debugPrint('\n[CONFIG ERROR] Supabase keys are missing!');
     debugPrint(

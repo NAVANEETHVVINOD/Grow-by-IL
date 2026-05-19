@@ -1,10 +1,13 @@
-// File generated manually to match google-services.json.
+// Firebase configuration — all secrets loaded from --dart-define at build time.
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// All sensitive values are injected via `--dart-define` flags at build time.
+/// No API keys, App IDs, or project identifiers are hardcoded in source.
 ///
 /// Example:
 /// ```dart
@@ -15,6 +18,35 @@ import 'package:flutter/foundation.dart'
 /// );
 /// ```
 class DefaultFirebaseOptions {
+  // Build-time injected values (via --dart-define)
+  static const _firebaseApiKey = String.fromEnvironment(
+    'FIREBASE_API_KEY',
+    defaultValue: '',
+  );
+  static const _firebaseAppId = String.fromEnvironment(
+    'FIREBASE_APP_ID',
+    defaultValue: '',
+  );
+  static const _firebaseMessagingSenderId = String.fromEnvironment(
+    'FIREBASE_MESSAGING_SENDER_ID',
+    defaultValue: '',
+  );
+  static const _firebaseProjectId = String.fromEnvironment(
+    'FIREBASE_PROJECT_ID',
+    defaultValue: '',
+  );
+  static const _firebaseStorageBucket = String.fromEnvironment(
+    'FIREBASE_STORAGE_BUCKET',
+    defaultValue: '',
+  );
+
+  /// Returns true if all required Firebase configuration values are present.
+  static bool get isConfigured =>
+      _firebaseApiKey.isNotEmpty &&
+      _firebaseAppId.isNotEmpty &&
+      _firebaseMessagingSenderId.isNotEmpty &&
+      _firebaseProjectId.isNotEmpty;
+
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
@@ -52,11 +84,11 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyApUWMfTjJtw29uPAwtMbRH4RbCTwJw6Tg',
-    appId: '1:353624899972:android:99ad0ce03ea73efa59ddd1',
-    messagingSenderId: '353624899972',
-    projectId: 'grow-2538a',
-    storageBucket: 'grow-2538a.firebasestorage.app',
-  );
+  static FirebaseOptions get android => FirebaseOptions(
+        apiKey: _firebaseApiKey,
+        appId: _firebaseAppId,
+        messagingSenderId: _firebaseMessagingSenderId,
+        projectId: _firebaseProjectId,
+        storageBucket: _firebaseStorageBucket,
+      );
 }
