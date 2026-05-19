@@ -1,3 +1,4 @@
+import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/core/utils/app_logger.dart';
 
 /// Represents a Grow~ user profile (maps to public.users table).
@@ -8,7 +9,7 @@ class UserModel {
     required this.email,
     this.phone,
     this.collegeRoll,
-    this.role = 'student',
+    this.role = 'student', // matches AppRole.student.value
     this.profileCompleted = false,
     this.clubId,
     this.clubTitle,
@@ -53,7 +54,7 @@ class UserModel {
       email: json['email'] as String,
       phone: json['phone'] as String?,
       collegeRoll: json['college_roll'] as String?,
-      role: json['role'] as String? ?? 'student',
+      role: json['role'] as String? ?? AppRole.student.value,
       profileCompleted: json['profile_completed'] as bool? ?? false,
       clubId: json['club_id'] as String?,
       clubTitle: json['club_title'] as String?,

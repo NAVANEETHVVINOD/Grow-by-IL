@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/features/notifications/domain/notification_providers.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -76,14 +77,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   const SizedBox(height: AppSizes.lg),
                   _buildActionGrid(context, ref),
                   const SizedBox(height: AppSizes.xxl),
-                  _buildSectionHeader('Your Schedule'),
+                  _buildSectionHeader(AppStrings.yourSchedule),
                   const SizedBox(height: AppSizes.md),
                   _buildUpcomingSchedule(ref),
                   const SizedBox(height: AppSizes.xxl),
                   _buildSectionHeader(
-                    'Active Projects',
+                    AppStrings.activeProjects,
                     onAction: () => context.go('/profile'),
-                    actionLabel: 'VIEW ALL',
+                    actionLabel: AppStrings.viewAll,
                   ),
                   const SizedBox(height: AppSizes.md),
                   _buildActiveProjects(ref),
@@ -122,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Live in Lab',
+                              AppStrings.liveInLab,
                               style: GoogleFonts.spaceGrotesk(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.green,
@@ -174,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Active Booking',
+                            AppStrings.activeBooking,
                             style: GoogleFonts.spaceGrotesk(
                               fontWeight: FontWeight.bold,
                               color: AppColors.cobalt,
@@ -292,8 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     : const SizedBox.shrink(),
               ],
             ),
-            if (['admin', 'operation_head', 'machine_head', 'super_admin']
-                .contains(user.role))
+            if (AppRole.isAdminRole(user.role))
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
                 color: AppColors.cobalt,
@@ -320,7 +320,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         children: [
           const Icon(Icons.error_outline, color: AppColors.red, size: 28),
           const SizedBox(width: AppSizes.sm),
-          const Text('Error loading profile'),
+          const Text(AppStrings.errorLoadingProfile),
         ],
       ),
     );
@@ -345,7 +345,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _ActionTile(
           title: AppStrings.bookTool,
           subtitle: const Text(
-            'Reserve equipment',
+            AppStrings.reserveEquipment,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontSize: 12,
@@ -362,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           _ActionTile(
             title: AppStrings.myProjects,
             subtitle: Text(
-              'Manage builds',
+              AppStrings.manageBuilds,
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 12,
@@ -422,7 +422,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           TextButton(
             onPressed: onAction,
             child: Text(
-              actionLabel ?? 'VIEW ALL',
+              actionLabel ?? AppStrings.viewAll,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -476,7 +476,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               children: futureBookings
                   .map(
                     (b) => _ScheduleItem(
-                      title: 'Equipment Booking',
+                      title: AppStrings.equipmentBooking,
                       time: b.slotStart.toLocal().toString().substring(5, 16),
                       icon: Icons.precision_manufacturing_rounded,
                       color: AppColors.cobalt,
@@ -624,7 +624,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               const SizedBox(width: AppSizes.sm),
               const Expanded(
                 child: Text(
-                  'Something went wrong',
+                  AppStrings.somethingWentWrong,
                   style: TextStyle(color: AppColors.red),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import '../../../core/constants/app_defaults.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../shared/repositories/supabase_client.dart';
 
@@ -121,17 +122,13 @@ class GoogleAuthService {
             LogCategory.auth,
             'GOOGLE_NEW_USER_DETECTED | creating profile row',
           );
-          await supabase.from('users').insert({
-            'id': response.user!.id,
-            'name': googleUser.displayName ?? 'Maker',
-            'email': googleUser.email,
-            'role': 'student', // Match existing DB column 'role'
-            'profile_completed': false,
-            'xp': 0,
-            'level': 1,
-            'reputation_score': 100,
-            'qr_code_data': 'GROWLAB-USER-${response.user!.id}',
-          });
+          await supabase.from('users').insert(
+                AppDefaults.buildNewUserRow(
+                  userId: response.user!.id,
+                  name: googleUser.displayName ?? '',
+                  email: googleUser.email,
+                ),
+              );
         }
       }
 

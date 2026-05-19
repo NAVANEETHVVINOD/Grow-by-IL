@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/constants/app_strings.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 
 class ExploreScreen extends ConsumerWidget {
@@ -20,7 +21,7 @@ class ExploreScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Explore',
+                AppStrings.explore,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -28,46 +29,44 @@ class ExploreScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.xl),
-              _buildSectionHeader('Our Services'),
+              _buildSectionHeader(AppStrings.ourServices),
               const SizedBox(height: AppSizes.md),
               _buildServiceCard(
-                title: 'Innovation Lab',
-                desc:
-                    'Access state-of-the-art tools and a collaborative workspace to build your dreams.',
+                title: AppStrings.innovationLab,
+                desc: AppStrings.innovationLabDesc,
                 icon: Icons.science_rounded,
                 color: AppColors.yellow,
                 onTap: () => context.go('/lab'),
               ),
               _buildServiceCard(
-                title: 'Tool Catalog',
-                desc:
-                    'Browse and book precision equipment from 3D printers to laser cutters.',
+                title: AppStrings.toolCatalog,
+                desc: AppStrings.toolCatalogDesc,
                 icon: Icons.build_rounded,
                 color: AppColors.cobalt,
                 iconColor: Colors.white,
                 onTap: () => context.push('/tools'),
               ),
               _buildServiceCard(
-                title: 'Project Support',
-                desc:
-                    'Get mentorship, find teammates, and showcase your builds to the community.',
+                title: AppStrings.projectSupport,
+                desc: AppStrings.projectSupportDesc,
                 icon: Icons.rocket_launch_rounded,
                 color: AppColors.green,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('Project Support hub coming soon!')),
+                        content: Text(AppStrings.projectSupportComingSoon)),
                   );
                 },
               ),
               const SizedBox(height: AppSizes.xl),
-              _buildSectionHeader('Knowledge Base'),
+              _buildSectionHeader(AppStrings.knowledgeBase),
               const SizedBox(height: AppSizes.md),
               NeoCard(
                 color: Colors.white,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Maker Wiki coming soon!')),
+                    const SnackBar(
+                        content: Text(AppStrings.makerWikiComingSoon)),
                   );
                 },
                 child: Padding(
@@ -84,14 +83,14 @@ class ExploreScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Maker Wiki',
+                              AppStrings.makerWiki,
                               style: GoogleFonts.spaceGrotesk(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                               ),
                             ),
                             Text(
-                              'SOPs, tutorials, and guides coming soon.',
+                              AppStrings.makerWikiSubtitle,
                               style: GoogleFonts.dmSans(
                                 fontSize: 14,
                                 color: AppColors.textSecondary,
@@ -105,10 +104,10 @@ class ExploreScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.xxl),
-              _buildSectionHeader('About IdeaLab'),
+              _buildSectionHeader(AppStrings.aboutIdeaLab),
               const SizedBox(height: AppSizes.md),
               Text(
-                'IdeaLab is the heart of innovation at our campus. We provide the tools, the space, and the community for students to transition from consumers to creators.',
+                AppStrings.ideaLabAbout,
                 style: GoogleFonts.dmSans(
                   fontSize: 15,
                   color: AppColors.textSecondary,
@@ -117,7 +116,7 @@ class ExploreScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSizes.md),
               Text(
-                'Grow~ by IdeaLab',
+                AppStrings.appTagline,
                 style: GoogleFonts.spaceGrotesk(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

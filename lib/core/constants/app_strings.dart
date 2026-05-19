@@ -61,4 +61,76 @@ class AppStrings {
   static const myQr = 'My QR';
   static const addSkills = 'Add skills and interests';
   static const profileEditingSoon = 'Profile editing coming soon';
+
+  // Home screen
+  static const liveInLab = 'Live in Lab';
+  static const activeBooking = 'Active Booking';
+  static const yourSchedule = 'Your Schedule';
+  static const activeProjects = 'Active Projects';
+  static const viewAll = 'VIEW ALL';
+  static const reserveEquipment = 'Reserve equipment';
+  static const manageBuilds = 'Manage builds';
+  static const equipmentBooking = 'Equipment Booking';
+  static const errorLoadingProfile = 'Error loading profile';
+  static const somethingWentWrong = 'Something went wrong';
+
+  // QR Scanner
+  static const scanQrCode = 'Scan QR Code';
+  static const qrSimulatorWeb = 'QR Simulator (Web)';
+  static const simulationMode = 'Simulation Mode';
+  static const simulationPrompt = 'Choose a QR to simulate for testing:';
+  static const visitorCheckIn = 'Visitor Check-In';
+  static const userCheckedIn = 'User Checked In!';
+  static const toolReturned = 'Tool Returned! +10 XP';
+  static const checkoutSuccessful = 'Checkout Successful!';
+  static const invalidQrCode = 'Invalid QR code';
+  static const noBookingFound =
+      'No approved or active booking found for this tool.';
+  static const userNotLoggedIn = 'User not logged in';
+
+  // Explore screen
+  static const explore = 'Explore';
+  static const ourServices = 'Our Services';
+  static const knowledgeBase = 'Knowledge Base';
+  static const aboutIdeaLab = 'About IdeaLab';
+  static const innovationLab = 'Innovation Lab';
+  static const innovationLabDesc =
+      'Access state-of-the-art tools and a collaborative workspace to build your dreams.';
+  static const toolCatalog = 'Tool Catalog';
+  static const toolCatalogDesc =
+      'Browse and book precision equipment from 3D printers to laser cutters.';
+  static const projectSupport = 'Project Support';
+  static const projectSupportDesc =
+      'Get mentorship, find teammates, and showcase your builds to the community.';
+  static const projectSupportComingSoon = 'Project Support hub coming soon!';
+  static const makerWiki = 'Maker Wiki';
+  static const makerWikiComingSoon = 'Maker Wiki coming soon!';
+  static const makerWikiSubtitle = 'SOPs, tutorials, and guides coming soon.';
+  static const ideaLabAbout =
+      'IdeaLab is the heart of innovation at our campus. We provide the tools, the space, and the community for students to transition from consumers to creators.';
+
+  // Profile screen
+  static const githubComingSoon = 'GitHub integration coming soon!';
+  static const skillsComingSoon = 'Skills showcase coming soon!';
+
+  // Profile setup
+  static const completeYourProfile = 'Complete Your Profile';
+  static const profileSetupSubtitle =
+      'Just a few more details to get you started.';
+  static const selectYourRole = 'Select your role:';
+  static const saving = 'Saving...';
+  static const completeSetup = 'Complete Setup';
+
+  // Admin
+  static const adminDashboard = 'Admin Dashboard';
+  static const unauthorizedAdmin =
+      'Unauthorized: Only administrators can approve bookings.';
+
+  // Project
+  static const transferOwnershipComingSoon =
+      'Please select a team member to transfer ownership to. (Coming soon)';
+
+  // Generic
+  static const cancel = 'Cancel';
+  static const goBack = 'Go Back';
 }

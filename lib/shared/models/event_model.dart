@@ -2,7 +2,7 @@ class EventModel {
   const EventModel({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
     required this.type,
     this.clubId,
     required this.eventDate,

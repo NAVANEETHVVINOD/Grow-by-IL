@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/constants/app_defaults.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/repositories/supabase_client.dart';
@@ -54,16 +55,15 @@ class AuthRepository {
       final userId = response.user!.id;
 
       // 2. Insert into public.users
-      await _client.from('users').insert({
-        'id': userId,
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'college_roll': collegeRoll,
-        'role': 'student',
-        'profile_completed': false,
-        'qr_code_data': 'GROWLAB-USER-$userId',
-      });
+      await _client.from('users').insert(
+            AppDefaults.buildNewUserRow(
+              userId: userId,
+              name: name,
+              email: email,
+              phone: phone,
+              collegeRoll: collegeRoll,
+            ),
+          );
 
       AppLogger.info(LogCategory.auth, 'Sign-up successful, userId: $userId');
     } catch (e, st) {
@@ -118,14 +118,13 @@ class AuthRepository {
           LogCategory.auth,
           'SYNC_PROFILE | Creating missing row for ${authUser.id}',
         );
-        await _client.from('users').insert({
-          'id': authUser.id,
-          'name': authUser.userMetadata?['full_name'] ?? 'Maker',
-          'email': authUser.email,
-          'role': 'student',
-          'profile_completed': false,
-          'qr_code_data': 'GROWLAB-USER-${authUser.id}',
-        });
+        await _client.from('users').insert(
+              AppDefaults.buildNewUserRow(
+                userId: authUser.id,
+                name: authUser.userMetadata?['full_name'] ?? '',
+                email: authUser.email ?? '',
+              ),
+            );
       }
     } catch (e, st) {
       AppLogger.error(
@@ -199,19 +198,15 @@ class AuthRepository {
 
         // Auto-create the missing row so the user is not stuck
         AppLogger.info(LogCategory.auth, 'AUTO_CREATING_PROFILE_ROW');
-        await _client.from('users').insert({
-          'id': authUser.id,
-          'name': authUser.userMetadata?['full_name'] ??
-              authUser.email?.split('@').first ??
-              'Maker',
-          'email': authUser.email ?? '',
-          'role': 'student',
-          'profile_completed': false,
-          'xp': 0,
-          'level': 1,
-          'reputation_score': 100,
-          'qr_code_data': 'GROWLAB-USER-${authUser.id}',
-        });
+        await _client.from('users').insert(
+              AppDefaults.buildNewUserRow(
+                userId: authUser.id,
+                name: authUser.userMetadata?['full_name'] ??
+                    authUser.email?.split('@').first ??
+                    '',
+                email: authUser.email ?? '',
+              ),
+            );
 
         // Fetch the newly created row
         final newData =

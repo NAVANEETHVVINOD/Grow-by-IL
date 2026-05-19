@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import 'package:grow/core/constants/app_qr.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/constants/app_strings.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
@@ -33,7 +35,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Text(
-            'QR Simulator (Web)',
+            AppStrings.qrSimulatorWeb,
             style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
           ),
           backgroundColor: AppColors.background,
@@ -52,7 +54,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                 ),
                 const SizedBox(height: AppSizes.lg),
                 Text(
-                  'Simulation Mode',
+                  AppStrings.simulationMode,
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -60,13 +62,20 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
-                  'Choose a QR to simulate for testing:',
+                  AppStrings.simulationPrompt,
                   style: GoogleFonts.dmSans(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSizes.xl),
-                _buildSimulationButton(
-                  'Visitor Check-In',
-                  'GROWLAB-USER-test-id',
+                Builder(
+                  builder: (context) {
+                    // Use the logged-in user's actual ID for realistic simulation
+                    final user = ref.watch(currentUserProvider).valueOrNull;
+                    final simulatedUserId = user?.id ?? 'demo-user';
+                    return _buildSimulationButton(
+                      AppStrings.visitorCheckIn,
+                      AppQr.generateUserQr(simulatedUserId),
+                    );
+                  },
                 ),
                 const SizedBox(height: AppSizes.md),
                 _buildSimulationButton(
@@ -75,7 +84,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                 ),
                 const SizedBox(height: AppSizes.xl),
                 NeoButton(
-                  label: 'Cancel',
+                  label: AppStrings.cancel,
                   width: 140,
                   onPressed: () => Navigator.pop(context),
                   color: Colors.white,
@@ -133,7 +142,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                   ),
                   const SizedBox(width: AppSizes.sm),
                   Text(
-                    'Scan QR Code',
+                    AppStrings.scanQrCode,
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -226,12 +235,12 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     });
 
     try {
-      if (value.startsWith('GROWLAB-USER-')) {
+      if (AppQr.isUserQr(value)) {
         await _handleUserScan(value);
-      } else if (value.startsWith('GROWLAB-TOOL-')) {
+      } else if (AppQr.isToolQr(value)) {
         await _handleToolScan(value);
       } else {
-        throw Exception('Invalid QR code');
+        throw Exception(AppStrings.invalidQrCode);
       }
 
       setState(() {
@@ -256,20 +265,22 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
   }
 
   Future<void> _handleUserScan(String value) async {
-    final userId = value.replaceFirst('GROWLAB-USER-', '');
+    final userId = AppQr.parseUserId(value);
+    if (userId == null) throw Exception(AppStrings.invalidQrCode);
     final repo = ref.read(labRepositoryProvider);
     await repo.checkIn(userId, 'QR check-in');
     ref.invalidate(activeSessionProvider);
     ref.invalidate(liveLabVisitorCountProvider);
-    _resultMessage = 'User Checked In!';
+    _resultMessage = AppStrings.userCheckedIn;
   }
 
   Future<void> _handleToolScan(String value) async {
-    final toolId = value.replaceFirst('GROWLAB-TOOL-', '');
+    final toolId = AppQr.parseToolId(value);
+    if (toolId == null) throw Exception(AppStrings.invalidQrCode);
     final toolRepo = ref.read(toolRepositoryProvider);
     final user = ref.read(currentUserProvider).valueOrNull;
 
-    if (user == null) throw Exception('User not logged in');
+    if (user == null) throw Exception(AppStrings.userNotLoggedIn);
 
     // Fetch user bookings for this tool
     final bookings = await toolRepo.getMyBookings(user.id);
@@ -281,7 +292,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     if (activeBooking != null) {
       await toolRepo.returnTool(activeBooking.id);
       ref.invalidate(myBookingsProvider);
-      _resultMessage = 'Tool Returned! +10 XP';
+      _resultMessage = AppStrings.toolReturned;
       return;
     }
 
@@ -292,10 +303,10 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
     if (approvedBooking != null) {
       await toolRepo.checkoutTool(approvedBooking.id);
       ref.invalidate(myBookingsProvider);
-      _resultMessage = 'Checkout Successful!';
+      _resultMessage = AppStrings.checkoutSuccessful;
       return;
     }
 
-    throw Exception('No approved or active booking found for this tool.');
+    throw Exception(AppStrings.noBookingFound);
   }
 }

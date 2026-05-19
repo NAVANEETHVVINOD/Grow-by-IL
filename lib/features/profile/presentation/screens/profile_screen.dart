@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
+import 'package:grow/core/constants/app_strings.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
@@ -150,7 +151,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('GitHub integration coming soon!')),
+                              content: Text(AppStrings.githubComingSoon)),
                         );
                       },
                     ),
@@ -162,7 +163,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Skills showcase coming soon!')),
+                              content: Text(AppStrings.skillsComingSoon)),
                         );
                       },
                     ),
