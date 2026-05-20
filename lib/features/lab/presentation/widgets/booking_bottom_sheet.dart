@@ -79,8 +79,9 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
               const SizedBox(height: AppSizes.sm),
               projectsAsync.when(
                 data: (projects) => _buildProjectDropdown(projects),
-                loading: () => const SizedBox.shrink(),
-                error: (e, st) => const SizedBox.shrink(),
+                loading: () => _buildDropdownPlaceholder('Loading projects...'),
+                error: (e, st) =>
+                    _buildDropdownPlaceholder('Could not load projects'),
               ),
               const SizedBox(height: AppSizes.xl),
               NeoButton(
@@ -361,6 +362,27 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
           ],
           onChanged: (val) => setState(() => _selectedProjectId = val),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownPlaceholder(String hint) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border.all(color: Colors.grey.shade300, width: 2),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(hint,
+              style: GoogleFonts.dmSans(
+                  fontSize: 14, color: AppColors.textSecondary)),
+          const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+        ],
       ),
     );
   }
