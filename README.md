@@ -62,10 +62,9 @@ See `.env.example` for a complete list of required values and where to find them
 - `google-services.json` is gitignored
 - No `service_role` keys in frontend
 - RLS enforced on all protected tables
-- See `docs/security.md` for full security policy
-
-## Documentation
-See `docs/` folder for architecture, database contract, and roadmap.
 
 ## Current status
-RC3 — Auth Stabilization, Security Hardening, and Firebase Integration complete
+**RC4 — Production Readiness Phase**
+- Auth Stabilization, Security Hardening, and Firebase Google Sign-In Integration complete.
+- Core workflows (Bookings, Dashboard, Profiles, QR Scanning) are fully functional.
+- Zero known critical vulnerabilities.
