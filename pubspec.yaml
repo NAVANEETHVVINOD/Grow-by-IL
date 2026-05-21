@@ -51,6 +51,9 @@ dependencies:
   timeago: ^3.7.0
   uuid: ^4.5.1
   package_info_plus: ^8.1.0
+  flutter_animate: ^4.5.2
+  shimmer: ^3.0.0
+  firebase_crashlytics: ^5.2.2
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +63,7 @@ dev_dependencies:
   build_runner: ^2.4.15
   flutter_lints: ^5.0.0
   riverpod_lint: ^2.6.5
+  mocktail: ^1.0.5
 
 flutter:
   uses-material-design: true

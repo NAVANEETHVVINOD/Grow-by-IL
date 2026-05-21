@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
+import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/shared/widgets/shimmer_skeleton.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/lab/presentation/widgets/booking_bottom_sheet.dart';
@@ -103,7 +105,7 @@ class ToolsScreen extends ConsumerWidget {
                           onTap: () => ref
                               .read(selectedToolProvider.notifier)
                               .state = tool,
-                        );
+                        ).animate(delay: (index * 40).ms).fadeIn(duration: 400.ms, curve: Curves.easeOutCubic).scaleXY(begin: 0.9, end: 1.0, duration: 400.ms, curve: Curves.easeOutCubic);
                       }, childCount: tools.length),
                     );
                   },
@@ -124,7 +126,12 @@ class ToolsScreen extends ConsumerWidget {
                     ),
                   ),
                   error: (e, st) => SliverFillRemaining(
-                    child: Center(child: Text('Error: $e')),
+                    hasScrollBody: false,
+                    child: NeoErrorWidget(
+                      title: 'Failed to load tools',
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(toolsProvider),
+                    ),
                   ),
                 ),
               ),

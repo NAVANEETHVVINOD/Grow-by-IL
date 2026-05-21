@@ -105,34 +105,35 @@ class AppTheme {
 
       // ── Input decoration ───────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
+        filled: true,
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.navy, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.2), width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.navy, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.navy.withValues(alpha: 0.2), width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.yellow, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.cobalt, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.red, width: 2),
         ),
         labelStyle: GoogleFonts.dmSans(color: AppColors.textSecondary),
       ),
 
       // ── Divider ────────────────────────────────────────────
-      dividerTheme: const DividerThemeData(
-        color: AppColors.navy,
-        thickness: 1.5,
+      dividerTheme: DividerThemeData(
+        color: AppColors.navy.withValues(alpha: 0.1),
+        thickness: 1,
       ),
     );
   }

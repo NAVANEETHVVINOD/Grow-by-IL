@@ -9,6 +9,10 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_logger.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'core/utils/provider_observer.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,7 +28,18 @@ void main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      AppLogger.success(LogCategory.system, 'FIREBASE_INITIALIZATION_SUCCESS');
+
+      // Pass all uncaught errors to Crashlytics
+      FlutterError.onError = (errorDetails) {
+        FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+      };
+
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+
+      AppLogger.success(LogCategory.system, 'FIREBASE_INITIALIZATION_SUCCESS & CRASHLYTICS_SETUP');
     } catch (e, st) {
       AppLogger.error(
         LogCategory.system,
@@ -57,19 +72,27 @@ void main() async {
     anonKey: SupabaseKeys.anonKey,
   );
 
-  runApp(const ProviderScope(child: GrowApp()));
+  runApp(
+    ProviderScope(
+      observers: [AppProviderObserver()],
+      child: const GrowApp(),
+    ),
+  );
 }
 
-class GrowApp extends StatelessWidget {
+class GrowApp extends ConsumerWidget {
   const GrowApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Grow~',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      routerConfig: goRouter,
+      routerConfig: router,
     );
   }
 }
+

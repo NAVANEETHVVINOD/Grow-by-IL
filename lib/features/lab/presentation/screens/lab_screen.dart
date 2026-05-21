@@ -12,6 +12,7 @@ import 'package:grow/core/utils/supabase_error_handler.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/neo_chip.dart';
+import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/shared/widgets/shimmer_skeleton.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
@@ -43,21 +44,10 @@ class LabScreen extends ConsumerWidget {
             return const _NotCheckedInView();
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: AppColors.red),
-                const SizedBox(height: AppSizes.md),
-                const Text('Something went wrong'),
-                const SizedBox(height: AppSizes.md),
-                NeoButton(
-                  label: 'Retry',
-                  width: 120,
-                  onPressed: () => ref.invalidate(activeSessionProvider),
-                ),
-              ],
-            ),
+          error: (err, stack) => NeoErrorWidget(
+            title: 'Failed to load session state',
+            message: err.toString(),
+            onRetry: () => ref.invalidate(activeSessionProvider),
           ),
         ),
       ),

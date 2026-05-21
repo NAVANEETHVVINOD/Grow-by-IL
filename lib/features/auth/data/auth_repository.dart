@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/constants/app_defaults.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/query_helper.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/repositories/supabase_client.dart';
 import 'google_auth_service.dart';
@@ -43,9 +44,11 @@ class AuthRepository {
 
     try {
       // 1. Create auth user
-      final response = await _client.auth.signUp(
-        email: email,
-        password: password,
+      final response = await guardedSupabaseCall(
+        _client.auth.signUp(
+          email: email,
+          password: password,
+        ),
       );
 
       if (response.user == null) {
@@ -55,15 +58,17 @@ class AuthRepository {
       final userId = response.user!.id;
 
       // 2. Insert into public.users
-      await _client.from('users').insert(
-            AppDefaults.buildNewUserRow(
-              userId: userId,
-              name: name,
-              email: email,
-              phone: phone,
-              collegeRoll: collegeRoll,
+      await guardedSupabaseCall(
+        _client.from('users').insert(
+              AppDefaults.buildNewUserRow(
+                userId: userId,
+                name: name,
+                email: email,
+                phone: phone,
+                collegeRoll: collegeRoll,
+              ),
             ),
-          );
+      );
 
       AppLogger.info(LogCategory.auth, 'Sign-up successful, userId: $userId');
     } catch (e, st) {
@@ -77,9 +82,11 @@ class AuthRepository {
     AppLogger.action(LogCategory.auth, 'signIn', {'email': email});
 
     try {
-      final response = await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
+      final response = await guardedSupabaseCall(
+        _client.auth.signInWithPassword(
+          email: email,
+          password: password,
+        ),
       );
 
       // Auto-sync profile for email users too
@@ -107,24 +114,28 @@ class AuthRepository {
   /// (Called during Google Login or Splash redirect)
   Future<void> ensureUserProfileExists(User authUser) async {
     try {
-      final existing = await _client
-          .from('users')
-          .select('id')
-          .eq('id', authUser.id)
-          .maybeSingle();
+      final existing = await guardedSupabaseCall(
+        _client
+            .from('users')
+            .select('id')
+            .eq('id', authUser.id)
+            .maybeSingle(),
+      );
 
       if (existing == null) {
         AppLogger.info(
           LogCategory.auth,
           'SYNC_PROFILE | Creating missing row for ${authUser.id}',
         );
-        await _client.from('users').insert(
-              AppDefaults.buildNewUserRow(
-                userId: authUser.id,
-                name: authUser.userMetadata?['full_name'] ?? '',
-                email: authUser.email ?? '',
+        await guardedSupabaseCall(
+          _client.from('users').insert(
+                AppDefaults.buildNewUserRow(
+                  userId: authUser.id,
+                  name: authUser.userMetadata?['full_name'] ?? '',
+                  email: authUser.email ?? '',
+                ),
               ),
-            );
+        );
       }
     } catch (e, st) {
       AppLogger.error(
@@ -141,7 +152,7 @@ class AuthRepository {
     AppLogger.action(LogCategory.auth, 'signOut');
     try {
       await _googleAuth.signOut();
-      await _client.auth.signOut();
+      await guardedSupabaseCall(_client.auth.signOut());
       AppLogger.info(LogCategory.auth, 'Sign-out successful');
     } catch (e, st) {
       AppLogger.error(LogCategory.auth, 'Sign-out failed', error: e, stack: st);
@@ -152,11 +163,13 @@ class AuthRepository {
   /// Fetch user profile from `public.users`
   Future<UserModel?> getUserProfile(String userId) async {
     try {
-      final data = await _client
-          .from('users')
-          .select()
-          .eq('id', userId)
-          .maybeSingle(); // Use maybeSingle to avoid PGRST116 crash
+      final data = await guardedSupabaseCall(
+        _client
+            .from('users')
+            .select()
+            .eq('id', userId)
+            .maybeSingle(),
+      );
 
       if (data == null) return null;
       return UserModel.fromJson(data);
@@ -184,11 +197,13 @@ class AuthRepository {
         'userId': authUser.id,
       });
 
-      final data = await _client
-          .from('users')
-          .select()
-          .eq('id', authUser.id)
-          .maybeSingle(); // was .single(), caused PGRST116 crash
+      final data = await guardedSupabaseCall(
+        _client
+            .from('users')
+            .select()
+            .eq('id', authUser.id)
+            .maybeSingle(),
+      );
 
       if (data == null) {
         AppLogger.warn(
@@ -198,19 +213,22 @@ class AuthRepository {
 
         // Auto-create the missing row so the user is not stuck
         AppLogger.info(LogCategory.auth, 'AUTO_CREATING_PROFILE_ROW');
-        await _client.from('users').insert(
-              AppDefaults.buildNewUserRow(
-                userId: authUser.id,
-                name: authUser.userMetadata?['full_name'] ??
-                    authUser.email?.split('@').first ??
-                    '',
-                email: authUser.email ?? '',
+        await guardedSupabaseCall(
+          _client.from('users').insert(
+                AppDefaults.buildNewUserRow(
+                  userId: authUser.id,
+                  name: authUser.userMetadata?['full_name'] ??
+                      authUser.email?.split('@').first ??
+                      '',
+                  email: authUser.email ?? '',
+                ),
               ),
-            );
+        );
 
         // Fetch the newly created row
-        final newData =
-            await _client.from('users').select().eq('id', authUser.id).single();
+        final newData = await guardedSupabaseCall(
+          _client.from('users').select().eq('id', authUser.id).single(),
+        );
 
         AppLogger.info(LogCategory.auth, 'PROFILE_ROW_CREATED_AND_FETCHED');
         final userModel = UserModel.fromJson(newData);
@@ -252,7 +270,9 @@ class AuthRepository {
       'fields': updates.keys.toList(),
     });
     try {
-      await _client.from('users').update(updates).eq('id', userId);
+      await guardedSupabaseCall(
+        _client.from('users').update(updates).eq('id', userId),
+      );
       AppLogger.info(
         LogCategory.auth,
         'Profile updated successfully for $userId',
@@ -268,3 +288,4 @@ class AuthRepository {
     }
   }
 }
+

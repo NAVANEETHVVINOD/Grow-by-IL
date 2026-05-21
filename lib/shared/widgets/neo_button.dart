@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 
@@ -43,12 +43,6 @@ class _NeoButtonState extends State<NeoButton> {
 
   @override
   Widget build(BuildContext context) {
-    final shadowOffset = _isPressed
-        ? const Offset(1, 1)
-        : const Offset(AppSizes.shadowX, AppSizes.shadowY);
-
-    final translationOffset = _isPressed ? const Offset(3, 3) : Offset.zero;
-
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -59,62 +53,60 @@ class _NeoButtonState extends State<NeoButton> {
         }
       },
       onTapCancel: () => setState(() => _isPressed = false),
-      child: Transform.translate(
-        offset: translationOffset,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 80),
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: widget.onPressed == null
-                ? widget.color.withValues(alpha: 0.5)
-                : widget.color,
-            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-            border: Border.all(
-              color: widget.borderColor,
-              width: AppSizes.borderWidth,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadowColor,
-                offset: shadowOffset,
-                blurRadius: 0,
-                spreadRadius: 0,
-              ),
-            ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: widget.onPressed == null
+              ? widget.color.withValues(alpha: 0.5)
+              : widget.color,
+          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+          border: Border.all(
+            color: widget.borderColor.withValues(alpha: 0.2),
+            width: AppSizes.borderWidth,
           ),
-          child: Center(
-            child: widget.isLoading
-                ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        widget.textColor,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowColor.withValues(alpha: 0.1),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Center(
+          child: widget.isLoading
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      widget.textColor,
+                    ),
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.icon != null) ...[
+                      Icon(widget.icon, color: widget.textColor, size: 20),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      widget.label,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: widget.fontSize,
+                        fontWeight: FontWeight.w700,
+                        color: widget.textColor,
                       ),
                     ),
-                  )
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.icon != null) ...[
-                        Icon(widget.icon, color: widget.textColor, size: 20),
-                        const SizedBox(width: 8),
-                      ],
-                      Text(
-                        widget.label,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: widget.fontSize,
-                          fontWeight: FontWeight.w700,
-                          color: widget.textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
+                  ],
+                ),
         ),
-      ),
+      ).animate(target: _isPressed ? 1 : 0).scaleXY(begin: 1.0, end: 0.95, duration: 100.ms, curve: Curves.easeInOut),
     );
   }
 }

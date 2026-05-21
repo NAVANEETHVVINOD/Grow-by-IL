@@ -57,7 +57,8 @@ jobs:
       - name: Create Dummy google-services.json for CI Build
         run: |
           mkdir -p android/app
-          echo '{
+          cat << 'EOF' > android/app/google-services.json
+          {
             "project_info": {
               "project_number": "353624899972",
               "project_id": "grow-2538a",
@@ -95,7 +96,9 @@ jobs:
               }
             ],
             "configuration_version": "1"
-          }' > android/app/google-services.json
+          }
+          EOF
+          ls -la android/app/google-services.json
 
       - name: Build APK (Release)
         env:

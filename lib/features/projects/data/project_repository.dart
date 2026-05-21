@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/query_helper.dart';
 import '../../../shared/models/project_model.dart';
 import '../../../shared/models/project_member_model.dart';
 import '../../../shared/models/project_update_model.dart';
@@ -12,12 +13,14 @@ class ProjectRepository {
   Future<List<ProjectModel>> getPublicProjects() async {
     AppLogger.action(LogCategory.projects, 'getPublicProjects');
     try {
-      final data = await _client
-          .from('projects')
-          .select()
-          .eq('visibility', 'public')
-          .neq('status', 'archived')
-          .order('updated_at', ascending: false);
+      final data = await guardedSupabaseCall(
+        _client
+            .from('projects')
+            .select()
+            .eq('visibility', 'public')
+            .neq('status', 'archived')
+            .order('updated_at', ascending: false),
+      );
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
@@ -34,12 +37,14 @@ class ProjectRepository {
   Future<List<ProjectModel>> getMyProjects(String userId) async {
     AppLogger.action(LogCategory.projects, 'getMyProjects', {'userId': userId});
     try {
-      final data = await _client
-          .from('projects')
-          .select('*, project_members!inner(user_id)')
-          .eq('project_members.user_id', userId)
-          .neq('status', 'archived')
-          .order('updated_at', ascending: false);
+      final data = await guardedSupabaseCall(
+        _client
+            .from('projects')
+            .select('*, project_members!inner(user_id)')
+            .eq('project_members.user_id', userId)
+            .neq('status', 'archived')
+            .order('updated_at', ascending: false),
+      );
       return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
@@ -55,8 +60,9 @@ class ProjectRepository {
   /// Fetch project details by ID.
   Future<ProjectModel> getProjectById(String id) async {
     try {
-      final data =
-          await _client.from('projects').select().eq('id', id).single();
+      final data = await guardedSupabaseCall(
+        _client.from('projects').select().eq('id', id).single(),
+      );
       return ProjectModel.fromJson(data);
     } catch (e, st) {
       AppLogger.error(
@@ -72,10 +78,12 @@ class ProjectRepository {
   /// Fetch members of a project.
   Future<List<ProjectMemberModel>> getProjectMembers(String projectId) async {
     try {
-      final data = await _client
-          .from('project_members')
-          .select('*, users(name, avatar_url)')
-          .eq('project_id', projectId);
+      final data = await guardedSupabaseCall(
+        _client
+            .from('project_members')
+            .select('*, users(name, avatar_url)')
+            .eq('project_id', projectId),
+      );
       return (data as List)
           .map((row) => ProjectMemberModel.fromJson(row))
           .toList();
@@ -95,16 +103,19 @@ class ProjectRepository {
     AppLogger.action(LogCategory.projects, 'createProject');
     try {
       // 1. Insert Project
-      final data =
-          await _client.from('projects').insert(projectData).select().single();
+      final data = await guardedSupabaseCall(
+        _client.from('projects').insert(projectData).select().single(),
+      );
       final project = ProjectModel.fromJson(data);
 
       // 2. Add creator as Lead
-      await _client.from('project_members').insert({
-        'project_id': project.id,
-        'user_id': project.createdBy,
-        'role': 'lead',
-      });
+      await guardedSupabaseCall(
+        _client.from('project_members').insert({
+          'project_id': project.id,
+          'user_id': project.createdBy,
+          'role': 'lead',
+        }),
+      );
 
       AppLogger.info(
         LogCategory.projects,
@@ -129,21 +140,25 @@ class ProjectRepository {
       'userId': userId,
     });
     try {
-      await _client.from('project_members').insert({
-        'project_id': projectId,
-        'user_id': userId,
-        'role': 'member',
-      });
+      await guardedSupabaseCall(
+        _client.from('project_members').insert({
+          'project_id': projectId,
+          'user_id': userId,
+          'role': 'member',
+        }),
+      );
 
       // Notify Owner
       final project = await getProjectById(projectId);
-      await _client.from('notifications').insert({
-        'user_id': project.createdBy,
-        'type': 'project_join',
-        'title': 'New Team Member',
-        'message': 'Someone just joined "${project.title}".',
-        'related_id': projectId,
-      });
+      await guardedSupabaseCall(
+        _client.from('notifications').insert({
+          'user_id': project.createdBy,
+          'type': 'project_join',
+          'title': 'New Team Member',
+          'message': 'Someone just joined "${project.title}".',
+          'related_id': projectId,
+        }),
+      );
 
       AppLogger.info(
         LogCategory.projects,
@@ -167,10 +182,12 @@ class ProjectRepository {
       'userId': userId,
     });
     try {
-      await _client.from('project_members').delete().match({
-        'project_id': projectId,
-        'user_id': userId,
-      });
+      await guardedSupabaseCall(
+        _client.from('project_members').delete().match({
+          'project_id': projectId,
+          'user_id': userId,
+        }),
+      );
       AppLogger.info(
         LogCategory.projects,
         'User $userId left project $projectId',
@@ -195,7 +212,9 @@ class ProjectRepository {
       'projectId': projectId,
     });
     try {
-      await _client.from('projects').update(updates).eq('id', projectId);
+      await guardedSupabaseCall(
+        _client.from('projects').update(updates).eq('id', projectId),
+      );
       AppLogger.info(LogCategory.projects, 'Project $projectId updated');
     } catch (e, st) {
       AppLogger.error(
@@ -219,20 +238,26 @@ class ProjectRepository {
       final oldOwnerId = project.createdBy;
 
       // 1. Update Project Creator
-      await _client
-          .from('projects')
-          .update({'created_by': newOwnerId}).eq('id', projectId);
+      await guardedSupabaseCall(
+        _client
+            .from('projects')
+            .update({'created_by': newOwnerId}).eq('id', projectId),
+      );
 
       // 2. Swap Roles in project_members
-      await _client.from('project_members').update({'role': 'admin'}).match({
-        'project_id': projectId,
-        'user_id': oldOwnerId,
-      });
-      await _client.from('project_members').upsert({
-        'project_id': projectId,
-        'user_id': newOwnerId,
-        'role': 'owner',
-      }, onConflict: 'project_id, user_id');
+      await guardedSupabaseCall(
+        _client.from('project_members').update({'role': 'admin'}).match({
+          'project_id': projectId,
+          'user_id': oldOwnerId,
+        }),
+      );
+      await guardedSupabaseCall(
+        _client.from('project_members').upsert({
+          'project_id': projectId,
+          'user_id': newOwnerId,
+          'role': 'owner',
+        }, onConflict: 'project_id, user_id'),
+      );
 
       AppLogger.info(
         LogCategory.projects,
@@ -255,10 +280,12 @@ class ProjectRepository {
       'projectId': projectId,
     });
     try {
-      await _client.from('projects').update({
-        'status': 'archived',
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', projectId);
+      await guardedSupabaseCall(
+        _client.from('projects').update({
+          'status': 'archived',
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        }).eq('id', projectId),
+      );
       AppLogger.info(LogCategory.projects, 'Project $projectId archived');
     } catch (e, st) {
       AppLogger.error(
@@ -298,11 +325,13 @@ class ProjectRepository {
     String content,
   ) async {
     try {
-      await _client.from('project_updates').insert({
-        'project_id': projectId,
-        'user_id': userId,
-        'content': content,
-      });
+      await guardedSupabaseCall(
+        _client.from('project_updates').insert({
+          'project_id': projectId,
+          'user_id': userId,
+          'content': content,
+        }),
+      );
       AppLogger.info(
         LogCategory.projects,
         'Project update added for $projectId',

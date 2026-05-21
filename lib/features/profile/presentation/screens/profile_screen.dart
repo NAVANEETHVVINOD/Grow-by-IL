@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -230,7 +231,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                 ),
                 const SizedBox(height: AppSizes.lg),
-              ],
+              ].animate(interval: 40.ms).fadeIn(duration: 400.ms, curve: Curves.easeOutCubic).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic),
             );
           },
           loading: () => Padding(

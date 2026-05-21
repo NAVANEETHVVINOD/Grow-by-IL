@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/repositories/supabase_client.dart';
 import '../utils/app_logger.dart';
+import '../../core/constants/app_roles.dart';
+import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
@@ -22,170 +28,206 @@ import '../../features/lab/presentation/screens/tools_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../shared/widgets/main_shell.dart';
 
+/// Adapter class to refresh GoRouter when a Stream triggers a new event.
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 /// Central route configuration for the Grow~ app.
-///
-/// Public routes (splash, onboarding, login, register) sit outside the shell.
-/// The 5 main tabs live inside a [StatefulShellRoute] so the bottom nav persists.
-/// Detail routes push on top without bottom nav.
-final goRouter = GoRouter(
-  initialLocation: '/splash',
-  debugLogDiagnostics: true,
-  redirect: (context, state) {
-    final session = supabase.auth.currentSession;
-    final path = state.uri.path;
+final routerProvider = Provider<GoRouter>((ref) {
+  // ignore: deprecated_member_use
+  final authStream = ref.watch(authStateProvider.stream);
+  final userProfileAsync = ref.watch(currentUserProvider);
 
-    final publicRoutes = {
-      '/splash',
-      '/onboarding',
-      '/login',
-      '/register',
-      '/explore',
-    };
-    final isPublic = publicRoutes.contains(path);
+  return GoRouter(
+    initialLocation: '/splash',
+    debugLogDiagnostics: true,
+    refreshListenable: GoRouterRefreshStream(authStream),
+    redirect: (context, state) {
+      final session = supabase.auth.currentSession;
+      final path = state.uri.path;
 
-    AppLogger.info(
-      LogCategory.router,
-      'REDIRECT_CHECK | '
-      'path=$path authed=${session != null}',
-    );
+      final publicRoutes = {
+        '/splash',
+        '/onboarding',
+        '/login',
+        '/register',
+        '/explore',
+      };
+      final isPublic = publicRoutes.contains(path);
 
-    // Unauthenticated trying to access protected route
-    if (session == null && !isPublic) {
-      AppLogger.warn(LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
-      return '/login';
-    }
-
-    // Authenticated user trying to access auth routes (onboarding/login) → send home
-    // We EXCLUDE /splash here so SplashScreen can do its async database check.
-    if (session != null &&
-        (path == '/onboarding' || path == '/login' || path == '/register')) {
       AppLogger.info(
         LogCategory.router,
-        'AUTH_USER_REDIRECTED_HOME | from=$path',
+        'REDIRECT_CHECK | '
+        'path=$path authed=${session != null}',
       );
-      return '/home';
-    }
 
-    // Authenticated but profile not complete → profile setup
-    // (Only redirect if NOT already going to profile-setup)
-    if (session != null && path != '/profile-setup') {
-      // Check profile_completed via a synchronous cache check only
-      // Full async check happens in splash_screen.dart
-    }
+      // Unauthenticated trying to access protected route
+      if (session == null && !isPublic) {
+        AppLogger.warn(LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
+        return '/login';
+      }
 
-    return null;
-  },
-  routes: [
-    // ── Public routes (no bottom nav) ────────────────────────
-    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-    GoRoute(
-      path: '/onboarding',
-      builder: (context, state) => const OnboardingScreen(),
-    ),
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    GoRoute(
-      path: '/register',
-      builder: (context, state) => const RegisterScreen(),
-    ),
-    GoRoute(
-      path: '/profile-setup',
-      builder: (context, state) => const ProfileSetupScreen(),
-    ),
+      // Authenticated user trying to access auth routes (onboarding/login) → send home
+      // We EXCLUDE /splash here so SplashScreen can do its async database check.
+      if (session != null &&
+          (path == '/onboarding' || path == '/login' || path == '/register')) {
+        AppLogger.info(
+          LogCategory.router,
+          'AUTH_USER_REDIRECTED_HOME | from=$path',
+        );
+        return '/home';
+      }
 
-    // ── Main shell (5 tabs with persistent bottom nav) ───────
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return MainShell(navigationShell: navigationShell);
-      },
-      branches: [
-        // Tab 0 — Home
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) => const HomeScreen(),
-            ),
-          ],
-        ),
-        // Tab 1 — Explore
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/explore',
-              builder: (context, state) => const ExploreScreen(),
-            ),
-          ],
-        ),
-        // Tab 2 — Events
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/events',
-              builder: (context, state) => const EventsScreen(),
-            ),
-          ],
-        ),
-        // Tab 3 — Lab
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/lab',
-              builder: (context, state) => const LabScreen(),
-            ),
-          ],
-        ),
-        // Tab 4 — Profile
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-
-    // ── Detail routes (pushed on top, no bottom nav) ─────────
-    GoRoute(
-      path: '/admin',
-      redirect: (context, state) {
-        final session = supabase.auth.currentSession;
+      // Admin route access check
+      if (path.startsWith('/admin')) {
         if (session == null) return '/login';
-        return null; // Sync session check only, UI handles role restriction
-      },
-      builder: (context, state) => const AdminDashboard(),
-    ),
-    GoRoute(
-      path: '/lab/scan',
-      builder: (context, state) => const QrScanScreen(),
-    ),
-    GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
-    GoRoute(
-      path: '/events/:id',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return EventDetailsScreen(eventId: id);
-      },
-    ),
-    GoRoute(
-      path: '/projects/create',
-      builder: (context, state) => const CreateProjectScreen(),
-    ),
-    GoRoute(
-      path: '/notifications',
-      builder: (context, state) => const NotificationInboxScreen(),
-    ),
-    GoRoute(
-      path: '/projects',
-      builder: (context, state) => const ProjectListScreen(),
-    ),
-    GoRoute(
-      path: '/projects/:id',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return ProjectDetailsScreen(projectId: id);
-      },
-    ),
-  ],
-);
+
+        final user = userProfileAsync.valueOrNull;
+        if (user == null) {
+          // If profile is loading, let it proceed to AdminDashboard which shows loading indicator
+          if (userProfileAsync.isLoading) {
+            return null;
+          }
+          return '/home'; // fallback if null profile is loaded
+        }
+
+        if (!AppRole.isAdminRole(user.role)) {
+          AppLogger.warn(
+            LogCategory.router,
+            'UNAUTHORIZED_ADMIN_ACCESS | role=${user.role} user=${session.user.email}',
+          );
+          return '/unauthorized';
+        }
+      }
+
+      return null;
+    },
+    routes: [
+      // ── Public routes (no bottom nav) ────────────────────────
+      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/profile-setup',
+        builder: (context, state) => const ProfileSetupScreen(),
+      ),
+
+      // ── Main shell (5 tabs with persistent bottom nav) ───────
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: [
+          // Tab 0 — Home
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          // Tab 1 — Explore
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/explore',
+                builder: (context, state) => const ExploreScreen(),
+              ),
+            ],
+          ),
+          // Tab 2 — Events
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/events',
+                builder: (context, state) => const EventsScreen(),
+              ),
+            ],
+          ),
+          // Tab 3 — Lab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/lab',
+                builder: (context, state) => const LabScreen(),
+              ),
+            ],
+          ),
+          // Tab 4 — Profile
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // ── Detail routes (pushed on top, no bottom nav) ─────────
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminDashboard(),
+      ),
+      GoRoute(
+        path: '/unauthorized',
+        builder: (context, state) => const UnauthorizedScreen(),
+      ),
+      GoRoute(
+        path: '/lab/scan',
+        builder: (context, state) => const QrScanScreen(),
+      ),
+      GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
+      GoRoute(
+        path: '/events/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return EventDetailsScreen(eventId: id);
+        },
+      ),
+      GoRoute(
+        path: '/projects/create',
+        builder: (context, state) => const CreateProjectScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationInboxScreen(),
+      ),
+      GoRoute(
+        path: '/projects',
+        builder: (context, state) => const ProjectListScreen(),
+      ),
+      GoRoute(
+        path: '/projects/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ProjectDetailsScreen(projectId: id);
+        },
+      ),
+    ],
+  );
+});
+

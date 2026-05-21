@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_roles.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/query_helper.dart';
 import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/tool_model.dart';
 import '../../../shared/models/user_model.dart';
@@ -29,7 +30,7 @@ class ToolRepository {
       if (searchQuery != null && searchQuery.isNotEmpty) {
         query = query.ilike('name', '%$searchQuery%');
       }
-      final data = await query;
+      final data = await guardedSupabaseCall(query);
       return (data as List).map((row) => ToolModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
@@ -46,7 +47,9 @@ class ToolRepository {
   Future<ToolModel> getToolById(String id) async {
     AppLogger.action(LogCategory.tools, 'getToolById', {'id': id});
     try {
-      final data = await _client.from('tools').select().eq('id', id).single();
+      final data = await guardedSupabaseCall(
+        _client.from('tools').select().eq('id', id).single(),
+      );
       return ToolModel.fromJson(data);
     } catch (e, st) {
       AppLogger.error(
@@ -77,13 +80,15 @@ class ToolRepository {
     try {
       // 1. Overlap Validation (MVP Repository check)
       // Check if there are any active or approved bookings that overlap with the requested slot
-      final overlapping = await _client
-          .from('tool_bookings')
-          .select()
-          .eq('tool_id', toolId)
-          .inFilter('status', ['approved', 'active'])
-          .filter('slot_start', 'lt', slotEnd.toIso8601String())
-          .filter('slot_end', 'gt', slotStart.toIso8601String());
+      final overlapping = await guardedSupabaseCall(
+        _client
+            .from('tool_bookings')
+            .select()
+            .eq('tool_id', toolId)
+            .inFilter('status', ['approved', 'active'])
+            .filter('slot_start', 'lt', slotEnd.toIso8601String())
+            .filter('slot_end', 'gt', slotStart.toIso8601String()),
+      );
 
       if ((overlapping as List).isNotEmpty) {
         throw Exception('This time slot overlaps with an existing booking.');
@@ -94,29 +99,33 @@ class ToolRepository {
       const status = 'pending';
 
       // 3. Insert booking (using UTC)
-      final data = await _client
-          .from('tool_bookings')
-          .insert({
-            'tool_id': toolId,
-            'user_id': userId,
-            'project_id': projectId,
-            'slot_start': slotStart.toUtc().toIso8601String(),
-            'slot_end': slotEnd.toUtc().toIso8601String(),
-            'status': status,
-          })
-          .select()
-          .single();
+      final data = await guardedSupabaseCall(
+        _client
+            .from('tool_bookings')
+            .insert({
+              'tool_id': toolId,
+              'user_id': userId,
+              'project_id': projectId,
+              'slot_start': slotStart.toUtc().toIso8601String(),
+              'slot_end': slotEnd.toUtc().toIso8601String(),
+              'status': status,
+            })
+            .select()
+            .single(),
+      );
 
       // 4. Create Notification
       try {
-        await _client.from('notifications').insert({
-          'user_id': userId,
-          'type': 'tool_booking',
-          'title':
-              status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
-          'message': 'Your booking for ${tool.name} is $status.',
-          'related_id': data['id'],
-        });
+        await guardedSupabaseCall(
+          _client.from('notifications').insert({
+            'user_id': userId,
+            'type': 'tool_booking',
+            'title':
+                status == 'pending' ? 'Booking Pending' : 'Booking Approved!',
+            'message': 'Your booking for ${tool.name} is $status.',
+            'related_id': data['id'],
+          }),
+        );
       } catch (notifErr) {
         AppLogger.warn(
           LogCategory.tools,
@@ -153,26 +162,32 @@ class ToolRepository {
     }
 
     try {
-      await _client.from('tool_bookings').update({
-        'status': 'approved',
-        'approved_by': actor.id,
-        'approved_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', bookingId);
+      await guardedSupabaseCall(
+        _client.from('tool_bookings').update({
+          'status': 'approved',
+          'approved_by': actor.id,
+          'approved_at': DateTime.now().toUtc().toIso8601String(),
+        }).eq('id', bookingId),
+      );
 
       // 3. Create Notification for user (Safe Catch)
       try {
-        final bookingData = await _client
-            .from('tool_bookings')
-            .select()
-            .eq('id', bookingId)
-            .single();
-        await _client.from('notifications').insert({
-          'user_id': bookingData['user_id'],
-          'type':
-              'system', // Must be one of: alert, reminder, invite, milestone, system
-          'title': 'Booking Approved!',
-          'message': 'Your equipment reservation has been approved.',
-        });
+        final bookingData = await guardedSupabaseCall(
+          _client
+              .from('tool_bookings')
+              .select()
+              .eq('id', bookingId)
+              .single(),
+        );
+        await guardedSupabaseCall(
+          _client.from('notifications').insert({
+            'user_id': bookingData['user_id'],
+            'type':
+                'system', // Must be one of: alert, reminder, invite, milestone, system
+            'title': 'Booking Approved!',
+            'message': 'Your equipment reservation has been approved.',
+          }),
+        );
       } catch (e) {
         AppLogger.warn(LogCategory.notifications,
             'Notification insert failed but booking approved: $e');
@@ -202,25 +217,31 @@ class ToolRepository {
 
     try {
       // 1. Update status to rejected
-      await _client.from('tool_bookings').update({
-        'status': 'rejected',
-      }).eq('id', bookingId);
+      await guardedSupabaseCall(
+        _client.from('tool_bookings').update({
+          'status': 'rejected',
+        }).eq('id', bookingId),
+      );
 
       // 2. Create Notification (Safe Catch)
       try {
-        final bookingData = await _client
-            .from('tool_bookings')
-            .select()
-            .eq('id', bookingId)
-            .single();
+        final bookingData = await guardedSupabaseCall(
+          _client
+              .from('tool_bookings')
+              .select()
+              .eq('id', bookingId)
+              .single(),
+        );
 
-        await _client.from('notifications').insert({
-          'user_id': bookingData['user_id'],
-          'type': 'system',
-          'title': 'Booking Cancelled',
-          'message':
-              'Your equipment reservation was not approved and has been cancelled.',
-        });
+        await guardedSupabaseCall(
+          _client.from('notifications').insert({
+            'user_id': bookingData['user_id'],
+            'type': 'system',
+            'title': 'Booking Cancelled',
+            'message':
+                'Your equipment reservation was not approved and has been cancelled.',
+          }),
+        );
       } catch (e) {
         AppLogger.warn(LogCategory.notifications,
             'Notification insert failed but booking cancelled: $e');
@@ -247,10 +268,12 @@ class ToolRepository {
       'bookingId': bookingId,
     });
     try {
-      await _client.from('tool_bookings').update({
-        'status': 'active',
-        'checkout_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', bookingId);
+      await guardedSupabaseCall(
+        _client.from('tool_bookings').update({
+          'status': 'active',
+          'checkout_at': DateTime.now().toUtc().toIso8601String(),
+        }).eq('id', bookingId),
+      );
       AppLogger.info(
         LogCategory.tools,
         'Tool checkout successful for booking $bookingId',
@@ -270,10 +293,12 @@ class ToolRepository {
   Future<void> returnTool(String bookingId) async {
     AppLogger.action(LogCategory.tools, 'returnTool', {'bookingId': bookingId});
     try {
-      await _client.from('tool_bookings').update({
-        'status': 'returned',
-        'returned_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', bookingId);
+      await guardedSupabaseCall(
+        _client.from('tool_bookings').update({
+          'status': 'returned',
+          'returned_at': DateTime.now().toUtc().toIso8601String(),
+        }).eq('id', bookingId),
+      );
       AppLogger.info(
         LogCategory.tools,
         'Tool return successful for booking $bookingId',
@@ -293,10 +318,12 @@ class ToolRepository {
   Future<List<BookingModel>> getMyBookings(String userId) async {
     try {
       // 1. Get projects where user is a member
-      final projectData = await _client
-          .from('project_members')
-          .select('project_id')
-          .eq('user_id', userId);
+      final projectData = await guardedSupabaseCall(
+        _client
+            .from('project_members')
+            .select('project_id')
+            .eq('user_id', userId),
+      );
 
       final projectIds =
           (projectData as List).map((p) => p['project_id'] as String).toList();
@@ -312,7 +339,9 @@ class ToolRepository {
         query = query.eq('user_id', userId);
       }
 
-      final data = await query.order('created_at', ascending: false);
+      final data = await guardedSupabaseCall(
+        query.order('created_at', ascending: false),
+      );
       return (data as List).map((row) => BookingModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
@@ -328,11 +357,13 @@ class ToolRepository {
   /// Fetch overdue bookings (Admin).
   Future<List<BookingModel>> getOverdueBookings() async {
     try {
-      final data = await _client
-          .from('tool_bookings')
-          .select()
-          .eq('status', 'active')
-          .lt('slot_end', DateTime.now().toUtc().toIso8601String());
+      final data = await guardedSupabaseCall(
+        _client
+            .from('tool_bookings')
+            .select()
+            .eq('status', 'active')
+            .lt('slot_end', DateTime.now().toUtc().toIso8601String()),
+      );
       return (data as List).map((row) => BookingModel.fromJson(row)).toList();
     } catch (e, st) {
       AppLogger.error(
@@ -345,3 +376,4 @@ class ToolRepository {
     }
   }
 }
+

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:grow/shared/models/notification_model.dart';
 import 'package:grow/core/utils/app_logger.dart';
+import 'package:grow/core/utils/query_helper.dart';
 
 class NotificationRepository {
   final SupabaseClient _client;
@@ -8,11 +9,13 @@ class NotificationRepository {
 
   Future<List<NotificationModel>> getNotifications(String userId) async {
     try {
-      final response = await _client
-          .from('notifications')
-          .select()
-          .eq('user_id', userId)
-          .order('created_at', ascending: false);
+      final response = await guardedSupabaseCall(
+        _client
+            .from('notifications')
+            .select()
+            .eq('user_id', userId)
+            .order('created_at', ascending: false),
+      );
 
       return (response as List)
           .map((n) => NotificationModel.fromJson(n))
@@ -29,9 +32,11 @@ class NotificationRepository {
 
   Future<void> markAsRead(String notificationId) async {
     try {
-      await _client
-          .from('notifications')
-          .update({'is_read': true}).eq('id', notificationId);
+      await guardedSupabaseCall(
+        _client
+            .from('notifications')
+            .update({'is_read': true}).eq('id', notificationId),
+      );
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,
@@ -44,9 +49,11 @@ class NotificationRepository {
 
   Future<void> markAllAsRead(String userId) async {
     try {
-      await _client
-          .from('notifications')
-          .update({'is_read': true}).eq('user_id', userId);
+      await guardedSupabaseCall(
+        _client
+            .from('notifications')
+            .update({'is_read': true}).eq('user_id', userId),
+      );
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,
@@ -59,7 +66,9 @@ class NotificationRepository {
 
   Future<void> createNotification(NotificationModel notification) async {
     try {
-      await _client.from('notifications').insert(notification.toJson());
+      await guardedSupabaseCall(
+        _client.from('notifications').insert(notification.toJson()),
+      );
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,

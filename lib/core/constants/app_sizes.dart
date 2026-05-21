@@ -3,12 +3,12 @@ class AppSizes {
   AppSizes._();
 
   // ── Border ───────────────────────────────────────────────
-  static const borderWidth = 2.0;
-  static const borderWidthThick = 3.0;
+  static const borderWidth = 1.0;
+  static const borderWidthThick = 2.0;
 
   // ── Shadow ───────────────────────────────────────────────
-  static const shadowX = 4.0;
-  static const shadowY = 4.0;
+  static const shadowX = 2.0;
+  static const shadowY = 2.0;
 
   // ── Border radius ────────────────────────────────────────
   static const radiusSm = 8.0;
