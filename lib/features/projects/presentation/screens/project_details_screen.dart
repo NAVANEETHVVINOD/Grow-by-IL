@@ -54,7 +54,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         error: (e, st) => NeoErrorWidget(
           title: 'Failed to load project details',
           message: e.toString(),
-          onRetry: () => ref.invalidate(projectDetailProvider(widget.projectId)),
+          onRetry: () =>
+              ref.invalidate(projectDetailProvider(widget.projectId)),
         ),
       ),
       bottomNavigationBar: projectAsync.when(

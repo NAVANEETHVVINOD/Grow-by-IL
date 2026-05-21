@@ -77,7 +77,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Unauthenticated trying to access protected route
       if (session == null && !isPublic) {
-        AppLogger.warn(LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
+        AppLogger.warn(
+            LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
         return '/login';
       }
 
@@ -118,7 +119,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       // ── Public routes (no bottom nav) ────────────────────────
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(
+          path: '/splash', builder: (context, state) => const SplashScreen()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
@@ -230,4 +232,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-

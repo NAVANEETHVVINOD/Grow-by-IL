@@ -76,7 +76,9 @@ class ProjectListScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.navy.withValues(alpha: 0.1), width: 1.5),
+                            border: Border.all(
+                                color: AppColors.navy.withValues(alpha: 0.1),
+                                width: 1.5),
                           ),
                           child: const Icon(Icons.architecture_rounded,
                               color: AppColors.navy),
@@ -109,7 +111,14 @@ class ProjectListScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ).animate(delay: (index * 50).ms).fadeIn(duration: 400.ms, curve: Curves.easeOutCubic).slideY(begin: 0.2, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+              )
+                  .animate(delay: (index * 50).ms)
+                  .fadeIn(duration: 400.ms, curve: Curves.easeOutCubic)
+                  .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic);
             },
           );
         },

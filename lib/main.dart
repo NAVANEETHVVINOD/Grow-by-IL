@@ -39,7 +39,8 @@ void main() async {
         return true;
       };
 
-      AppLogger.success(LogCategory.system, 'FIREBASE_INITIALIZATION_SUCCESS & CRASHLYTICS_SETUP');
+      AppLogger.success(LogCategory.system,
+          'FIREBASE_INITIALIZATION_SUCCESS & CRASHLYTICS_SETUP');
     } catch (e, st) {
       AppLogger.error(
         LogCategory.system,
@@ -95,4 +96,3 @@ class GrowApp extends ConsumerWidget {
     );
   }
 }
-

@@ -106,7 +106,8 @@ class _NeoButtonState extends State<NeoButton> {
                   ],
                 ),
         ),
-      ).animate(target: _isPressed ? 1 : 0).scaleXY(begin: 1.0, end: 0.95, duration: 100.ms, curve: Curves.easeInOut),
+      ).animate(target: _isPressed ? 1 : 0).scaleXY(
+          begin: 1.0, end: 0.95, duration: 100.ms, curve: Curves.easeInOut),
     );
   }
 }

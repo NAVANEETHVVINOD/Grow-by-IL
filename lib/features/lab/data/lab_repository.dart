@@ -108,7 +108,9 @@ class LabRepository {
             .limit(limit),
       );
 
-      return (data as List).map((row) => LabSessionModel.fromJson(row)).toList();
+      return (data as List)
+          .map((row) => LabSessionModel.fromJson(row))
+          .toList();
     } catch (e, st) {
       AppLogger.error(
         LogCategory.lab,
@@ -151,4 +153,3 @@ class LabRepository {
     }
   }
 }
-

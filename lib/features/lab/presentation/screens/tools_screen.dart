@@ -105,7 +105,15 @@ class ToolsScreen extends ConsumerWidget {
                           onTap: () => ref
                               .read(selectedToolProvider.notifier)
                               .state = tool,
-                        ).animate(delay: (index * 40).ms).fadeIn(duration: 400.ms, curve: Curves.easeOutCubic).scaleXY(begin: 0.9, end: 1.0, duration: 400.ms, curve: Curves.easeOutCubic);
+                        )
+                            .animate(delay: (index * 40).ms)
+                            .fadeIn(
+                                duration: 400.ms, curve: Curves.easeOutCubic)
+                            .scaleXY(
+                                begin: 0.9,
+                                end: 1.0,
+                                duration: 400.ms,
+                                curve: Curves.easeOutCubic);
                       }, childCount: tools.length),
                     );
                   },

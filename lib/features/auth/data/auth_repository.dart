@@ -115,11 +115,7 @@ class AuthRepository {
   Future<void> ensureUserProfileExists(User authUser) async {
     try {
       final existing = await guardedSupabaseCall(
-        _client
-            .from('users')
-            .select('id')
-            .eq('id', authUser.id)
-            .maybeSingle(),
+        _client.from('users').select('id').eq('id', authUser.id).maybeSingle(),
       );
 
       if (existing == null) {
@@ -164,11 +160,7 @@ class AuthRepository {
   Future<UserModel?> getUserProfile(String userId) async {
     try {
       final data = await guardedSupabaseCall(
-        _client
-            .from('users')
-            .select()
-            .eq('id', userId)
-            .maybeSingle(),
+        _client.from('users').select().eq('id', userId).maybeSingle(),
       );
 
       if (data == null) return null;
@@ -198,11 +190,7 @@ class AuthRepository {
       });
 
       final data = await guardedSupabaseCall(
-        _client
-            .from('users')
-            .select()
-            .eq('id', authUser.id)
-            .maybeSingle(),
+        _client.from('users').select().eq('id', authUser.id).maybeSingle(),
       );
 
       if (data == null) {
@@ -288,4 +276,3 @@ class AuthRepository {
     }
   }
 }
-

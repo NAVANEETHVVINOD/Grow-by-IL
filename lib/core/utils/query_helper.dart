@@ -16,7 +16,8 @@ Future<T> guardedSupabaseCall<T>(
       error: e,
       stack: stack,
     );
-    throw Exception('Connection timed out. Please check your internet connection and try again.');
+    throw Exception(
+        'Connection timed out. Please check your internet connection and try again.');
   } on PostgrestException catch (e, stack) {
     AppLogger.error(
       LogCategory.network,

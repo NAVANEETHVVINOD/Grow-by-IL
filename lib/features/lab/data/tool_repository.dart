@@ -173,11 +173,7 @@ class ToolRepository {
       // 3. Create Notification for user (Safe Catch)
       try {
         final bookingData = await guardedSupabaseCall(
-          _client
-              .from('tool_bookings')
-              .select()
-              .eq('id', bookingId)
-              .single(),
+          _client.from('tool_bookings').select().eq('id', bookingId).single(),
         );
         await guardedSupabaseCall(
           _client.from('notifications').insert({
@@ -226,11 +222,7 @@ class ToolRepository {
       // 2. Create Notification (Safe Catch)
       try {
         final bookingData = await guardedSupabaseCall(
-          _client
-              .from('tool_bookings')
-              .select()
-              .eq('id', bookingId)
-              .single(),
+          _client.from('tool_bookings').select().eq('id', bookingId).single(),
         );
 
         await guardedSupabaseCall(
@@ -376,4 +368,3 @@ class ToolRepository {
     }
   }
 }
-

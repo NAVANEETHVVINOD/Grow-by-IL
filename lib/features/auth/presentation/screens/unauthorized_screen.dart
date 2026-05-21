@@ -43,10 +43,14 @@ class UnauthorizedScreen extends StatelessWidget {
                   )
                       .animate()
                       .fadeIn(duration: 500.ms, curve: Curves.easeOutCubic)
-                      .scaleXY(begin: 0.7, end: 1.0, duration: 500.ms, curve: Curves.elasticOut),
-                  
+                      .scaleXY(
+                          begin: 0.7,
+                          end: 1.0,
+                          duration: 500.ms,
+                          curve: Curves.elasticOut),
+
                   const SizedBox(height: AppSizes.xl),
-                  
+
                   // Text Warning Box
                   NeoCard(
                     color: Colors.white,
@@ -78,9 +82,9 @@ class UnauthorizedScreen extends StatelessWidget {
                       .animate()
                       .fadeIn(delay: 200.ms, duration: 400.ms)
                       .slideY(begin: 0.1, end: 0.0, curve: Curves.easeOutCubic),
-                  
+
                   const SizedBox(height: AppSizes.xl),
-                  
+
                   // Return Home Action Button
                   NeoButton(
                     label: 'Return to Safety',

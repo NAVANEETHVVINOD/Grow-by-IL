@@ -38,8 +38,7 @@ class _NeoCardState extends State<NeoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final offset =
-        widget.shadowOffset ?? const Offset(0, 4);
+    final offset = widget.shadowOffset ?? const Offset(0, 4);
 
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -48,7 +47,9 @@ class _NeoCardState extends State<NeoCard> {
       decoration: BoxDecoration(
         color: widget.color,
         borderRadius: BorderRadius.circular(widget.borderRadius),
-        border: Border.all(color: widget.borderColor.withValues(alpha: 0.15), width: widget.borderWidth),
+        border: Border.all(
+            color: widget.borderColor.withValues(alpha: 0.15),
+            width: widget.borderWidth),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowColor.withValues(alpha: 0.08),
@@ -70,7 +71,8 @@ class _NeoCardState extends State<NeoCard> {
           widget.onTap!();
         },
         onTapCancel: () => setState(() => _isPressed = false),
-        child: card.animate(target: _isPressed ? 1 : 0).scaleXY(begin: 1.0, end: 0.97, duration: 100.ms, curve: Curves.easeInOut),
+        child: card.animate(target: _isPressed ? 1 : 0).scaleXY(
+            begin: 1.0, end: 0.97, duration: 100.ms, curve: Curves.easeInOut),
       );
     }
     return card;

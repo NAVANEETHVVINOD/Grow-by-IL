@@ -231,7 +231,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                 ),
                 const SizedBox(height: AppSizes.lg),
-              ].animate(interval: 40.ms).fadeIn(duration: 400.ms, curve: Curves.easeOutCubic).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic),
+              ]
+                  .animate(interval: 40.ms)
+                  .fadeIn(duration: 400.ms, curve: Curves.easeOutCubic)
+                  .slideY(
+                      begin: 0.1,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic),
             );
           },
           loading: () => Padding(

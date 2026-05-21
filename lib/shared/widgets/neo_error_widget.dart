@@ -60,7 +60,7 @@ class NeoErrorWidget extends StatelessWidget {
                     curve: Curves.easeOutBack,
                   ),
               const SizedBox(height: AppSizes.lg),
-              
+
               // Title
               Text(
                 displayTitle,
@@ -72,7 +72,7 @@ class NeoErrorWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.sm),
-              
+
               // Message
               Text(
                 displayMessage,
@@ -83,7 +83,7 @@ class NeoErrorWidget extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              
+
               if (onRetry != null) ...[
                 const SizedBox(height: AppSizes.xl),
                 NeoButton(
