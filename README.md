@@ -65,6 +65,8 @@ See `.env.example` for a complete list of required values and where to find them
 
 ## Current status
 **RC4 — Production Readiness Phase**
-- Auth Stabilization, Security Hardening, and Firebase Google Sign-In Integration complete.
-- Core workflows (Bookings, Dashboard, Profiles, QR Scanning) are fully functional.
+- **Auth & Route Hardening**: Implemented role-aware dynamic navigation gating `/admin` direct routing via a Riverpod-backed `routerProvider` and `/unauthorized` fallback UI.
+- **Resilience & Observability**: Integrated Firebase Crashlytics for production exception tracking, and added a centralized 10-second timeout guard on all Supabase queries.
+- **Global Error Handling**: Standardized screen error states using tactile custom retry widgets.
+- **Robust Testing**: Expanded integration flow testing using Mocktail (57 tests passing with 100% clean static analysis).
 - Zero known critical vulnerabilities.
