@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -9,7 +8,6 @@ import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
-import 'package:grow/shared/providers/toast_provider.dart';
 
 class BookingBottomSheet extends ConsumerStatefulWidget {
   const BookingBottomSheet({super.key, required this.tool});
@@ -105,19 +103,19 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             children: [
               Text(
                 widget.tool.name,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navy,
+                    ),
               ),
               Text(
                 widget.tool.category.toUpperCase().replaceAll('_', ' '),
-                style: GoogleFonts.dmSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
               ),
             ],
           ),
@@ -142,11 +140,11 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.spaceGrotesk(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: AppColors.navy,
-      ),
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
     );
   }
 
@@ -181,20 +179,21 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 children: [
                   Text(
                     DateFormat('E').format(date),
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isSelected ? AppColors.navy : AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? AppColors.navy
+                              : AppColors.textSecondary,
+                        ),
                   ),
                   Text(
                     DateFormat('d').format(date),
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.navy,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                        ),
                   ),
                 ],
               ),
@@ -235,11 +234,11 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
                 ),
                 child: Text(
                   opt['label'] as String,
-                  style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    color: isSelected ? Colors.white : AppColors.navy,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: isSelected ? Colors.white : AppColors.navy,
+                      ),
                 ),
               ),
             ),
@@ -279,7 +278,10 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       return Center(
         child: Text(
           'No slots available for this day.',
-          style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: AppColors.textSecondary),
         ),
       );
     }
@@ -318,12 +320,14 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
               ),
               child: Text(
                 DateFormat('h:mm a').format(slot),
-                style: GoogleFonts.dmSans(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: AppColors.navy,
-                  decoration: isConflict ? TextDecoration.lineThrough : null,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 12,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: AppColors.navy,
+                      decoration:
+                          isConflict ? TextDecoration.lineThrough : null,
+                    ),
               ),
             ),
           ),
@@ -346,7 +350,8 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
           isExpanded: true,
           hint: Text(
             'Select a project...',
-            style: GoogleFonts.dmSans(fontSize: 14),
+            style:
+                Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
           ),
           items: [
             const DropdownMenuItem(
@@ -379,8 +384,10 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(hint,
-              style: GoogleFonts.dmSans(
-                  fontSize: 14, color: AppColors.textSecondary)),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontSize: 14, color: AppColors.textSecondary)),
           const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
         ],
       ),
@@ -416,26 +423,19 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
       // Clear selection so the confirm button goes away
       ref.read(selectedToolProvider.notifier).state = null;
 
-      // Senior Dev Touch: Global Top Toast
-      ref.read(toastProvider.notifier).show(
-            title: 'Booking Successful! 🌱',
-            message: 'Your tool reservation has been sent for approval.',
-            color: AppColors.green,
-            icon: Icons.check_circle_rounded,
-          );
-
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(
+          context, true); // Pop the bottom sheet and return true for success
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      ref.read(toastProvider.notifier).show(
-            title: 'Booking Failed',
-            message: 'Something went wrong. Please try again.',
-            color: AppColors.red,
-            icon: Icons.error_outline_rounded,
-          );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
     }
   }
 }

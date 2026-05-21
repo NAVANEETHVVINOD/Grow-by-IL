@@ -6,6 +6,29 @@ import 'app_logger.dart';
 /// Riverpod Provider Observer to report errors to Firebase Crashlytics.
 class AppProviderObserver extends ProviderObserver {
   @override
+  void didAddProvider(
+    ProviderBase<Object?> provider,
+    Object? value,
+    ProviderContainer container,
+  ) {
+    AppLogger.info(
+      LogCategory.system,
+      'PROVIDER ADDED | ${provider.name ?? provider.runtimeType}',
+    );
+  }
+
+  @override
+  void didDisposeProvider(
+    ProviderBase<Object?> provider,
+    ProviderContainer container,
+  ) {
+    AppLogger.info(
+      LogCategory.system,
+      'PROVIDER DISPOSED | ${provider.name ?? provider.runtimeType}',
+    );
+  }
+
+  @override
   void providerDidFail(
     ProviderBase<Object?> provider,
     Object error,
@@ -14,7 +37,7 @@ class AppProviderObserver extends ProviderObserver {
   ) {
     AppLogger.error(
       LogCategory.system,
-      'Provider ${provider.name ?? provider.runtimeType} failed',
+      'PROVIDER FAILED | ${provider.name ?? provider.runtimeType}',
       error: error,
       stack: stackTrace,
     );

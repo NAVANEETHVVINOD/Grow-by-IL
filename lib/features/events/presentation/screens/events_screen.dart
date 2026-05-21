@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -44,11 +43,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen>
               padding: const EdgeInsets.all(AppSizes.lg),
               child: Text(
                 'Events',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navy,
+                    ),
               ),
             ),
             TabBar(
@@ -57,10 +56,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen>
               unselectedLabelColor: AppColors.textSecondary,
               indicatorColor: AppColors.yellow,
               indicatorWeight: 4,
-              labelStyle: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              labelStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
               tabs: const [
                 Tab(text: 'UPCOMING'),
                 Tab(text: 'MY RSVPS'),
@@ -117,7 +116,10 @@ class _EventsListTab extends ConsumerWidget {
                   statusFilter == 'upcoming'
                       ? 'No upcoming events'
                       : 'No past events',
-                  style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -171,7 +173,10 @@ class _MyRsvpsTab extends ConsumerWidget {
                 const SizedBox(height: AppSizes.md),
                 Text(
                   'You haven\'t RSVP\'d to any events',
-                  style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -245,21 +250,22 @@ class _EventCard extends StatelessWidget {
                         const Spacer(),
                         Text(
                           '${event.rsvpCount} attending',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       event.title,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.navy,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.navy,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -272,10 +278,11 @@ class _EventCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           event.eventDate.toLocal().toString().substring(5, 16),
-                          style: GoogleFonts.dmSans(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -304,11 +311,11 @@ class _TypeChip extends StatelessWidget {
       ),
       child: Text(
         type.toUpperCase(),
-        style: GoogleFonts.dmSans(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: AppColors.navy,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy,
+            ),
       ),
     );
   }

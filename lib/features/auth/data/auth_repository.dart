@@ -24,7 +24,7 @@ final currentUserProvider = FutureProvider<UserModel?>((ref) async {
   if (session == null) return null;
 
   final repository = ref.watch(authRepositoryProvider);
-  return repository.getUserProfile(session.user.id);
+  return repository.getCurrentUser();
 });
 
 class AuthRepository {

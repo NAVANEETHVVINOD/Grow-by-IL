@@ -48,14 +48,10 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 /// Central route configuration for the Grow~ app.
 final routerProvider = Provider<GoRouter>((ref) {
-  // ignore: deprecated_member_use
-  final authStream = ref.watch(authStateProvider.stream);
-  final userProfileAsync = ref.watch(currentUserProvider);
-
   return GoRouter(
     initialLocation: '/splash',
-    debugLogDiagnostics: true,
-    refreshListenable: GoRouterRefreshStream(authStream),
+    debugLogDiagnostics: false,
+    refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),
     redirect: (context, state) {
       final session = supabase.auth.currentSession;
       final path = state.uri.path;
@@ -97,6 +93,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (path.startsWith('/admin')) {
         if (session == null) return '/login';
 
+        final userProfileAsync = ref.read(currentUserProvider);
         final user = userProfileAsync.valueOrNull;
         if (user == null) {
           // If profile is loading, let it proceed to AdminDashboard which shows loading indicator

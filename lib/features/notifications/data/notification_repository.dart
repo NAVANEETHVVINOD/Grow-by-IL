@@ -80,6 +80,8 @@ class NotificationRepository {
   }
 
   Stream<List<NotificationModel>> subscribeToNotifications(String userId) {
+    AppLogger.info(
+        LogCategory.notifications, 'Subscribing to notifications for $userId');
     return _client
         .from('notifications')
         .stream(primaryKey: ['id'])

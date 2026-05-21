@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -40,27 +39,27 @@ class UserQrCard extends StatelessWidget {
           const SizedBox(height: AppSizes.lg),
           Text(
             user.name,
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: AppSizes.xs),
           Text(
             user.email,
-            style: GoogleFonts.dmSans(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
           ),
           if (user.collegeRoll != null) ...[
             const SizedBox(height: AppSizes.xs),
             Text(
               user.collegeRoll!,
-              style: GoogleFonts.dmSans(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ],
@@ -85,10 +84,10 @@ void showUserQrCard(BuildContext context, UserModel user) {
           children: [
             Text(
               AppStrings.myQr,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: AppSizes.lg),
             UserQrCard(user: user),

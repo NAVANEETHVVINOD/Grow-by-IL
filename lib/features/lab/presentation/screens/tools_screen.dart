@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/shared/widgets/shimmer_skeleton.dart';
+import 'package:grow/shared/widgets/neo_success_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/lab/presentation/widgets/booking_bottom_sheet.dart';
 import 'package:grow/shared/models/tool_model.dart';
@@ -105,15 +106,7 @@ class ToolsScreen extends ConsumerWidget {
                           onTap: () => ref
                               .read(selectedToolProvider.notifier)
                               .state = tool,
-                        )
-                            .animate(delay: (index * 40).ms)
-                            .fadeIn(
-                                duration: 400.ms, curve: Curves.easeOutCubic)
-                            .scaleXY(
-                                begin: 0.9,
-                                end: 1.0,
-                                duration: 400.ms,
-                                curve: Curves.easeOutCubic);
+                        );
                       }, childCount: tools.length),
                     );
                   },
@@ -157,14 +150,27 @@ class ToolsScreen extends ConsumerWidget {
               right: AppSizes.lg,
               child: NeoButton(
                 label: 'Confirm Booking',
-                onPressed: () {
-                  showModalBottomSheet(
+                onPressed: () async {
+                  final result = await showModalBottomSheet<bool>(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                     builder: (context) =>
                         BookingBottomSheet(tool: selectedTool),
                   );
+
+                  if (result == true && context.mounted) {
+                    NeoSuccessDialog.show(
+                      context,
+                      title: 'Booking Sent! 🌱',
+                      message:
+                          'Your tool reservation has been sent for approval.',
+                      buttonText: 'Back to Home',
+                      onButtonPressed: () {
+                        context.go('/home');
+                      },
+                    );
+                  }
                 },
               ),
             ),

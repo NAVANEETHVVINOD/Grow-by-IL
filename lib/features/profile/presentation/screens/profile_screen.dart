@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -320,11 +319,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(width: AppSizes.sm),
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
         const Spacer(),
         if (onAction != null)
@@ -332,11 +331,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: onAction,
             child: Text(
               actionLabel ?? 'VIEW ALL',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.cobalt,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.cobalt,
+                  ),
             ),
           ),
       ],
@@ -425,20 +424,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           children: [
                             Text(
                               project.title,
-                              style: GoogleFonts.spaceGrotesk(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               project.visibility.toUpperCase(),
-                              style: GoogleFonts.dmSans(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                           ],
                         ),
@@ -479,18 +484,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 8),
             Text(
               'Launch New',
-              style: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: AppColors.navy,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: AppColors.navy,
+                  ),
             ),
             Text(
               'Project',
-              style: GoogleFonts.dmSans(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
             ),
           ],
         ),
@@ -517,11 +522,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(width: 8),
             Text(
               label,
-              style: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: textColor ?? AppColors.navy,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: textColor ?? AppColors.navy,
+                  ),
             ),
           ],
         ),
@@ -580,11 +585,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(width: 4),
                   Text(
                     b['name'] as String,
-                    style: GoogleFonts.dmSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: b['color'] as Color,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: b['color'] as Color,
+                        ),
                   ),
                 ],
               ),
@@ -614,22 +619,22 @@ class _StatItem extends StatelessWidget {
         countAsync.when(
           data: (count) => Text(
             count.toString(),
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.navy,
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navy,
+                ),
           ),
           loading: () => const ShimmerSkeleton(width: 24, height: 20),
           error: (_, __) => const Text('0'),
         ),
         Text(
           label,
-          style: GoogleFonts.dmSans(
-            fontSize: 10,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 10,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );

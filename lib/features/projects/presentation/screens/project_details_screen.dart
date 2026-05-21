@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/core/constants/app_strings.dart';
@@ -120,12 +120,12 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         const SizedBox(height: AppSizes.md),
         Text(
           project.title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-            height: 1.1,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+                height: 1.1,
+              ),
         ),
       ],
     );
@@ -140,29 +140,29 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       children: [
         Text(
           'Description',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
         const SizedBox(height: AppSizes.sm),
         Text(
           project.description ?? 'No description provided.',
-          style: GoogleFonts.dmSans(
-            fontSize: 16,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
         ),
         const SizedBox(height: AppSizes.xl),
         Text(
           'Team',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
         const SizedBox(height: AppSizes.md),
         membersAsync.when(
@@ -275,6 +275,18 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           .leaveProject(projectId, user.id);
       ref.invalidate(projectMembersProvider(projectId));
       ref.invalidate(userProjectsProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Successfully left project'),
+            backgroundColor: AppColors.green),
+      );
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/projects');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -307,11 +319,11 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             children: [
               Text(
                 'Project Actions',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.navy,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.lg),
@@ -357,10 +369,10 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           const SizedBox(width: AppSizes.md),
           Text(
             label,
-            style: GoogleFonts.dmSans(
-              fontWeight: FontWeight.bold,
-              color: color ?? AppColors.navy,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color ?? AppColors.navy,
+                ),
           ),
         ],
       ),
@@ -439,11 +451,11 @@ class _TypeBadge extends StatelessWidget {
       ),
       child: Text(
         type.toUpperCase(),
-        style: GoogleFonts.dmSans(
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-          color: Colors.white,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: Colors.white,
+            ),
       ),
     );
   }
@@ -468,11 +480,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.toUpperCase(),
-        style: GoogleFonts.dmSans(
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-          color: color,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: color,
+            ),
       ),
     );
   }
@@ -504,10 +516,10 @@ class _MemberChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             member.userName ?? 'User',
-            style: GoogleFonts.dmSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(width: 4),
           Container(

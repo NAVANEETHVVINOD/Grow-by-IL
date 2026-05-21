@@ -38,7 +38,9 @@ class _NeoCardState extends State<NeoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final offset = widget.shadowOffset ?? const Offset(0, 4);
+    final offset = _isPressed
+        ? const Offset(0, 0)
+        : (widget.shadowOffset ?? const Offset(4, 4));
 
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -48,13 +50,13 @@ class _NeoCardState extends State<NeoCard> {
         color: widget.color,
         borderRadius: BorderRadius.circular(widget.borderRadius),
         border: Border.all(
-            color: widget.borderColor.withValues(alpha: 0.15),
-            width: widget.borderWidth),
+            color: widget.borderColor,
+            width: widget.borderWidth < 2 ? 3 : widget.borderWidth),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor.withValues(alpha: 0.08),
+            color: AppColors.navy,
             offset: offset,
-            blurRadius: 16,
+            blurRadius: 0, // Hard shadow
             spreadRadius: 0,
           ),
         ],
@@ -63,18 +65,20 @@ class _NeoCardState extends State<NeoCard> {
     );
 
     if (widget.onTap != null) {
-      return GestureDetector(
-        onTapDown: (_) => setState(() => _isPressed = true),
-        onTapUp: (_) {
-          setState(() => _isPressed = false);
-          HapticFeedback.lightImpact();
-          widget.onTap!();
-        },
-        onTapCancel: () => setState(() => _isPressed = false),
-        child: card.animate(target: _isPressed ? 1 : 0).scaleXY(
-            begin: 1.0, end: 0.97, duration: 100.ms, curve: Curves.easeInOut),
+      return RepaintBoundary(
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            widget.onTap!();
+          },
+          child: card.animate(target: _isPressed ? 1 : 0).scaleXY(
+              begin: 1.0, end: 0.97, duration: 100.ms, curve: Curves.easeInOut),
+        ),
       );
     }
-    return card;
+    return RepaintBoundary(child: card);
   }
 }

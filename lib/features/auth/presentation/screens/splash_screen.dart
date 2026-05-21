@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/app_logger.dart';
@@ -90,12 +89,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             Text(
               'Grow~',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 64,
-                fontWeight: FontWeight.w700,
-                color: AppColors.navy,
-                letterSpacing: -2,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 64,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.navy,
+                    letterSpacing: -2,
+                  ),
             ),
             const SizedBox(height: 8),
             Container(
