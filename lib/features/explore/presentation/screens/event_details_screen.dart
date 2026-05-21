@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -111,11 +110,11 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
               ),
               child: Text(
                 event.type.toUpperCase(),
-                style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: AppColors.navy,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: AppColors.navy,
+                    ),
               ),
             ),
             const SizedBox(width: AppSizes.sm),
@@ -125,12 +124,12 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
         const SizedBox(height: AppSizes.md),
         Text(
           event.title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-            height: 1.1,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+                height: 1.1,
+              ),
         ),
       ],
     );
@@ -164,20 +163,20 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
       children: [
         Text(
           'About the Event',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
         const SizedBox(height: AppSizes.sm),
         Text(
           event.description ?? 'No description provided.',
-          style: GoogleFonts.dmSans(
-            fontSize: 16,
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
         ),
         const SizedBox(height: AppSizes.lg),
         NeoCard(
@@ -192,14 +191,17 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                   children: [
                     Text(
                       'Location',
-                      style: GoogleFonts.dmSans(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.navy,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.navy,
+                          ),
                     ),
                     Text(
                       event.venue ?? 'IdeaLab Main Room',
-                      style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -343,18 +345,18 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             title,
-            style: GoogleFonts.dmSans(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
           ),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: AppColors.navy,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.navy,
+                ),
           ),
         ],
       ),

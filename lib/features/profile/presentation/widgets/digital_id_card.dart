@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -91,11 +90,11 @@ class _DigitalIdCardState extends State<DigitalIdCard>
               children: [
                 Text(
                   'GROW~ MEMBER',
-                  style: GoogleFonts.spaceGrotesk(
-                    color: AppColors.yellow,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.yellow,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
                 ),
                 const Icon(Icons.bolt_rounded, color: AppColors.yellow),
               ],
@@ -155,21 +154,21 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                     children: [
                       Text(
                         widget.user.name.toUpperCase(),
-                        style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         widget.user.role.toUpperCase(),
-                        style: GoogleFonts.dmSans(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          letterSpacing: 1,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              letterSpacing: 1,
+                            ),
                       ),
                     ],
                   ),
@@ -182,10 +181,10 @@ class _DigitalIdCardState extends State<DigitalIdCard>
               children: [
                 Text(
                   'EST. 2024',
-                  style: GoogleFonts.dmSans(
-                    color: Colors.white38,
-                    fontSize: 10,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
                 ),
                 const Text(
                   'VERIFIED MAKER',
@@ -219,18 +218,18 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                 children: [
                   Text(
                     'SCAN TO IDENTIFY',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Use this QR for lab access, tool checkout, and event attendance.',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 10,
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 10,
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),

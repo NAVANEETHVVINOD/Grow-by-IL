@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
@@ -29,11 +28,11 @@ class NeoTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.dmSans(
-            fontWeight: FontWeight.w600,
-            color: AppColors.navy,
-            fontSize: 14,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.navy,
+                fontSize: 14,
+              ),
         ),
         const SizedBox(height: AppSizes.sm),
         TextFormField(
@@ -41,7 +40,10 @@ class NeoTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
-          style: GoogleFonts.dmSans(fontSize: 16, color: AppColors.textPrimary),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontSize: 16, color: AppColors.textPrimary),
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.surface,

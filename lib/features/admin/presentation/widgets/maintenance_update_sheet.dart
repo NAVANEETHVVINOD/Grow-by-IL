@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/core/utils/app_logger.dart';
@@ -52,11 +51,11 @@ class _MaintenanceUpdateSheetState
         children: [
           Text(
             'Update Status: ${widget.tool.name}',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.navy,
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navy,
+                ),
           ),
           const SizedBox(height: AppSizes.lg),
           _buildDropdown(),

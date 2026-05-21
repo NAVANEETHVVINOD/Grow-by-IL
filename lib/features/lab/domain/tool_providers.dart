@@ -25,8 +25,20 @@ final toolsProvider = FutureProvider<List<ToolModel>>((ref) async {
   return repo.getTools(category: category, searchQuery: searchQuery);
 });
 
+final myBookingsStreamProvider =
+    StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  final userId = ref.watch(currentUserProvider).valueOrNull?.id;
+  if (userId == null) return Stream.value([]);
+  return supabase
+      .from('tool_bookings')
+      .stream(primaryKey: ['id']).eq('user_id', userId);
+});
+
 /// Future provider for the current user's bookings
 final myBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+  // Watch the stream to trigger re-fetches on realtime updates
+  ref.watch(myBookingsStreamProvider);
+
   final userAsync = ref.watch(currentUserProvider);
   final userId = userAsync.valueOrNull?.id;
   if (userId == null) return [];

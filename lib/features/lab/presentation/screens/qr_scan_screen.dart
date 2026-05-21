@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:grow/core/constants/app_qr.dart';
@@ -36,7 +35,10 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
         appBar: AppBar(
           title: Text(
             AppStrings.qrSimulatorWeb,
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           backgroundColor: AppColors.background,
           elevation: 0,
@@ -55,15 +57,18 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                 const SizedBox(height: AppSizes.lg),
                 Text(
                   AppStrings.simulationMode,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: AppSizes.sm),
                 Text(
                   AppStrings.simulationPrompt,
-                  style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSizes.xl),
                 Builder(
@@ -143,11 +148,11 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
                   const SizedBox(width: AppSizes.sm),
                   Text(
                     AppStrings.scanQrCode,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                   ),
                 ],
               ),
@@ -208,11 +213,11 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
             const SizedBox(height: AppSizes.md),
             Text(
               _resultMessage,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],

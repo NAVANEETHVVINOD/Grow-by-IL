@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
@@ -45,14 +44,14 @@ class _NeoButtonState extends State<NeoButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: () {
         if (!widget.isLoading && widget.onPressed != null) {
           HapticFeedback.lightImpact();
           widget.onPressed!();
         }
       },
-      onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
@@ -64,14 +63,14 @@ class _NeoButtonState extends State<NeoButton> {
               : widget.color,
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           border: Border.all(
-            color: widget.borderColor.withValues(alpha: 0.2),
-            width: AppSizes.borderWidth,
+            color: widget.borderColor,
+            width: 3,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowColor.withValues(alpha: 0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 12,
+              color: AppColors.navy,
+              offset: _isPressed ? const Offset(0, 0) : const Offset(4, 4),
+              blurRadius: 0,
               spreadRadius: 0,
             ),
           ],
@@ -97,11 +96,11 @@ class _NeoButtonState extends State<NeoButton> {
                     ],
                     Text(
                       widget.label,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: widget.fontSize,
-                        fontWeight: FontWeight.w700,
-                        color: widget.textColor,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: widget.fontSize,
+                            fontWeight: FontWeight.w700,
+                            color: widget.textColor,
+                          ),
                     ),
                   ],
                 ),

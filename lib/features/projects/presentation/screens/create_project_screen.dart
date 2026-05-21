@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -53,11 +52,11 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
         ),
         title: Text(
           'Start a Project',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
       ),
       body: Form(
@@ -97,11 +96,14 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'SELECT COVER PHOTO',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
                           ),
                         ],
                       ),
@@ -142,10 +144,10 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         label,
-        style: GoogleFonts.spaceGrotesk(
-          fontWeight: FontWeight.bold,
-          color: AppColors.navy,
-        ),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy,
+            ),
       ),
     );
   }
@@ -197,10 +199,10 @@ class _CreateProjectScreenState extends ConsumerState<CreateProjectScreen> {
                   value: i,
                   child: Text(
                     i.toString().toUpperCase(),
-                    style: GoogleFonts.dmSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               )

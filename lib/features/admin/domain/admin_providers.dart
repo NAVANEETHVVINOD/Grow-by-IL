@@ -7,7 +7,18 @@ final adminRepositoryProvider = Provider<AdminRepository>((ref) {
   return AdminRepository(supabase);
 });
 
-final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+final pendingBookingsStreamProvider =
+    StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  return supabase
+      .from('tool_bookings')
+      .stream(primaryKey: ['id']).eq('status', 'pending');
+});
+
+final pendingBookingsProvider =
+    FutureProvider.autoDispose<List<BookingModel>>((ref) async {
+  // Watch the raw stream to trigger a re-fetch whenever the table changes
+  ref.watch(pendingBookingsStreamProvider);
+
   final repo = ref.watch(adminRepositoryProvider);
   return repo.getPendingBookings();
 });

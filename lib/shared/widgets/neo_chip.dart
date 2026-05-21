@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Compact neobrutalist status chip / badge.
 ///
@@ -45,12 +44,12 @@ class NeoChip extends StatelessWidget {
       child: Center(
         child: Text(
           label,
-          style: GoogleFonts.dmSans(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: textColor,
-            height: 1,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+                height: 1,
+              ),
         ),
       ),
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -59,21 +58,23 @@ class UnauthorizedScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Access Denied',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.navy,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.navy,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppSizes.md),
                         Text(
                           'You do not have the required permissions to view this section. This page is restricted to lab administrators and operational heads.',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                            height: 1.5,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontSize: 14,
+                                    color: AppColors.textSecondary,
+                                    height: 1.5,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:grow/core/constants/app_colors.dart';
@@ -24,15 +23,21 @@ class ProjectListScreen extends ConsumerWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
-          onPressed: () => context.go('/home'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
         ),
         title: Text(
           'My Projects',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
       ),
       body: projectsAsync.when(
@@ -90,17 +95,23 @@ class ProjectListScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 project.title,
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                               ),
                               Text(
                                 project.visibility.toUpperCase(),
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
                               ),
                             ],
                           ),

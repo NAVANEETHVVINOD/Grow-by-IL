@@ -17,44 +17,41 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ── Firebase initialization ──────────────────────────────
-  if (DefaultFirebaseOptions.isConfigured) {
-    try {
+  try {
+    if (DefaultFirebaseOptions.isConfigured) {
       AppLogger.info(
         LogCategory.system,
-        'FIREBASE_INITIALIZATION_START | '
-        'projectId=${DefaultFirebaseOptions.android.projectId} '
-        'appId=${DefaultFirebaseOptions.android.appId}',
+        'FIREBASE_INITIALIZATION | Using injected --dart-define options',
       );
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-
-      // Pass all uncaught errors to Crashlytics
-      FlutterError.onError = (errorDetails) {
-        FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
-      };
-
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
-
-      AppLogger.success(LogCategory.system,
-          'FIREBASE_INITIALIZATION_SUCCESS & CRASHLYTICS_SETUP');
-    } catch (e, st) {
-      AppLogger.error(
+    } else {
+      AppLogger.info(
         LogCategory.system,
-        'FIREBASE_INITIALIZATION_FAILED',
-        error: e,
-        stack: st,
+        'FIREBASE_INITIALIZATION | Using native google-services.json fallback',
       );
+      await Firebase.initializeApp();
     }
-  } else {
-    AppLogger.warn(
+
+    // Pass all uncaught errors to Crashlytics
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+    };
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    AppLogger.success(LogCategory.system,
+        'FIREBASE_INITIALIZATION_SUCCESS & CRASHLYTICS_SETUP');
+  } catch (e, st) {
+    AppLogger.error(
       LogCategory.system,
-      'FIREBASE_NOT_CONFIGURED | Firebase keys missing from --dart-define. '
-      'Google Sign-In will not work. '
-      'Pass: --dart-define=FIREBASE_API_KEY=... --dart-define=FIREBASE_APP_ID=... etc.',
+      'FIREBASE_INITIALIZATION_FAILED',
+      error: e,
+      stack: st,
     );
   }
 

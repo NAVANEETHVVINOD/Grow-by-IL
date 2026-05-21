@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/features/notifications/domain/notification_providers.dart';
@@ -62,14 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: AppSizes.md),
                 _buildActiveProjects(ref),
                 const SizedBox(height: 100),
-              ]
-                  .animate(interval: 40.ms)
-                  .fadeIn(duration: 400.ms, curve: Curves.easeOutCubic)
-                  .slideY(
-                      begin: 0.1,
-                      end: 0,
-                      duration: 400.ms,
-                      curve: Curves.easeOutCubic),
+              ],
             ),
           ),
         ),
@@ -103,17 +94,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Text(
                               AppStrings.liveInLab,
-                              style: GoogleFonts.spaceGrotesk(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.green,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.green,
+                                  ),
                             ),
                             Text(
                               'Checked in at ${session.checkinTime?.toLocal().toString().substring(11, 16) ?? "--:--"}',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
                             ),
                           ],
                         ),
@@ -155,17 +152,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             AppStrings.activeBooking,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.cobalt,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.cobalt,
+                                ),
                           ),
                           Text(
                             'Machine usage until ${booking.slotEnd.toLocal().toString().substring(11, 16)}',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                           ),
                         ],
                       ),
@@ -204,11 +207,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 radius: 24,
                 child: Text(
                   user.name.substring(0, 1).toUpperCase(),
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: AppColors.navy,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: AppColors.navy,
+                      ),
                 ),
               ),
             ),
@@ -219,19 +222,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     'Hello, ${user.name.split(' ').first}',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.navy,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                        ),
                   ),
                   Text(
                     'Level ${user.level} \u2022 ${user.xp} XP',
-                    style: GoogleFonts.dmSans(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -361,11 +364,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return liveCount.when(
       data: (count) => Text(
         '$count ${AppStrings.activeNow}',
-        style: GoogleFonts.dmSans(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColors.navy.withValues(alpha: 0.7),
-        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.navy.withValues(alpha: 0.7),
+            ),
       ),
       loading: () => const ShimmerSkeleton(width: 60, height: 14),
       error: (err, stack) => const SizedBox.shrink(),
@@ -390,11 +393,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(width: AppSizes.sm),
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
         ),
         const Spacer(),
         if (onAction != null)
@@ -402,11 +405,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: onAction,
             child: Text(
               actionLabel ?? AppStrings.viewAll,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.cobalt,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.cobalt,
+                  ),
             ),
           ),
       ],
@@ -495,7 +498,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Expanded(
                     child: Text(
                       AppStrings.noActiveProjects,
-                      style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -540,10 +546,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         Text(
                           project.title,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -563,10 +570,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           child: Text(
                             project.visibility.toUpperCase(),
-                            style: GoogleFonts.dmSans(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                       ],
@@ -691,11 +701,11 @@ class _ActionTileState extends State<_ActionTile>
                 children: [
                   Text(
                     widget.title,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: widget.textColor,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: widget.textColor,
+                        ),
                   ),
                   widget.subtitle,
                 ],
@@ -751,19 +761,19 @@ class _ScheduleItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     time,
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -62,10 +61,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 onPressed: () => context.go('/login'),
                 child: Text(
                   'Skip',
-                  style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ),
             ),
