@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/query_helper.dart';
 import '../../../shared/models/lab_session_model.dart';
 
 class LabRepository {
@@ -11,14 +12,16 @@ class LabRepository {
   Future<LabSessionModel?> getActiveSession(String userId) async {
     AppLogger.action(LogCategory.lab, 'getActiveSession', {'userId': userId});
     try {
-      final data = await _client
-          .from('lab_sessions')
-          .select()
-          .eq('user_id', userId)
-          .isFilter('checkout_time', null)
-          .order('checkin_time', ascending: false)
-          .limit(1)
-          .maybeSingle();
+      final data = await guardedSupabaseCall(
+        _client
+            .from('lab_sessions')
+            .select()
+            .eq('user_id', userId)
+            .isFilter('checkout_time', null)
+            .order('checkin_time', ascending: false)
+            .limit(1)
+            .maybeSingle(),
+      );
 
       if (data == null) return null;
       return LabSessionModel.fromJson(data);
@@ -41,11 +44,13 @@ class LabRepository {
     });
 
     try {
-      final data = await _client
-          .from('lab_sessions')
-          .insert({'user_id': userId, 'purpose': purpose})
-          .select()
-          .single();
+      final data = await guardedSupabaseCall(
+        _client
+            .from('lab_sessions')
+            .insert({'user_id': userId, 'purpose': purpose})
+            .select()
+            .single(),
+      );
 
       final session = LabSessionModel.fromJson(data);
       AppLogger.info(
@@ -64,9 +69,11 @@ class LabRepository {
     AppLogger.action(LogCategory.lab, 'checkOut', {'sessionId': sessionId});
 
     try {
-      await _client.from('lab_sessions').update({
-        'checkout_time': DateTime.now().toUtc().toIso8601String()
-      }).eq('id', sessionId);
+      await guardedSupabaseCall(
+        _client.from('lab_sessions').update({
+          'checkout_time': DateTime.now().toUtc().toIso8601String()
+        }).eq('id', sessionId),
+      );
 
       AppLogger.info(
         LogCategory.lab,
@@ -91,14 +98,28 @@ class LabRepository {
     int limit = 20,
   }) async {
     AppLogger.action(LogCategory.lab, 'getMyHistory', {'userId': userId});
-    final data = await _client
-        .from('lab_sessions')
-        .select()
-        .eq('user_id', userId)
-        .order('checkin_time', ascending: false)
-        .limit(limit);
+    try {
+      final data = await guardedSupabaseCall(
+        _client
+            .from('lab_sessions')
+            .select()
+            .eq('user_id', userId)
+            .order('checkin_time', ascending: false)
+            .limit(limit),
+      );
 
-    return (data as List).map((row) => LabSessionModel.fromJson(row)).toList();
+      return (data as List)
+          .map((row) => LabSessionModel.fromJson(row))
+          .toList();
+    } catch (e, st) {
+      AppLogger.error(
+        LogCategory.lab,
+        'getMyHistory failed',
+        error: e,
+        stack: st,
+      );
+      rethrow;
+    }
   }
 
   /// Refresh Supabase auth session if close to expiry.
@@ -119,7 +140,7 @@ class LabRepository {
           LogCategory.auth,
           'Session expiring in ${expiresIn.inMinutes}m, refreshing...',
         );
-        await _client.auth.refreshSession();
+        await guardedSupabaseCall(_client.auth.refreshSession());
         AppLogger.info(LogCategory.auth, 'Session refreshed successfully');
       }
     } catch (e, st) {

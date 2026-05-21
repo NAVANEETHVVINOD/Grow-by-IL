@@ -52,12 +52,14 @@ class MainShell extends ConsumerStatefulWidget {
   ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends ConsumerState<MainShell> {
+class _MainShellState extends ConsumerState<MainShell>
+    with WidgetsBindingObserver {
   late Timer _heartbeatTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _heartbeatTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       AppLogger.info(
         LogCategory.system,
@@ -69,8 +71,20 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _heartbeatTimer.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      AppLogger.info(
+        LogCategory.system,
+        'App resumed — refreshing session to ensure token freshness',
+      );
+      ref.read(labRepositoryProvider).refreshSession();
+    }
   }
 
   @override

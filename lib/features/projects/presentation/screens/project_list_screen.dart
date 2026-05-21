@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/shared/widgets/shimmer_skeleton.dart';
 
 class ProjectListScreen extends ConsumerWidget {
@@ -74,7 +76,9 @@ class ProjectListScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.navy, width: 2),
+                            border: Border.all(
+                                color: AppColors.navy.withValues(alpha: 0.1),
+                                width: 1.5),
                           ),
                           child: const Icon(Icons.architecture_rounded,
                               color: AppColors.navy),
@@ -107,7 +111,14 @@ class ProjectListScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              );
+              )
+                  .animate(delay: (index * 50).ms)
+                  .fadeIn(duration: 400.ms, curve: Curves.easeOutCubic)
+                  .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic);
             },
           );
         },
@@ -119,7 +130,11 @@ class ProjectListScreen extends ConsumerWidget {
             child: ShimmerSkeleton(width: double.infinity, height: 80),
           ),
         ),
-        error: (e, __) => Center(child: Text('Error: $e')),
+        error: (e, __) => NeoErrorWidget(
+          title: 'Failed to load projects',
+          message: e.toString(),
+          onRetry: () => ref.invalidate(userProjectsProvider),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.yellow,

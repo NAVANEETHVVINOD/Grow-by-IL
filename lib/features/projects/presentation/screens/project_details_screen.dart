@@ -8,6 +8,7 @@ import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/project_member_model.dart';
 import 'package:grow/shared/widgets/neo_button.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
+import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
 
@@ -50,7 +51,12 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) => NeoErrorWidget(
+          title: 'Failed to load project details',
+          message: e.toString(),
+          onRetry: () =>
+              ref.invalidate(projectDetailProvider(widget.projectId)),
+        ),
       ),
       bottomNavigationBar: projectAsync.when(
         data: (project) =>

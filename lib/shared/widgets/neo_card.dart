@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 
 /// Neobrutalist card — the core container widget for Grow~.
-///
-/// Thick solid border, flat offset shadow, no blur.
-class NeoCard extends StatelessWidget {
+/// Refined with premium soft shadows and dynamic borders.
+class NeoCard extends StatefulWidget {
   const NeoCard({
     super.key,
     required this.child,
@@ -29,30 +30,50 @@ class NeoCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final offset =
-        shadowOffset ?? const Offset(AppSizes.shadowX, AppSizes.shadowY);
+  State<NeoCard> createState() => _NeoCardState();
+}
 
-    final card = Container(
-      padding: padding,
+class _NeoCardState extends State<NeoCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final offset = widget.shadowOffset ?? const Offset(0, 4);
+
+    final card = AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOutCubic,
+      padding: widget.padding,
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor, width: borderWidth),
+        color: widget.color,
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        border: Border.all(
+            color: widget.borderColor.withValues(alpha: 0.15),
+            width: widget.borderWidth),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
+            color: AppColors.shadowColor.withValues(alpha: 0.08),
             offset: offset,
-            blurRadius: 0,
+            blurRadius: 16,
             spreadRadius: 0,
           ),
         ],
       ),
-      child: child,
+      child: widget.child,
     );
 
-    if (onTap != null) {
-      return GestureDetector(onTap: onTap, child: card);
+    if (widget.onTap != null) {
+      return GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          HapticFeedback.lightImpact();
+          widget.onTap!();
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: card.animate(target: _isPressed ? 1 : 0).scaleXY(
+            begin: 1.0, end: 0.97, duration: 100.ms, curve: Curves.easeInOut),
+      );
     }
     return card;
   }

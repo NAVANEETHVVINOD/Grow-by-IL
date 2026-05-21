@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/features/notifications/domain/notification_providers.dart';
@@ -23,31 +24,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    );
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,36 +38,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ref.invalidate(activeBookingProvider);
             ref.invalidate(currentUserProvider);
           },
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSizes.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(context, ref),
-                  // const SizedBox(height: AppSizes.lg),
-                  // _buildSearchBar(context, ref), // REMOVED: fake search
-                  const SizedBox(height: AppSizes.lg),
-                  _buildLiveStatus(ref),
-                  const SizedBox(height: AppSizes.lg),
-                  _buildActionGrid(context, ref),
-                  const SizedBox(height: AppSizes.xxl),
-                  _buildSectionHeader(AppStrings.yourSchedule),
-                  const SizedBox(height: AppSizes.md),
-                  _buildUpcomingSchedule(ref),
-                  const SizedBox(height: AppSizes.xxl),
-                  _buildSectionHeader(
-                    AppStrings.activeProjects,
-                    onAction: () => context.go('/profile'),
-                    actionLabel: AppStrings.viewAll,
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  _buildActiveProjects(ref),
-                  const SizedBox(height: 100),
-                ],
-              ),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSizes.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(context, ref),
+                const SizedBox(height: AppSizes.lg),
+                _buildLiveStatus(ref),
+                const SizedBox(height: AppSizes.lg),
+                _buildActionGrid(context, ref),
+                const SizedBox(height: AppSizes.xxl),
+                _buildSectionHeader(AppStrings.yourSchedule),
+                const SizedBox(height: AppSizes.md),
+                _buildUpcomingSchedule(ref),
+                const SizedBox(height: AppSizes.xxl),
+                _buildSectionHeader(
+                  AppStrings.activeProjects,
+                  onAction: () => context.go('/profile'),
+                  actionLabel: AppStrings.viewAll,
+                ),
+                const SizedBox(height: AppSizes.md),
+                _buildActiveProjects(ref),
+                const SizedBox(height: 100),
+              ]
+                  .animate(interval: 40.ms)
+                  .fadeIn(duration: 400.ms, curve: Curves.easeOutCubic)
+                  .slideY(
+                      begin: 0.1,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic),
             ),
           ),
         ),
