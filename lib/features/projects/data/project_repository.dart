@@ -153,16 +153,6 @@ class ProjectRepository {
         }),
       );
 
-      // Notify Owner via server-side RPC (bypasses RLS safely)
-      final project = await getProjectById(projectId);
-      await _client.rpc('notify_user', params: {
-        'p_user_id': project.createdBy,
-        'p_type': 'project_join',
-        'p_title': 'New Team Member',
-        'p_message': 'Someone just joined "${project.title}".',
-        'p_related_id': projectId,
-      });
-
       AppLogger.info(
         LogCategory.projects,
         'User $userId joined project $projectId',

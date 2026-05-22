@@ -175,23 +175,6 @@ class ToolRepository {
         }).eq('id', bookingId),
       );
 
-      // 3. Notify user via server-side RPC (bypasses RLS safely)
-      try {
-        final bookingData = await guardedSupabaseCall(
-          _client.from('tool_bookings').select().eq('id', bookingId).single(),
-        );
-        await _client.rpc('notify_user', params: {
-          'p_user_id': bookingData['user_id'],
-          'p_type': 'system',
-          'p_title': 'Booking Approved!',
-          'p_message': 'Your equipment reservation has been approved.',
-          'p_related_id': bookingId,
-        });
-      } catch (e) {
-        AppLogger.warn(LogCategory.notifications,
-            'Notification RPC failed but booking approved: $e');
-      }
-
       AppLogger.info(
         LogCategory.tools,
         'Booking $bookingId approved by ${actor.name}',
@@ -221,24 +204,6 @@ class ToolRepository {
           'status': 'rejected',
         }).eq('id', bookingId),
       );
-
-      // 2. Notify user via server-side RPC (bypasses RLS safely)
-      try {
-        final bookingData = await guardedSupabaseCall(
-          _client.from('tool_bookings').select().eq('id', bookingId).single(),
-        );
-        await _client.rpc('notify_user', params: {
-          'p_user_id': bookingData['user_id'],
-          'p_type': 'system',
-          'p_title': 'Booking Cancelled',
-          'p_message':
-              'Your equipment reservation was not approved and has been cancelled.',
-          'p_related_id': bookingId,
-        });
-      } catch (e) {
-        AppLogger.warn(LogCategory.notifications,
-            'Notification RPC failed but booking cancelled: $e');
-      }
 
       AppLogger.info(
         LogCategory.tools,

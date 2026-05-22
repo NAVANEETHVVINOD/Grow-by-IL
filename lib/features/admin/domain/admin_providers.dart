@@ -14,10 +14,12 @@ final pendingBookingsStreamProvider =
       .stream(primaryKey: ['id']).eq('status', 'pending');
 });
 
-/// Provider for pending bookings, derived directly from stream data.
-final pendingBookingsProvider = Provider<AsyncValue<List<BookingModel>>>((ref) {
-  final streamData = ref.watch(pendingBookingsStreamProvider);
-  return streamData.whenData((data) {
-    return data.map((row) => BookingModel.fromJson(row)).toList();
-  });
+/// Provider for pending bookings.
+///
+/// Raw realtime rows do not include joined tool/user names required by the
+/// admin queue, so realtime is used as a refresh signal for the joined query.
+final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+  ref.watch(pendingBookingsStreamProvider);
+  final repo = ref.watch(adminRepositoryProvider);
+  return repo.getPendingBookings();
 });
