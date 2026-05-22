@@ -56,6 +56,29 @@ class AppProviderObserver extends ProviderObserver {
   }
 
   @override
+  void didAddProvider(
+    ProviderBase<Object?> provider,
+    Object? value,
+    ProviderContainer container,
+  ) {
+    AppLogger.info(
+      LogCategory.system,
+      'PROVIDER ADDED | ${provider.name ?? provider.runtimeType}',
+    );
+  }
+
+  @override
+  void didDisposeProvider(
+    ProviderBase<Object?> provider,
+    ProviderContainer container,
+  ) {
+    AppLogger.info(
+      LogCategory.system,
+      'PROVIDER DISPOSED | ${provider.name ?? provider.runtimeType}',
+    );
+  }
+
+  @override
   void providerDidFail(
     ProviderBase<Object?> provider,
     Object error,
