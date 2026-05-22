@@ -32,7 +32,7 @@ class AppProviderObserver extends ProviderObserver {
   ) {
     final name = provider.name ?? provider.runtimeType.toString();
     providerRebuilds[name] = (providerRebuilds[name] ?? 0) + 1;
-    
+
     // Only log high-frequency rebuilds or specific ones if needed, but for now log all updates
     AppLogger.info(
       LogCategory.system,
@@ -52,29 +52,6 @@ class AppProviderObserver extends ProviderObserver {
     AppLogger.info(
       LogCategory.system,
       'PROVIDER DISPOSED | $name | Active Streams: ${activeStreams[name] ?? 0}',
-    );
-  }
-
-  @override
-  void didAddProvider(
-    ProviderBase<Object?> provider,
-    Object? value,
-    ProviderContainer container,
-  ) {
-    AppLogger.info(
-      LogCategory.system,
-      'PROVIDER ADDED | ${provider.name ?? provider.runtimeType}',
-    );
-  }
-
-  @override
-  void didDisposeProvider(
-    ProviderBase<Object?> provider,
-    ProviderContainer container,
-  ) {
-    AppLogger.info(
-      LogCategory.system,
-      'PROVIDER DISPOSED | ${provider.name ?? provider.runtimeType}',
     );
   }
 
