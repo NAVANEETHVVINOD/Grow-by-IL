@@ -104,7 +104,9 @@ class NotificationListNotifier
         state.isLoading ||
         state.isRefreshing ||
         state.valueOrNull == null ||
-        userId == null) return;
+        userId == null) {
+      return;
+    }
 
     final currentItems = state.value!;
     try {
