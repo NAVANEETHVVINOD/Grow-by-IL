@@ -373,8 +373,8 @@ class ActionGridSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Only select the boolean value to avoid rebuilding on every project update
-    final hasProjects = ref.watch(userProjectsProvider.select((asyncValue) =>
-        asyncValue.valueOrNull?.isNotEmpty ?? false));
+    final hasProjects = ref.watch(userProjectsProvider
+        .select((asyncValue) => asyncValue.valueOrNull?.isNotEmpty ?? false));
 
     return GridView.count(
       crossAxisCount: 2,

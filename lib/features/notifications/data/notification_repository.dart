@@ -7,7 +7,8 @@ class NotificationRepository {
   final SupabaseClient _client;
   const NotificationRepository(this._client);
 
-  Future<List<NotificationModel>> getNotifications(String userId, {int offset = 0, int limit = 50}) async {
+  Future<List<NotificationModel>> getNotifications(String userId,
+      {int offset = 0, int limit = 50}) async {
     final sw = Stopwatch()..start();
     try {
       final response = await guardedSupabaseCall(
@@ -19,9 +20,8 @@ class NotificationRepository {
             .range(offset, offset + limit - 1),
       );
 
-      final result = (response as List)
-          .map((n) => NotificationModel.fromJson(n))
-          .toList();
+      final result =
+          (response as List).map((n) => NotificationModel.fromJson(n)).toList();
       AppLogger.info(LogCategory.notifications,
           'QUERY getNotifications | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
       return result;

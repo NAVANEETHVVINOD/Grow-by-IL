@@ -54,8 +54,7 @@ final myRsvpsWithEventsProvider =
 
   return (data as List).map((row) {
     final rsvp = RsvpModel.fromJson(row);
-    final event =
-        EventModel.fromJson(row['event'] as Map<String, dynamic>);
+    final event = EventModel.fromJson(row['event'] as Map<String, dynamic>);
     return (rsvp: rsvp, event: event);
   }).toList();
 });

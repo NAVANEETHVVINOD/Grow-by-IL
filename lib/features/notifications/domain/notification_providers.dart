@@ -39,7 +39,7 @@ class NotificationListNotifier
   final String? userId;
   bool _hasMore = true;
   bool get hasMore => _hasMore;
-  
+
   static const int _pageSize = 50;
   RealtimeChannel? _channel;
 
@@ -56,7 +56,8 @@ class NotificationListNotifier
             value: userId,
           ),
           callback: (payload) {
-            AppLogger.info(LogCategory.notifications, 'Realtime update received');
+            AppLogger.info(
+                LogCategory.notifications, 'Realtime update received');
             // On any change, simplest approach for RC4 is to refresh the top page
             // to ensure accurate unread counts and ordering without complex merge logic.
             refresh();
@@ -74,7 +75,8 @@ class NotificationListNotifier
   Future<void> loadInitial() async {
     state = const AsyncLoading();
     try {
-      final items = await repository.getNotifications(userId!, offset: 0, limit: _pageSize);
+      final items = await repository.getNotifications(userId!,
+          offset: 0, limit: _pageSize);
       _hasMore = items.length == _pageSize;
       state = AsyncData(items);
     } catch (e, st) {
@@ -85,18 +87,25 @@ class NotificationListNotifier
   Future<void> refresh() async {
     if (userId == null) return;
     try {
-      final items = await repository.getNotifications(userId!, offset: 0, limit: _pageSize);
+      final items = await repository.getNotifications(userId!,
+          offset: 0, limit: _pageSize);
       _hasMore = items.length == _pageSize;
       state = AsyncData(items);
     } catch (e, st) {
       // Don't override state with error if we already have data, just log it
-      AppLogger.error(LogCategory.notifications, 'Failed to refresh notifications', error: e, stack: st);
+      AppLogger.error(
+          LogCategory.notifications, 'Failed to refresh notifications',
+          error: e, stack: st);
     }
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore || state.isLoading || state.isRefreshing || state.valueOrNull == null || userId == null) return;
-    
+    if (!_hasMore ||
+        state.isLoading ||
+        state.isRefreshing ||
+        state.valueOrNull == null ||
+        userId == null) return;
+
     final currentItems = state.value!;
     try {
       final newItems = await repository.getNotifications(
@@ -104,11 +113,13 @@ class NotificationListNotifier
         offset: currentItems.length,
         limit: _pageSize,
       );
-      
+
       _hasMore = newItems.length == _pageSize;
       state = AsyncData([...currentItems, ...newItems]);
     } catch (e, st) {
-      AppLogger.error(LogCategory.notifications, 'Failed to load more notifications', error: e, stack: st);
+      AppLogger.error(
+          LogCategory.notifications, 'Failed to load more notifications',
+          error: e, stack: st);
     }
   }
 }
