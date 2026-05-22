@@ -35,6 +35,7 @@ class ProjectRepository {
 
   /// Fetch projects the user is a member of.
   Future<List<ProjectModel>> getMyProjects(String userId) async {
+    final sw = Stopwatch()..start();
     AppLogger.action(LogCategory.projects, 'getMyProjects', {'userId': userId});
     try {
       final data = await guardedSupabaseCall(
@@ -45,11 +46,15 @@ class ProjectRepository {
             .neq('status', 'archived')
             .order('updated_at', ascending: false),
       );
-      return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
+      final result =
+          (data as List).map((row) => ProjectModel.fromJson(row)).toList();
+      AppLogger.info(LogCategory.projects,
+          'QUERY getMyProjects | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
+      return result;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.projects,
-        'getMyProjects failed',
+        'QUERY getMyProjects FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );
@@ -148,17 +153,15 @@ class ProjectRepository {
         }),
       );
 
-      // Notify Owner
+      // Notify Owner via server-side RPC (bypasses RLS safely)
       final project = await getProjectById(projectId);
-      await guardedSupabaseCall(
-        _client.from('notifications').insert({
-          'user_id': project.createdBy,
-          'type': 'project_join',
-          'title': 'New Team Member',
-          'message': 'Someone just joined "${project.title}".',
-          'related_id': projectId,
-        }),
-      );
+      await _client.rpc('notify_user', params: {
+        'p_user_id': project.createdBy,
+        'p_type': 'project_join',
+        'p_title': 'New Team Member',
+        'p_message': 'Someone just joined "${project.title}".',
+        'p_related_id': projectId,
+      });
 
       AppLogger.info(
         LogCategory.projects,

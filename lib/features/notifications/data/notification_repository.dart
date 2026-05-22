@@ -8,6 +8,7 @@ class NotificationRepository {
   const NotificationRepository(this._client);
 
   Future<List<NotificationModel>> getNotifications(String userId) async {
+    final sw = Stopwatch()..start();
     try {
       final response = await guardedSupabaseCall(
         _client
@@ -17,13 +18,16 @@ class NotificationRepository {
             .order('created_at', ascending: false),
       );
 
-      return (response as List)
+      final result = (response as List)
           .map((n) => NotificationModel.fromJson(n))
           .toList();
+      AppLogger.info(LogCategory.notifications,
+          'QUERY getNotifications | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
+      return result;
     } catch (e) {
       AppLogger.error(
         LogCategory.notifications,
-        'Error fetching notifications',
+        'QUERY getNotifications FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
       );
       rethrow;

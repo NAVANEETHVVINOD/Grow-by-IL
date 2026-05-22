@@ -34,17 +34,12 @@ final myBookingsStreamProvider =
       .stream(primaryKey: ['id']).eq('user_id', userId);
 });
 
-/// Future provider for the current user's bookings
-final myBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
-  // Watch the stream to trigger re-fetches on realtime updates
-  ref.watch(myBookingsStreamProvider);
-
-  final userAsync = ref.watch(currentUserProvider);
-  final userId = userAsync.valueOrNull?.id;
-  if (userId == null) return [];
-
-  final repo = ref.watch(toolRepositoryProvider);
-  return repo.getMyBookings(userId);
+/// Provider for the current user's bookings, derived directly from stream data.
+final myBookingsProvider = Provider<AsyncValue<List<BookingModel>>>((ref) {
+  final streamAsync = ref.watch(myBookingsStreamProvider);
+  return streamAsync.whenData(
+    (rows) => rows.map((row) => BookingModel.fromJson(row)).toList(),
+  );
 });
 
 /// The current user's active or upcoming booking

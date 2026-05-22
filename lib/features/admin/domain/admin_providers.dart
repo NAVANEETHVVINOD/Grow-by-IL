@@ -14,11 +14,10 @@ final pendingBookingsStreamProvider =
       .stream(primaryKey: ['id']).eq('status', 'pending');
 });
 
-final pendingBookingsProvider =
-    FutureProvider.autoDispose<List<BookingModel>>((ref) async {
-  // Watch the raw stream to trigger a re-fetch whenever the table changes
-  ref.watch(pendingBookingsStreamProvider);
-
-  final repo = ref.watch(adminRepositoryProvider);
-  return repo.getPendingBookings();
+/// Provider for pending bookings, derived directly from stream data.
+final pendingBookingsProvider = Provider<AsyncValue<List<BookingModel>>>((ref) {
+  final streamData = ref.watch(pendingBookingsStreamProvider);
+  return streamData.whenData((data) {
+    return data.map((row) => BookingModel.fromJson(row)).toList();
+  });
 });

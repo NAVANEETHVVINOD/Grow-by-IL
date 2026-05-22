@@ -40,6 +40,7 @@ class AppLogger {
     String msg, [
     Map<String, dynamic>? data,
   ]) {
+    if (!kDebugMode) return;
     _log(category, 'INFO', msg, data);
   }
 
@@ -48,6 +49,7 @@ class AppLogger {
     String msg, [
     Map<String, dynamic>? data,
   ]) {
+    if (!kDebugMode) return;
     _log(category, 'WARN', msg, data);
   }
 
@@ -56,6 +58,7 @@ class AppLogger {
     String msg, [
     Map<String, dynamic>? data,
   ]) {
+    if (!kDebugMode) return;
     _log(category, 'SUCCESS', msg, data);
   }
 
@@ -64,6 +67,7 @@ class AppLogger {
     String act, [
     Map<String, dynamic>? data,
   ]) {
+    if (!kDebugMode) return;
     _log(category, 'ACTION', act, data);
   }
 
@@ -86,6 +90,7 @@ class AppLogger {
     String msg,
     Map<String, dynamic>? data,
   ) {
+    if (!kDebugMode) return;
     final extra = _formatData(data);
     debugPrint('[$_tag][${cat.name.toUpperCase()}] $level: $msg$extra');
   }
