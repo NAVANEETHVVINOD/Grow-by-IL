@@ -53,7 +53,7 @@ class NotificationInboxScreen extends ConsumerWidget {
                     await ref
                         .read(notificationRepositoryProvider)
                         .markAllAsRead(user.id);
-                    ref.invalidate(notificationStreamProvider);
+                    ref.invalidate(notificationsProvider);
                   },
                   child: Text(
                     'MARK ALL READ',
@@ -103,13 +103,32 @@ class NotificationInboxScreen extends ConsumerWidget {
           }
 
           // Group notifications by date
-          return ListView.builder(
-            padding: const EdgeInsets.all(AppSizes.lg),
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              final notification = notifications[index];
-              return _NotificationTile(notification: notification);
+          return RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(notificationsProvider.notifier).refresh();
             },
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                  ref.read(notificationsProvider.notifier).loadMore();
+                }
+                return false;
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(AppSizes.lg),
+                itemCount: notifications.length + (ref.watch(notificationsProvider.notifier).hasMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == notifications.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(AppSizes.md),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final notification = notifications[index];
+                  return _NotificationTile(notification: notification);
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -139,7 +158,7 @@ class _NotificationTile extends ConsumerWidget {
             ref
                 .read(notificationRepositoryProvider)
                 .markAsRead(notification.id)
-                .then((_) => ref.invalidate(notificationStreamProvider));
+                .then((_) => ref.read(notificationsProvider.notifier).refresh());
           }
         },
         child: Padding(

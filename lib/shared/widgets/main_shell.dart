@@ -89,7 +89,7 @@ class _MainShellState extends ConsumerState<MainShell>
   @override
   Widget build(BuildContext context) {
     // Listen for new notifications to show Top Toasts
-    ref.listen(notificationStreamProvider, (previous, next) {
+    ref.listen(notificationsProvider, (previous, next) {
       if (next is AsyncData && next.value!.isNotEmpty) {
         final newest = next.value!.first;
         // Only show if it's new (created in the last 10 seconds)
