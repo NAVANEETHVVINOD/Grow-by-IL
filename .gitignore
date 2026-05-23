@@ -18,6 +18,7 @@ hs_err_pid*
 replay_pid*
 
 # Project Specific Documentation (Sensitive)
+docs/
 /docs/
 
 # IntelliJ related
@@ -49,6 +50,10 @@ replay_pid*
 **/android/key.properties
 *.jks
 
+# Release signing - NEVER commit these
+**/android/upload-keystore.jks
+**/android/key.properties
+
 # Symbolication related
 app.*.symbols
 app.*.map.json
@@ -58,7 +63,7 @@ app.*.map.json
 .env.*
 !.env.example
 *.secrets
-.vscode/launch.json
+.vscode/
 supabase/.temp/
 .supabase/
 .gemini/
@@ -73,6 +78,8 @@ supabase/.temp/
 analyze_output.txt
 analyzer_output.txt
 mcp_output.txt
-*.txt
-docs/
-/docs/
+build_error.log
+qa_artifacts/
+scratch/
+web/
+refactor_fonts.py
