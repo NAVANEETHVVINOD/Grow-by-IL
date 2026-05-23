@@ -1,32 +1,34 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../shared/repositories/supabase_client.dart';
-import '../utils/app_logger.dart';
-import '../../core/constants/app_roles.dart';
-import '../../features/auth/data/auth_repository.dart';
-import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
+import '../../features/akathalam/presentation/screens/akathalam_screen.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/events/presentation/screens/events_screen.dart';
 import '../../features/explore/presentation/screens/event_details_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
-import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
-import '../../features/projects/presentation/screens/create_project_screen.dart';
-import '../../features/projects/presentation/screens/project_details_screen.dart';
-import '../../features/projects/presentation/screens/project_list_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/lab/presentation/screens/lab_screen.dart';
 import '../../features/lab/presentation/screens/qr_scan_screen.dart';
 import '../../features/lab/presentation/screens/tools_screen.dart';
+import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/projects/presentation/screens/create_project_screen.dart';
+import '../../features/projects/presentation/screens/project_details_screen.dart';
+import '../../features/projects/presentation/screens/project_list_screen.dart';
+import '../../shared/repositories/supabase_client.dart';
 import '../../shared/widgets/main_shell.dart';
+import '../constants/app_roles.dart';
+import '../utils/app_logger.dart';
 
 /// Adapter class to refresh GoRouter when a Stream triggers a new event.
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -61,25 +63,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         '/onboarding',
         '/login',
         '/register',
-        '/explore',
       };
       final isPublic = publicRoutes.contains(path);
 
       AppLogger.info(
         LogCategory.router,
-        'REDIRECT_CHECK | '
-        'path=$path authed=${session != null}',
+        'REDIRECT_CHECK | path=$path authed=${session != null}',
       );
 
-      // Unauthenticated trying to access protected route
       if (session == null && !isPublic) {
         AppLogger.warn(
-            LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
+          LogCategory.router,
+          'UNAUTH_ACCESS_BLOCKED | path=$path',
+        );
         return '/login';
       }
 
-      // Authenticated user trying to access auth routes (onboarding/login) → send home
-      // We EXCLUDE /splash here so SplashScreen can do its async database check.
       if (session != null &&
           (path == '/onboarding' || path == '/login' || path == '/register')) {
         AppLogger.info(
@@ -89,18 +88,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/home';
       }
 
-      // Admin route access check
       if (path.startsWith('/admin')) {
         if (session == null) return '/login';
 
         final userProfileAsync = ref.read(currentUserProvider);
         final user = userProfileAsync.valueOrNull;
         if (user == null) {
-          // If profile is loading, let it proceed to AdminDashboard which shows loading indicator
-          if (userProfileAsync.isLoading) {
-            return null;
-          }
-          return '/home'; // fallback if null profile is loaded
+          if (userProfileAsync.isLoading) return null;
+          return '/home';
         }
 
         if (!AppRole.isAdminRole(user.role)) {
@@ -115,9 +110,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // ── Public routes (no bottom nav) ────────────────────────
       GoRoute(
-          path: '/splash', builder: (context, state) => const SplashScreen()),
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
@@ -131,14 +127,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile-setup',
         builder: (context, state) => const ProfileSetupScreen(),
       ),
-
-      // ── Main shell (5 tabs with persistent bottom nav) ───────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShell(navigationShell: navigationShell);
         },
         branches: [
-          // Tab 0 — Home
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -147,34 +140,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Tab 1 — Explore
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/explore',
-                builder: (context, state) => const ExploreScreen(),
+                path: '/akathalam',
+                builder: (context, state) => const AkathalamScreen(),
               ),
             ],
           ),
-          // Tab 2 — Events
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/events',
-                builder: (context, state) => const EventsScreen(),
-              ),
-            ],
-          ),
-          // Tab 3 — Lab
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/lab',
-                builder: (context, state) => const LabScreen(),
-              ),
-            ],
-          ),
-          // Tab 4 — Profile
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -185,8 +158,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-
-      // ── Detail routes (pushed on top, no bottom nav) ─────────
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminDashboard(),
@@ -199,7 +170,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/lab/scan',
         builder: (context, state) => const QrScanScreen(),
       ),
+      GoRoute(path: '/lab', builder: (context, state) => const LabScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
+      GoRoute(
+        path: '/events',
+        builder: (context, state) => const EventsScreen(),
+      ),
+      GoRoute(
+        path: '/explore',
+        builder: (context, state) => const ExploreScreen(),
+      ),
       GoRoute(
         path: '/events/:id',
         builder: (context, state) {
