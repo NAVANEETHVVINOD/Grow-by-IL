@@ -176,8 +176,8 @@ class _MainShellState extends ConsumerState<MainShell>
         bottomNavigationBar: RC5BottomNav(
           selectedIndex: widget.navigationShell.currentIndex,
           onTap: widget.navigationShell.goBranch,
-          items: const [
-            RC5BottomNavItem(
+          items: [
+            const RC5BottomNavItem(
               icon: Icons.home_outlined,
               activeIcon: Icons.home_rounded,
               label: AppStrings.tabHome,
@@ -186,8 +186,11 @@ class _MainShellState extends ConsumerState<MainShell>
               icon: Icons.public_outlined,
               activeIcon: Icons.public_rounded,
               label: AppStrings.tabAkathalam,
+              iconBuilder: (color, size) {
+                return RC5KeralaMarkIcon(color: color, size: size);
+              },
             ),
-            RC5BottomNavItem(
+            const RC5BottomNavItem(
               icon: Icons.person_outline_rounded,
               activeIcon: Icons.person_rounded,
               label: AppStrings.tabProfile,

@@ -7,11 +7,13 @@ class RC5BottomNavItem {
     required this.icon,
     required this.label,
     this.activeIcon,
+    this.iconBuilder,
   });
 
   final IconData icon;
   final IconData? activeIcon;
   final String label;
+  final Widget Function(Color color, double size)? iconBuilder;
 }
 
 class RC5BottomNav extends StatelessWidget {
@@ -108,11 +110,15 @@ class _RC5BottomNavButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isSelected ? item.activeIcon ?? item.icon : item.icon,
-                color: isSelected ? Colors.white : RC5DesignTokens.muted,
-                size: 22,
-              ),
+              item.iconBuilder?.call(
+                    isSelected ? Colors.white : RC5DesignTokens.muted,
+                    22,
+                  ) ??
+                  Icon(
+                    isSelected ? item.activeIcon ?? item.icon : item.icon,
+                    color: isSelected ? Colors.white : RC5DesignTokens.muted,
+                    size: 22,
+                  ),
               ClipRect(
                 child: AnimatedAlign(
                   alignment: Alignment.centerLeft,
