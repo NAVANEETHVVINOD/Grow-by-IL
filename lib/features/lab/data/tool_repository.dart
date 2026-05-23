@@ -15,6 +15,7 @@ class ToolRepository {
     String? category,
     String? searchQuery,
   }) async {
+    final sw = Stopwatch()..start();
     AppLogger.action(LogCategory.tools, 'getTools', {
       'category': category,
       'query': searchQuery,
@@ -31,11 +32,15 @@ class ToolRepository {
         query = query.ilike('name', '%$searchQuery%');
       }
       final data = await guardedSupabaseCall(query);
-      return (data as List).map((row) => ToolModel.fromJson(row)).toList();
+      final result =
+          (data as List).map((row) => ToolModel.fromJson(row)).toList();
+      AppLogger.info(LogCategory.tools,
+          'QUERY getTools | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
+      return result;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.tools,
-        'getTools failed',
+        'QUERY getTools FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );
@@ -70,6 +75,7 @@ class ToolRepository {
     required DateTime slotEnd,
     String? projectId,
   }) async {
+    final sw = Stopwatch()..start();
     AppLogger.action(LogCategory.tools, 'createBooking', {
       'toolId': toolId,
       'userId': userId,
@@ -133,15 +139,14 @@ class ToolRepository {
         );
       }
 
-      AppLogger.info(
-        LogCategory.tools,
-        'Booking created successfully with status: $status',
-      );
-      return BookingModel.fromJson(data);
+      final result = BookingModel.fromJson(data);
+      AppLogger.info(LogCategory.tools,
+          'QUERY createBooking | ${sw.elapsedMilliseconds}ms | status: $status');
+      return result;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.tools,
-        'createBooking failed',
+        'QUERY createBooking FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );
@@ -169,25 +174,6 @@ class ToolRepository {
           'approved_at': DateTime.now().toUtc().toIso8601String(),
         }).eq('id', bookingId),
       );
-
-      // 3. Create Notification for user (Safe Catch)
-      try {
-        final bookingData = await guardedSupabaseCall(
-          _client.from('tool_bookings').select().eq('id', bookingId).single(),
-        );
-        await guardedSupabaseCall(
-          _client.from('notifications').insert({
-            'user_id': bookingData['user_id'],
-            'type':
-                'system', // Must be one of: alert, reminder, invite, milestone, system
-            'title': 'Booking Approved!',
-            'message': 'Your equipment reservation has been approved.',
-          }),
-        );
-      } catch (e) {
-        AppLogger.warn(LogCategory.notifications,
-            'Notification insert failed but booking approved: $e');
-      }
 
       AppLogger.info(
         LogCategory.tools,
@@ -218,26 +204,6 @@ class ToolRepository {
           'status': 'rejected',
         }).eq('id', bookingId),
       );
-
-      // 2. Create Notification (Safe Catch)
-      try {
-        final bookingData = await guardedSupabaseCall(
-          _client.from('tool_bookings').select().eq('id', bookingId).single(),
-        );
-
-        await guardedSupabaseCall(
-          _client.from('notifications').insert({
-            'user_id': bookingData['user_id'],
-            'type': 'system',
-            'title': 'Booking Cancelled',
-            'message':
-                'Your equipment reservation was not approved and has been cancelled.',
-          }),
-        );
-      } catch (e) {
-        AppLogger.warn(LogCategory.notifications,
-            'Notification insert failed but booking cancelled: $e');
-      }
 
       AppLogger.info(
         LogCategory.tools,
@@ -308,6 +274,7 @@ class ToolRepository {
 
   /// Fetch user's bookings (including project-linked ones).
   Future<List<BookingModel>> getMyBookings(String userId) async {
+    final sw = Stopwatch()..start();
     try {
       // 1. Get projects where user is a member
       final projectData = await guardedSupabaseCall(
@@ -334,11 +301,15 @@ class ToolRepository {
       final data = await guardedSupabaseCall(
         query.order('created_at', ascending: false),
       );
-      return (data as List).map((row) => BookingModel.fromJson(row)).toList();
+      final result =
+          (data as List).map((row) => BookingModel.fromJson(row)).toList();
+      AppLogger.info(LogCategory.tools,
+          'QUERY getMyBookings | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
+      return result;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.tools,
-        'getMyBookings failed',
+        'QUERY getMyBookings FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );

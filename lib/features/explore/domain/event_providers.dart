@@ -39,3 +39,22 @@ final myRsvpsProvider = FutureProvider<List<RsvpModel>>((ref) async {
   final repo = ref.watch(eventRepositoryProvider);
   return repo.getUserRsvps(user.id);
 });
+
+/// Fetches RSVPs with embedded event data in a single query (no N+1).
+final myRsvpsWithEventsProvider =
+    FutureProvider<List<({RsvpModel rsvp, EventModel event})>>((ref) async {
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  if (user == null) return [];
+
+  final data = await supabase
+      .from('rsvps')
+      .select('*, event:events(*)')
+      .eq('user_id', user.id)
+      .order('created_at', ascending: false);
+
+  return (data as List).map((row) {
+    final rsvp = RsvpModel.fromJson(row);
+    final event = EventModel.fromJson(row['event'] as Map<String, dynamic>);
+    return (rsvp: rsvp, event: event);
+  }).toList();
+});

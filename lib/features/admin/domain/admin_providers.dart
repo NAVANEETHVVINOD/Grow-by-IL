@@ -14,11 +14,12 @@ final pendingBookingsStreamProvider =
       .stream(primaryKey: ['id']).eq('status', 'pending');
 });
 
-final pendingBookingsProvider =
-    FutureProvider.autoDispose<List<BookingModel>>((ref) async {
-  // Watch the raw stream to trigger a re-fetch whenever the table changes
+/// Provider for pending bookings.
+///
+/// Raw realtime rows do not include joined tool/user names required by the
+/// admin queue, so realtime is used as a refresh signal for the joined query.
+final pendingBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
   ref.watch(pendingBookingsStreamProvider);
-
   final repo = ref.watch(adminRepositoryProvider);
   return repo.getPendingBookings();
 });

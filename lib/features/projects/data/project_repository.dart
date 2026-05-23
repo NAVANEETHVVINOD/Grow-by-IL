@@ -35,6 +35,7 @@ class ProjectRepository {
 
   /// Fetch projects the user is a member of.
   Future<List<ProjectModel>> getMyProjects(String userId) async {
+    final sw = Stopwatch()..start();
     AppLogger.action(LogCategory.projects, 'getMyProjects', {'userId': userId});
     try {
       final data = await guardedSupabaseCall(
@@ -45,11 +46,15 @@ class ProjectRepository {
             .neq('status', 'archived')
             .order('updated_at', ascending: false),
       );
-      return (data as List).map((row) => ProjectModel.fromJson(row)).toList();
+      final result =
+          (data as List).map((row) => ProjectModel.fromJson(row)).toList();
+      AppLogger.info(LogCategory.projects,
+          'QUERY getMyProjects | ${sw.elapsedMilliseconds}ms | ${result.length} rows');
+      return result;
     } catch (e, st) {
       AppLogger.error(
         LogCategory.projects,
-        'getMyProjects failed',
+        'QUERY getMyProjects FAILED | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );
@@ -145,18 +150,6 @@ class ProjectRepository {
           'project_id': projectId,
           'user_id': userId,
           'role': 'member',
-        }),
-      );
-
-      // Notify Owner
-      final project = await getProjectById(projectId);
-      await guardedSupabaseCall(
-        _client.from('notifications').insert({
-          'user_id': project.createdBy,
-          'type': 'project_join',
-          'title': 'New Team Member',
-          'message': 'Someone just joined "${project.title}".',
-          'related_id': projectId,
         }),
       );
 

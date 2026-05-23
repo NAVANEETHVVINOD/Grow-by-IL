@@ -42,23 +42,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(context, ref),
+                const HomeHeaderSection(),
                 const SizedBox(height: AppSizes.lg),
-                _buildLiveStatus(ref),
+                const LiveStatusSection(),
                 const SizedBox(height: AppSizes.lg),
-                _buildActionGrid(context, ref),
+                const ActionGridSection(),
                 const SizedBox(height: AppSizes.xxl),
-                _buildSectionHeader(AppStrings.yourSchedule),
+                _buildSectionHeader(context, AppStrings.yourSchedule),
                 const SizedBox(height: AppSizes.md),
-                _buildUpcomingSchedule(ref),
+                const UpcomingScheduleSection(),
                 const SizedBox(height: AppSizes.xxl),
                 _buildSectionHeader(
+                  context,
                   AppStrings.activeProjects,
                   onAction: () => context.go('/profile'),
                   actionLabel: AppStrings.viewAll,
                 ),
                 const SizedBox(height: AppSizes.md),
-                _buildActiveProjects(ref),
+                const ActiveProjectsSection(),
                 const SizedBox(height: 100),
               ],
             ),
@@ -68,7 +69,180 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildLiveStatus(WidgetRef ref) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    VoidCallback? onAction,
+    String? actionLabel,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 20,
+          decoration: BoxDecoration(
+            color: AppColors.yellow,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: AppSizes.sm),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
+        ),
+        const Spacer(),
+        if (onAction != null)
+          TextButton(
+            onPressed: onAction,
+            child: Text(
+              actionLabel ?? AppStrings.viewAll,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.cobalt,
+                  ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ISOLATED SECTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+class HomeHeaderSection extends ConsumerWidget {
+  const HomeHeaderSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Only watch what we strictly need here
+    final userAsync = ref.watch(currentUserProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
+    return userAsync.when(
+      data: (user) {
+        if (user == null) return const SizedBox.shrink();
+        return Row(
+          children: [
+            GestureDetector(
+              onTap: () => context.go('/profile'),
+              child: CircleAvatar(
+                backgroundColor: AppColors.yellow,
+                radius: 24,
+                child: Text(
+                  user.name.substring(0, 1).toUpperCase(),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: AppColors.navy,
+                      ),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSizes.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello, ${user.name.split(' ').first}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                        ),
+                  ),
+                  Text(
+                    'Level ${user.level} \u2022 ${user.xp} XP',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined, size: 28),
+                  color: AppColors.navy,
+                  onPressed: () => context.push('/notifications'),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppColors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            if (AppRole.isAdminRole(user.role))
+              IconButton(
+                icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
+                color: AppColors.cobalt,
+                onPressed: () => context.push('/admin'),
+              ),
+          ],
+        );
+      },
+      loading: () => Row(
+        children: [
+          const ShimmerSkeleton(width: 48, height: 48, borderRadius: 24),
+          const SizedBox(width: AppSizes.md),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              ShimmerSkeleton(width: 150, height: 24),
+              SizedBox(height: 6),
+              ShimmerSkeleton(width: 100, height: 14),
+            ],
+          ),
+        ],
+      ),
+      error: (err, stack) => Row(
+        children: const [
+          Icon(Icons.error_outline, color: AppColors.red, size: 28),
+          SizedBox(width: AppSizes.sm),
+          Text(AppStrings.errorLoadingProfile),
+        ],
+      ),
+    );
+  }
+}
+
+class LiveStatusSection extends ConsumerWidget {
+  const LiveStatusSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final sessionAsync = ref.watch(activeSessionProvider);
     final bookingAsync = ref.watch(activeBookingProvider);
 
@@ -191,124 +365,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ],
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
+class ActionGridSection extends ConsumerWidget {
+  const ActionGridSection({super.key});
 
-    return userAsync.when(
-      data: (user) {
-        if (user == null) return const SizedBox.shrink();
-        return Row(
-          children: [
-            GestureDetector(
-              onTap: () => context.go('/profile'),
-              child: CircleAvatar(
-                backgroundColor: AppColors.yellow,
-                radius: 24,
-                child: Text(
-                  user.name.substring(0, 1).toUpperCase(),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: AppColors.navy,
-                      ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, ${user.name.split(' ').first}',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.navy,
-                        ),
-                  ),
-                  Text(
-                    'Level ${user.level} \u2022 ${user.xp} XP',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined, size: 28),
-                  color: AppColors.navy,
-                  onPressed: () => context.push('/notifications'),
-                ),
-                ref.watch(unreadNotificationCountProvider) > 0
-                    ? Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: AppColors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '${ref.watch(unreadNotificationCountProvider)}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ],
-            ),
-            if (AppRole.isAdminRole(user.role))
-              IconButton(
-                icon: const Icon(Icons.admin_panel_settings_outlined, size: 28),
-                color: AppColors.cobalt,
-                onPressed: () => context.push('/admin'),
-              ),
-          ],
-        );
-      },
-      loading: () => Row(
-        children: [
-          const ShimmerSkeleton(width: 48, height: 48, borderRadius: 24),
-          const SizedBox(width: AppSizes.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              ShimmerSkeleton(width: 150, height: 24),
-              SizedBox(height: 6),
-              ShimmerSkeleton(width: 100, height: 14),
-            ],
-          ),
-        ],
-      ),
-      error: (err, stack) => Row(
-        children: [
-          const Icon(Icons.error_outline, color: AppColors.red, size: 28),
-          const SizedBox(width: AppSizes.sm),
-          const Text(AppStrings.errorLoadingProfile),
-        ],
-      ),
-    );
-  }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Only select the boolean value to avoid rebuilding on every project update
+    final hasProjects = ref.watch(userProjectsProvider
+        .select((asyncValue) => asyncValue.valueOrNull?.isNotEmpty ?? false));
 
-  Widget _buildActionGrid(BuildContext context, WidgetRef ref) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -319,7 +386,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         _ActionTile(
           title: AppStrings.checkIn,
-          subtitle: _buildVisitorCount(ref),
+          subtitle: const VisitorCountWidget(),
           icon: Icons.qr_code_scanner_rounded,
           color: AppColors.yellow,
           onTap: () => context.go('/lab'),
@@ -340,7 +407,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           textColor: Colors.white,
           onTap: () => context.push('/tools'),
         ),
-        if (ref.watch(userProjectsProvider).valueOrNull?.isNotEmpty ?? false)
+        if (hasProjects)
           _ActionTile(
             title: AppStrings.myProjects,
             subtitle: Text(
@@ -358,8 +425,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ],
     );
   }
+}
 
-  Widget _buildVisitorCount(WidgetRef ref) {
+class VisitorCountWidget extends ConsumerWidget {
+  const VisitorCountWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final liveCount = ref.watch(liveLabVisitorCountProvider);
     return liveCount.when(
       data: (count) => Text(
@@ -374,49 +446,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       error: (err, stack) => const SizedBox.shrink(),
     );
   }
+}
 
-  Widget _buildSectionHeader(
-    String title, {
-    VoidCallback? onAction,
-    String? actionLabel,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 20,
-          decoration: BoxDecoration(
-            color: AppColors.yellow,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: AppSizes.sm),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.navy,
-              ),
-        ),
-        const Spacer(),
-        if (onAction != null)
-          TextButton(
-            onPressed: onAction,
-            child: Text(
-              actionLabel ?? AppStrings.viewAll,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.cobalt,
-                  ),
-            ),
-          ),
-      ],
-    );
-  }
+class UpcomingScheduleSection extends ConsumerWidget {
+  const UpcomingScheduleSection({super.key});
 
-  Widget _buildUpcomingSchedule(WidgetRef ref) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final eventsAsync = ref.watch(activeEventsProvider);
     final bookingsAsync = ref.watch(myBookingsProvider);
 
@@ -476,8 +512,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ],
     );
   }
+}
 
-  Widget _buildActiveProjects(WidgetRef ref) {
+class ActiveProjectsSection extends ConsumerWidget {
+  const ActiveProjectsSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final projectsAsync = ref.watch(userProjectsProvider);
 
     return projectsAsync.when(
@@ -608,10 +649,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.md),
           child: Row(
-            children: [
-              const Icon(Icons.error_outline, color: AppColors.red),
-              const SizedBox(width: AppSizes.sm),
-              const Expanded(
+            children: const [
+              Icon(Icons.error_outline, color: AppColors.red),
+              SizedBox(width: AppSizes.sm),
+              Expanded(
                 child: Text(
                   AppStrings.somethingWentWrong,
                   style: TextStyle(color: AppColors.red),
@@ -624,6 +665,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI COMPONENTS
+// ─────────────────────────────────────────────────────────────────────────────
 
 /// Animated action tile with scale-on-press effect.
 class _ActionTile extends StatefulWidget {

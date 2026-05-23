@@ -156,11 +156,11 @@ class _MyRsvpsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rsvpsAsync = ref.watch(myRsvpsProvider);
+    final rsvpsAsync = ref.watch(myRsvpsWithEventsProvider);
 
     return rsvpsAsync.when(
-      data: (rsvps) {
-        if (rsvps.isEmpty) {
+      data: (rsvpsWithEvents) {
+        if (rsvpsWithEvents.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -184,23 +184,13 @@ class _MyRsvpsTab extends ConsumerWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: () => ref.refresh(myRsvpsProvider.future),
+          onRefresh: () => ref.refresh(myRsvpsWithEventsProvider.future),
           child: ListView.builder(
             padding: const EdgeInsets.all(AppSizes.lg),
-            itemCount: rsvps.length,
+            itemCount: rsvpsWithEvents.length,
             itemBuilder: (context, index) {
-              final rsvp = rsvps[index];
-              return FutureBuilder(
-                future: ref
-                    .read(eventRepositoryProvider)
-                    .getEventById(rsvp.eventId),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return _EventCard(event: snapshot.data!);
-                  }
-                  return const SizedBox.shrink();
-                },
-              );
+              final tuple = rsvpsWithEvents[index];
+              return _EventCard(event: tuple.event);
             },
           ),
         );

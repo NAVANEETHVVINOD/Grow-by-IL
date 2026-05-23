@@ -34,15 +34,15 @@ final myBookingsStreamProvider =
       .stream(primaryKey: ['id']).eq('user_id', userId);
 });
 
-/// Future provider for the current user's bookings
+/// Provider for the current user's bookings.
+///
+/// Realtime rows do not include project-linked bookings or joined display data,
+/// so the stream is used only as a change signal until the backend exposes a
+/// denormalized booking projection.
 final myBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
-  // Watch the stream to trigger re-fetches on realtime updates
   ref.watch(myBookingsStreamProvider);
-
-  final userAsync = ref.watch(currentUserProvider);
-  final userId = userAsync.valueOrNull?.id;
+  final userId = ref.watch(currentUserProvider).valueOrNull?.id;
   if (userId == null) return [];
-
   final repo = ref.watch(toolRepositoryProvider);
   return repo.getMyBookings(userId);
 });
