@@ -22,11 +22,14 @@ import '../../features/lab/presentation/screens/qr_scan_screen.dart';
 import '../../features/lab/presentation/screens/tools_screen.dart';
 import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/rc5_edit_profile_hub.dart';
+import '../../features/profile/presentation/screens/rc5_profile_screen.dart';
 import '../../features/projects/presentation/screens/create_project_screen.dart';
 import '../../features/projects/presentation/screens/project_details_screen.dart';
 import '../../features/projects/presentation/screens/project_list_screen.dart';
 import '../../shared/repositories/supabase_client.dart';
 import '../../shared/widgets/main_shell.dart';
+import '../constants/feature_flags.dart';
 import '../constants/app_roles.dart';
 import '../utils/app_logger.dart';
 
@@ -152,11 +155,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                builder: (context, state) => const ProfileScreen(),
+                builder: (context, state) => FeatureFlags.enableNewProfile
+                    ? const RC5ProfileScreen()
+                    : const ProfileScreen(),
               ),
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const RC5EditProfileHub(),
       ),
       GoRoute(
         path: '/admin',
