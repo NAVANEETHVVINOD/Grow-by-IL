@@ -16,7 +16,7 @@ import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/events/presentation/screens/events_screen.dart';
 import '../../features/explore/presentation/screens/event_details_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/home/presentation/screens/rc5_home_screen.dart';
 import '../../features/lab/presentation/screens/lab_screen.dart';
 import '../../features/lab/presentation/screens/qr_scan_screen.dart';
 import '../../features/lab/presentation/screens/tools_screen.dart';
@@ -136,7 +136,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const RC5HomeScreen(),
               ),
             ],
           ),
