@@ -12,4 +12,7 @@ class FeatureFlags {
   /// UI placeholder flag only in this slice; backend arrives later.
   static const bool enableVouches =
       bool.fromEnvironment('ENABLE_VOUCHES', defaultValue: false);
+
+  /// Safe onboarding & profile migration flag.
+  static const bool kEnableProfileMigration = true;
 }

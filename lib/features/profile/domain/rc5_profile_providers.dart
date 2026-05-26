@@ -1,12 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grow/core/constants/feature_flags.dart';
+import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
-
+import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
+import 'package:grow/features/profile/data/profile_migration_service.dart';
+import 'package:grow/features/profile/domain/profile_migration_coordinator.dart';
+import 'package:grow/features/profile/domain/profile_migration_state.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
+import 'package:grow/shared/models/profile_ecosystem_models.dart';
 import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/shared/repositories/supabase_client.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Rc5ProfileHeaderData {
   const Rc5ProfileHeaderData({
@@ -59,27 +64,92 @@ final rc5ProfileHeaderProvider =
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return null;
 
-  final draft = await _loadOnboardingDraft(user.id);
-  final username = draft.username.isNotEmpty
-      ? draft.username
-      : _deriveUsernameFromEmail(user.email);
-  final bio = draft.bio.isNotEmpty
-      ? draft.bio
-      : 'Builder at IDEA Lab, exploring projects and collaboration.';
-  final department = draft.departmentOrRole.isNotEmpty
-      ? draft.departmentOrRole
-      : (draft.userType == 'professional'
-          ? 'Professional'
-          : 'Student, IDEA Lab');
+  final repo = ref.watch(profileEcosystemRepositoryProvider);
+  final migrationService = ProfileMigrationService(repo);
 
-  return Rc5ProfileHeaderData(
+  UserProfileModel? serverProfile;
+  List<String> interestsList = const [];
+  Map<String, int> skillsMap = const {};
+
+  try {
+    // 1. Try to fetch profile from Supabase
+    serverProfile = await repo.getProfile(user.id);
+
+    // 2. Run Safe Onboarding Migration inside global coordinator mutex if needed
+    if (serverProfile == null && FeatureFlags.kEnableProfileMigration) {
+      final state = await ProfileMigrationStorage.getMigrationState(user.id);
+      if (state != ProfileMigrationState.migrated) {
+        AppLogger.info(LogCategory.profile, '[PROFILE_MIGRATION] Profile not found in Supabase. Checking migration state...');
+        
+        await ProfileMigrationCoordinator.run(() async {
+          await migrationService.migrate(user.id);
+        });
+        
+        // Refetch the migrated profile
+        serverProfile = await repo.getProfile(user.id);
+      }
+    }
+
+    if (serverProfile != null) {
+      interestsList = await repo.getInterests(user.id);
+      final skillsList = await repo.getSkills(user.id);
+      final tempSkills = <String, int>{};
+      for (final s in skillsList) {
+        tempSkills[s.name] = s.level;
+      }
+      skillsMap = tempSkills;
+    }
+  } catch (e, st) {
+    AppLogger.error(LogCategory.profile, 'Error loading profile from Supabase, attempting local cache fallback...', error: e, stack: st);
+    
+    // Offline Cache Fallback: Try loading from local SharedPreferences cache
+    final cachedData = await ProfileMigrationStorage.getCachedProfileData(user.id);
+    if (cachedData != null) {
+      final cachedSkillsList = (cachedData['skills'] as List).cast<String>();
+      final cachedSkillsMap = <String, int>{};
+      for (final s in cachedSkillsList) {
+        final parts = s.split(':');
+        if (parts.length == 2) {
+          cachedSkillsMap[parts[0]] = int.tryParse(parts[1]) ?? 1;
+        }
+      }
+      return Rc5ProfileHeaderData(
+        user: user,
+        username: cachedData['username'] as String,
+        departmentOrRole: cachedData['departmentOrRole'] as String,
+        bio: cachedData['bio'] as String,
+        interests: (cachedData['interests'] as List).cast<String>(),
+        skills: cachedSkillsMap,
+      );
+    }
+  }
+
+  // 3. Construct header data and cache it locally
+  final username = serverProfile?.username ?? _deriveUsernameFromEmail(user.email);
+  final bio = serverProfile?.bio ?? 'Builder at IDEA Lab, exploring projects and collaboration.';
+  final department = serverProfile?.department ??
+      (serverProfile?.userType == 'professional' ? 'Professional' : 'Student, IDEA Lab');
+
+  final headerData = Rc5ProfileHeaderData(
     user: user,
     username: username,
     departmentOrRole: department,
     bio: bio,
-    interests: draft.interests,
-    skills: draft.skills,
+    interests: interestsList,
+    skills: skillsMap,
   );
+
+  // Write to local cache asynchronously
+  await ProfileMigrationStorage.cacheProfileData(
+    userId: user.id,
+    username: username,
+    departmentOrRole: department,
+    bio: bio,
+    interests: interestsList,
+    skills: skillsMap,
+  );
+
+  return headerData;
 });
 
 final rc5ProfileStatsProvider = FutureProvider<Rc5ProfileStats>((ref) async {
@@ -165,50 +235,6 @@ final rc5ProfileSkillsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
   return headerAsync
       .whenData((header) => header?.skills ?? const <String, int>{});
 });
-
-class _DraftData {
-  const _DraftData({
-    required this.username,
-    required this.bio,
-    required this.userType,
-    required this.departmentOrRole,
-    required this.interests,
-    required this.skills,
-  });
-
-  final String username;
-  final String bio;
-  final String userType;
-  final String departmentOrRole;
-  final List<String> interests;
-  final Map<String, int> skills;
-}
-
-Future<_DraftData> _loadOnboardingDraft(String userId) async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'rc5_onboarding.$userId';
-
-  final interests = prefs.getStringList('$key.interests') ?? const [];
-  final skillEntries = prefs.getStringList('$key.skills') ?? const [];
-  final skills = <String, int>{};
-
-  for (final entry in skillEntries) {
-    final parts = entry.split(':');
-    if (parts.length != 2) continue;
-    final level = int.tryParse(parts.last);
-    if (level == null || level < 1 || level > 3) continue;
-    skills[parts.first] = level;
-  }
-
-  return _DraftData(
-    username: prefs.getString('$key.username') ?? '',
-    bio: prefs.getString('$key.bio') ?? '',
-    userType: prefs.getString('$key.userType') ?? 'student',
-    departmentOrRole: prefs.getString('$key.department') ?? '',
-    interests: interests.take(5).toList(),
-    skills: skills,
-  );
-}
 
 String _deriveUsernameFromEmail(String email) {
   final local = email.split('@').first.toLowerCase();
