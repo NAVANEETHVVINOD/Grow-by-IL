@@ -31,7 +31,7 @@ class ToolsScreen extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Book a Tool',
+          '/// Book a Tool',
           style: GoogleFonts.spaceGrotesk(
             fontSize: 28,
             fontWeight: FontWeight.bold,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -31,6 +32,22 @@ class LabScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'Lab Session',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: activeSession.when(
           data: (session) {
@@ -72,8 +89,6 @@ class _NotCheckedInView extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSizes.lg),
         children: [
-          _buildHeader(),
-          const SizedBox(height: AppSizes.xl),
           _buildLiveCountCard(ref),
           const SizedBox(height: AppSizes.xl),
           _buildCheckInButton(context, ref),
@@ -84,23 +99,6 @@ class _NotCheckedInView extends ConsumerWidget {
           const SizedBox(height: AppSizes.xxl),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      children: [
-        const Icon(Icons.science_rounded, size: 28, color: AppColors.navy),
-        const SizedBox(width: AppSizes.sm),
-        Text(
-          'Grow~',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.navy,
-          ),
-        ),
-      ],
     );
   }
 
@@ -359,26 +357,6 @@ class _CheckedInView extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSizes.lg),
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.science_rounded,
-                size: 28,
-                color: AppColors.navy,
-              ),
-              const SizedBox(width: AppSizes.sm),
-              Text(
-                'Grow~',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.xl),
-
           // Status card
           NeoCard(
             color: AppColors.yellow,

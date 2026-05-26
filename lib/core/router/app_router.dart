@@ -1,32 +1,47 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../shared/repositories/supabase_client.dart';
-import '../utils/app_logger.dart';
-import '../../core/constants/app_roles.dart';
-import '../../features/auth/data/auth_repository.dart';
-import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
+import '../../features/akathalam/presentation/screens/akathalam_screen.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
-import '../../features/auth/presentation/screens/profile_setup_screen.dart';
+import '../../features/auth/presentation/screens/rc5_onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/events/presentation/screens/events_screen.dart';
 import '../../features/explore/presentation/screens/event_details_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
-import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
-import '../../features/projects/presentation/screens/create_project_screen.dart';
-import '../../features/projects/presentation/screens/project_details_screen.dart';
-import '../../features/projects/presentation/screens/project_list_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/home/presentation/screens/rc5_home_screen.dart';
+import '../../features/home/presentation/screens/mentorship_screen.dart';
+import '../../features/home/presentation/screens/knowledge_base_screen.dart';
+import '../../features/home/presentation/screens/donation_screen.dart';
 import '../../features/lab/presentation/screens/lab_screen.dart';
 import '../../features/lab/presentation/screens/qr_scan_screen.dart';
 import '../../features/lab/presentation/screens/tools_screen.dart';
+import '../../features/notifications/presentation/screens/notification_inbox_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/rc5_edit_profile_hub.dart';
+import '../../features/profile/presentation/screens/rc5_profile_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_basic_profile_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_education_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_interests_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_skills_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_social_links_screen.dart';
+import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_visibility_screen.dart';
+import '../../features/projects/presentation/screens/create_project_screen.dart';
+import '../../features/projects/presentation/screens/project_details_screen.dart';
+import '../../features/projects/presentation/screens/project_list_screen.dart';
+import '../../shared/repositories/supabase_client.dart';
 import '../../shared/widgets/main_shell.dart';
+import '../constants/feature_flags.dart';
+import '../constants/app_roles.dart';
+import '../utils/app_logger.dart';
 
 /// Adapter class to refresh GoRouter when a Stream triggers a new event.
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -48,10 +63,17 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 /// Central route configuration for the Grow~ app.
 final routerProvider = Provider<GoRouter>((ref) {
+  // Only trigger router refresh on major auth state changes, NOT token refreshes.
+  final filteredAuthStream = supabase.auth.onAuthStateChange.where((event) {
+    return event.event == AuthChangeEvent.signedIn ||
+        event.event == AuthChangeEvent.signedOut ||
+        event.event == AuthChangeEvent.initialSession;
+  });
+
   return GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: false,
-    refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),
+    refreshListenable: GoRouterRefreshStream(filteredAuthStream),
     redirect: (context, state) {
       final session = supabase.auth.currentSession;
       final path = state.uri.path;
@@ -61,25 +83,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         '/onboarding',
         '/login',
         '/register',
-        '/explore',
       };
       final isPublic = publicRoutes.contains(path);
 
       AppLogger.info(
         LogCategory.router,
-        'REDIRECT_CHECK | '
-        'path=$path authed=${session != null}',
+        'REDIRECT_CHECK | path=$path authed=${session != null}',
       );
 
-      // Unauthenticated trying to access protected route
       if (session == null && !isPublic) {
         AppLogger.warn(
-            LogCategory.router, 'UNAUTH_ACCESS_BLOCKED | path=$path');
+          LogCategory.router,
+          'UNAUTH_ACCESS_BLOCKED | path=$path',
+        );
         return '/login';
       }
 
-      // Authenticated user trying to access auth routes (onboarding/login) → send home
-      // We EXCLUDE /splash here so SplashScreen can do its async database check.
       if (session != null &&
           (path == '/onboarding' || path == '/login' || path == '/register')) {
         AppLogger.info(
@@ -89,18 +108,42 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/home';
       }
 
-      // Admin route access check
+      // ---------------------------------------------------------
+      // RC5 STRICT ONBOARDING ENFORCEMENT
+      // ---------------------------------------------------------
+      if (session != null &&
+          !isPublic &&
+          path != '/splash' &&
+          path != '/profile-setup') {
+        final userProfileAsync = ref.read(currentUserProvider);
+        final user = userProfileAsync.valueOrNull;
+
+        if (user != null && !user.profileCompleted) {
+          AppLogger.warn(
+            LogCategory.router,
+            'INCOMPLETE_PROFILE_REDIRECT | path=$path',
+          );
+          return '/profile-setup';
+        }
+      }
+
+      if (session != null && path == '/profile-setup') {
+        final userProfileAsync = ref.read(currentUserProvider);
+        final user = userProfileAsync.valueOrNull;
+
+        if (user != null && user.profileCompleted) {
+          return '/home';
+        }
+      }
+
       if (path.startsWith('/admin')) {
         if (session == null) return '/login';
 
         final userProfileAsync = ref.read(currentUserProvider);
         final user = userProfileAsync.valueOrNull;
         if (user == null) {
-          // If profile is loading, let it proceed to AdminDashboard which shows loading indicator
-          if (userProfileAsync.isLoading) {
-            return null;
-          }
-          return '/home'; // fallback if null profile is loaded
+          if (userProfileAsync.isLoading) return null;
+          return '/home';
         }
 
         if (!AppRole.isAdminRole(user.role)) {
@@ -115,9 +158,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // ── Public routes (no bottom nav) ────────────────────────
       GoRoute(
-          path: '/splash', builder: (context, state) => const SplashScreen()),
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
@@ -129,64 +173,69 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/profile-setup',
-        builder: (context, state) => const ProfileSetupScreen(),
+        builder: (context, state) => const RC5OnboardingScreen(),
       ),
-
-      // ── Main shell (5 tabs with persistent bottom nav) ───────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShell(navigationShell: navigationShell);
         },
         branches: [
-          // Tab 0 — Home
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const RC5HomeScreen(),
               ),
             ],
           ),
-          // Tab 1 — Explore
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/explore',
-                builder: (context, state) => const ExploreScreen(),
+                path: '/akathalam',
+                builder: (context, state) => const AkathalamScreen(),
               ),
             ],
           ),
-          // Tab 2 — Events
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/events',
-                builder: (context, state) => const EventsScreen(),
-              ),
-            ],
-          ),
-          // Tab 3 — Lab
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/lab',
-                builder: (context, state) => const LabScreen(),
-              ),
-            ],
-          ),
-          // Tab 4 — Profile
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/profile',
-                builder: (context, state) => const ProfileScreen(),
+                builder: (context, state) => FeatureFlags.enableNewProfile
+                    ? const RC5ProfileScreen()
+                    : const ProfileScreen(),
               ),
             ],
           ),
         ],
       ),
-
-      // ── Detail routes (pushed on top, no bottom nav) ─────────
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const RC5EditProfileHub(),
+      ),
+      GoRoute(
+        path: '/profile/edit/basic',
+        builder: (context, state) => const RC5EditBasicProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit/interests',
+        builder: (context, state) => const RC5EditInterestsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit/skills',
+        builder: (context, state) => const RC5EditSkillsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit/education',
+        builder: (context, state) => const RC5EditEducationScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit/social-links',
+        builder: (context, state) => const RC5EditSocialLinksScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit/visibility',
+        builder: (context, state) => const RC5EditVisibilityScreen(),
+      ),
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminDashboard(),
@@ -199,7 +248,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/lab/scan',
         builder: (context, state) => const QrScanScreen(),
       ),
+      GoRoute(
+        path: '/mentorship',
+        builder: (context, state) => const MentorshipScreen(),
+      ),
+      GoRoute(
+        path: '/knowledge',
+        builder: (context, state) => const KnowledgeBaseScreen(),
+      ),
+      GoRoute(
+        path: '/donate',
+        builder: (context, state) => const DonationScreen(),
+      ),
+      GoRoute(path: '/lab', builder: (context, state) => const LabScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
+      GoRoute(
+        path: '/events',
+        builder: (context, state) => const EventsScreen(),
+      ),
+      GoRoute(
+        path: '/explore',
+        builder: (context, state) => const ExploreScreen(),
+      ),
       GoRoute(
         path: '/events/:id',
         builder: (context, state) {

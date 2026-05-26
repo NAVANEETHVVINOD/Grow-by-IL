@@ -35,21 +35,26 @@ class _EventsScreenState extends ConsumerState<EventsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          '/// Events',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy,
+              ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSizes.lg),
-              child: Text(
-                'Events',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.navy,
-                    ),
-              ),
-            ),
             TabBar(
               controller: _tabController,
               labelColor: AppColors.navy,

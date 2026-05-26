@@ -11,6 +11,7 @@ import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/neo_error_widget.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
+import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 
 class ProjectDetailsScreen extends ConsumerStatefulWidget {
   const ProjectDetailsScreen({super.key, required this.projectId});
@@ -505,13 +506,11 @@ class _MemberChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            radius: 12,
-            backgroundColor: AppColors.yellow,
-            child: Text(
-              (member.userName ?? '?')[0].toUpperCase(),
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-            ),
+          RC5Avatar(
+            imageUrl: member.userAvatar,
+            displayName: member.userName,
+            size: 24,
+            showBorder: false,
           ),
           const SizedBox(width: 6),
           Text(

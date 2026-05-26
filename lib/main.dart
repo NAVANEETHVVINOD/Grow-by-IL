@@ -6,7 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/constants/supabase_keys.dart';
 import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'core/theme/rc5_theme.dart';
 import 'core/utils/app_logger.dart';
 
 import 'package:flutter/foundation.dart';
@@ -88,7 +88,7 @@ class GrowApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Grow~',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: RC5Theme.light,
       routerConfig: router,
     );
   }

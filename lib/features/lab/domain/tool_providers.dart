@@ -26,7 +26,7 @@ final toolsProvider = FutureProvider<List<ToolModel>>((ref) async {
 });
 
 final myBookingsStreamProvider =
-    StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
   final userId = ref.watch(currentUserProvider).valueOrNull?.id;
   if (userId == null) return Stream.value([]);
   return supabase

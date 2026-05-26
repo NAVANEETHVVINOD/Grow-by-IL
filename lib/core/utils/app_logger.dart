@@ -26,7 +26,7 @@ class AppLogger {
   static void printStartupBanner({
     String version = '1.0.0',
     String buildNumber = '1',
-    String buildStage = 'RC3',
+    String buildStage = 'RC5',
   }) {
     debugPrint('\n${'=' * 50}');
     debugPrint('   🌱 $_tag RELEASE CANDIDATE ($buildStage)');
