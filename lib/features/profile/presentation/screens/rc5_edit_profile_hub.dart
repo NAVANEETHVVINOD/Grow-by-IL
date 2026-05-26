@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 
@@ -18,12 +19,20 @@ class RC5EditProfileHub extends StatelessWidget {
           _HubTile(
             icon: Icons.person_rounded,
             title: 'Basic Profile',
-            subtitle: 'Name, bio, social links, profile image',
+            subtitle: 'Name, bio, department, profile image',
+            onTap: () => context.push('/profile/edit/basic'),
+          ),
+          _HubTile(
+            icon: Icons.link_rounded,
+            title: 'Social Links',
+            subtitle: 'GitHub, LinkedIn, and website',
+            onTap: () => context.push('/profile/edit/social-links'),
           ),
           _HubTile(
             icon: Icons.badge_rounded,
-            title: 'Portfolio',
+            title: 'Portfolio Settings',
             subtitle: 'Public/private profile visibility',
+            onTap: () => context.push('/profile/edit/visibility'),
           ),
           _HubTile(
             icon: Icons.folder_copy_rounded,
@@ -39,6 +48,7 @@ class RC5EditProfileHub extends StatelessWidget {
             icon: Icons.school_rounded,
             title: 'Education',
             subtitle: 'Department, batch, and timeline',
+            onTap: () => context.push('/profile/edit/education'),
           ),
           _HubTile(
             icon: Icons.volunteer_activism_rounded,
@@ -49,11 +59,13 @@ class RC5EditProfileHub extends StatelessWidget {
             icon: Icons.code_rounded,
             title: 'Code Languages',
             subtitle: 'Familiarity levels and tools',
+            onTap: () => context.push('/profile/edit/skills'),
           ),
           _HubTile(
             icon: Icons.interests_rounded,
             title: 'Interests',
             subtitle: 'Maker interests and activity focus',
+            onTap: () => context.push('/profile/edit/interests'),
           ),
           const SizedBox(height: RC5DesignTokens.space5),
           RC5Button(
@@ -73,11 +85,13 @@ class _HubTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -86,18 +100,19 @@ class _HubTile extends StatelessWidget {
       child: RC5Card(
         backgroundColor: Colors.white,
         shadowOpacity: 0.65,
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  Text('Detailed edit pages come in the next profile slice.'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
+        onTap: onTap ??
+            () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Detailed edit pages come in the next profile slice.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
         child: Row(
           children: [
-            Icon(icon, color: RC5DesignTokens.primary),
+            Icon(icon, color: RC5DesignTokens.ink),
             const SizedBox(width: RC5DesignTokens.space3),
             Expanded(
               child: Column(

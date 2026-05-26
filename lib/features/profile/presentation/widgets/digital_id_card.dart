@@ -5,6 +5,8 @@ import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 
+import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
+
 class DigitalIdCard extends StatefulWidget {
   const DigitalIdCard({
     super.key,
@@ -51,6 +53,7 @@ class _DigitalIdCardState extends State<DigitalIdCard>
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: _flip,
       child: AnimatedBuilder(
@@ -77,8 +80,8 @@ class _DigitalIdCardState extends State<DigitalIdCard>
 
   Widget _buildFront() {
     return NeoCard(
-      color: AppColors.navy,
-      borderColor: AppColors.yellow,
+      color: Colors.white,
+      borderColor: const Color(0xFF111111),
       padding: const EdgeInsets.all(AppSizes.lg),
       child: AspectRatio(
         aspectRatio: 1.6,
@@ -91,14 +94,16 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                 Text(
                   'GROW~ MEMBER',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.yellow,
-                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF111111),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14,
                         letterSpacing: 2,
                       ),
                 ),
-                const Icon(Icons.bolt_rounded, color: AppColors.yellow),
+                const Icon(Icons.bolt_rounded, color: Color(0xFF111111), size: 20),
               ],
             ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 GestureDetector(
@@ -106,48 +111,39 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      CircleAvatar(
-                        radius: 35,
-                        backgroundColor: AppColors.yellow,
-                        backgroundImage: widget.user.avatarUrl != null
-                            ? NetworkImage(widget.user.avatarUrl!)
-                            : null,
-                        child: widget.user.avatarUrl == null
-                            ? const Icon(
-                                Icons.person,
-                                size: 40,
-                                color: AppColors.navy,
-                              )
-                            : null,
+                      RC5Avatar(
+                        imageUrl: widget.user.avatarUrl,
+                        displayName: widget.user.name,
+                        size: 56,
                       ),
                       if (widget.isUploading)
                         const CircleAvatar(
-                          radius: 35,
-                          backgroundColor: Colors.black54,
+                          radius: 28,
+                          backgroundColor: Colors.white54,
                           child: CircularProgressIndicator(
-                            color: AppColors.yellow,
+                            color: Color(0xFF111111),
                           ),
                         ),
                       Positioned(
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(3),
                           decoration: const BoxDecoration(
-                            color: AppColors.yellow,
+                            color: Color(0xFF111111),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.camera_alt,
-                            size: 12,
-                            color: AppColors.navy,
+                            size: 10,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSizes.md),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,9 +151,9 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                       Text(
                         widget.user.name.toUpperCase(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF111111),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
                             ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -165,8 +161,9 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                       Text(
                         widget.user.role.toUpperCase(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
-                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),
                       ),
@@ -182,16 +179,25 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                 Text(
                   'EST. 2024',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white38,
-                        fontSize: 10,
+                        color: AppColors.textSecondary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
                       ),
                 ),
-                const Text(
-                  'VERIFIED MAKER',
-                  style: TextStyle(
-                    color: AppColors.yellow,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDF5D7),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                  ),
+                  child: const Text(
+                    'VERIFIED MAKER',
+                    style: TextStyle(
+                      color: Color(0xFF111111),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
@@ -205,7 +211,7 @@ class _DigitalIdCardState extends State<DigitalIdCard>
   Widget _buildBack() {
     return NeoCard(
       color: Colors.white,
-      borderColor: AppColors.navy,
+      borderColor: const Color(0xFF111111),
       padding: const EdgeInsets.all(AppSizes.lg),
       child: AspectRatio(
         aspectRatio: 1.6,
@@ -234,14 +240,14 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                 ],
               ),
             ),
-            const SizedBox(width: AppSizes.md),
+            const SizedBox(width: 12),
             QrImageView(
               data: widget.user.qrCodeData ?? widget.user.id,
               version: QrVersions.auto,
-              size: 100,
+              size: 80,
               eyeStyle: const QrEyeStyle(
                 eyeShape: QrEyeShape.square,
-                color: AppColors.navy,
+                color: Color(0xFF111111),
               ),
             ),
           ],

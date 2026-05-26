@@ -7,7 +7,7 @@ class RC5Card extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
-    this.padding = const EdgeInsets.all(RC5DesignTokens.space4),
+    this.padding = const EdgeInsets.all(20.0),
     this.margin = EdgeInsets.zero,
     this.backgroundColor = RC5DesignTokens.surface,
     this.gradient,

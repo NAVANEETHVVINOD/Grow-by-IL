@@ -32,7 +32,7 @@ class ProjectListScreen extends ConsumerWidget {
           },
         ),
         title: Text(
-          'My Projects',
+          '/// My Projects',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,

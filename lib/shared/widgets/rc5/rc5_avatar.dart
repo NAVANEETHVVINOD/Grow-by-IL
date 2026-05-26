@@ -45,6 +45,7 @@ class RC5Avatar extends StatelessWidget {
             ? Image.network(
                 imageUrl!,
                 fit: BoxFit.cover,
+                cacheWidth: (size * 3).toInt(),
                 errorBuilder: (_, __, ___) => _FallbackAvatar(
                   initials: initials,
                   size: size,
@@ -76,19 +77,52 @@ class _FallbackAvatar extends StatelessWidget {
   final String initials;
   final double size;
 
+  Color _getColorForInitials(String str) {
+    if (str.isEmpty) return const Color(0xFF2563EB); // Default blue
+    final hash = str.codeUnits.fold<int>(0, (prev, curr) => prev + curr);
+    final colors = [
+      const Color(0xFF2563EB), // Blue
+      const Color(0xFF16A34A), // Green
+      const Color(0xFFD97706), // Amber
+      const Color(0xFFDC2626), // Red
+      const Color(0xFF9333EA), // Purple
+      const Color(0xFF0D9488), // Teal
+      const Color(0xFFEC4899), // Pink
+      const Color(0xFF06B6D4), // Cyan
+    ];
+    return colors[hash % colors.length];
+  }
+
+  IconData _getIconForInitials(String str) {
+    if (str.isEmpty) return Icons.smart_toy_rounded;
+    final hash = str.codeUnits.fold<int>(0, (prev, curr) => prev + curr);
+    final icons = [
+      Icons.smart_toy_rounded,         // Robot
+      Icons.sports_esports_rounded,    // Gamer
+      Icons.rocket_launch_rounded,     // Rocket
+      Icons.auto_awesome_rounded,      // Sparkles
+      Icons.construction_rounded,      // Builder
+      Icons.brush_rounded,             // Designer
+      Icons.science_rounded,           // Scientist
+      Icons.lightbulb_outline_rounded, // Inventor
+      Icons.psychology_rounded,        // Thinker
+      Icons.videogame_asset_rounded,   // Retro arcade
+    ];
+    return icons[hash % icons.length];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bgColor = _getColorForInitials(initials);
+    final iconData = _getIconForInitials(initials);
+
     return DecoratedBox(
-      decoration:
-          const BoxDecoration(gradient: RC5DesignTokens.primaryGradient),
+      decoration: BoxDecoration(color: bgColor),
       child: Center(
-        child: Text(
-          initials,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontSize: size * 0.34,
-                fontWeight: FontWeight.w900,
-              ),
+        child: Icon(
+          iconData,
+          color: Colors.white,
+          size: size * 0.52,
         ),
       ),
     );

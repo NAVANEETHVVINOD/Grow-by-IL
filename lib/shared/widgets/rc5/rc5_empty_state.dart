@@ -13,6 +13,7 @@ class RC5EmptyState extends StatelessWidget {
     this.onPrimaryAction,
     this.secondaryActionLabel,
     this.onSecondaryAction,
+    this.accentColor,
   });
 
   final IconData icon;
@@ -22,9 +23,12 @@ class RC5EmptyState extends StatelessWidget {
   final VoidCallback? onPrimaryAction;
   final String? secondaryActionLabel;
   final VoidCallback? onSecondaryAction;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveAccentColor = accentColor ?? RC5DesignTokens.accent;
+
     return RC5Card(
       backgroundColor: Colors.white,
       shadowOpacity: 0.7,
@@ -35,14 +39,14 @@ class RC5EmptyState extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              gradient: RC5DesignTokens.softGradient,
+              color: effectiveAccentColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(RC5DesignTokens.radiusLg),
               border: Border.all(
                 color: RC5DesignTokens.border,
                 width: RC5DesignTokens.borderWidth,
               ),
             ),
-            child: Icon(icon, color: RC5DesignTokens.primary, size: 28),
+            child: Icon(icon, color: effectiveAccentColor, size: 28),
           ),
           const SizedBox(height: RC5DesignTokens.space4),
           Text(

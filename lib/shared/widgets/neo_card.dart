@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_sizes.dart';
+
 
 /// Neobrutalist card — the core container widget for Grow~.
 /// Refined with premium soft shadows and dynamic borders.
@@ -11,12 +10,12 @@ class NeoCard extends StatefulWidget {
   const NeoCard({
     super.key,
     required this.child,
-    this.color = AppColors.surface,
-    this.borderColor = AppColors.navy,
+    this.color = Colors.white,
+    this.borderColor = const Color(0xFF111111),
     this.shadowOffset,
-    this.padding = const EdgeInsets.all(AppSizes.md),
-    this.borderRadius = AppSizes.radiusMd,
-    this.borderWidth = AppSizes.borderWidth,
+    this.padding = const EdgeInsets.all(20.0),
+    this.borderRadius = 24.0,
+    this.borderWidth = 2.0,
     this.onTap,
   });
 
@@ -40,7 +39,7 @@ class _NeoCardState extends State<NeoCard> {
   Widget build(BuildContext context) {
     final offset = _isPressed
         ? const Offset(0, 0)
-        : (widget.shadowOffset ?? const Offset(4, 4));
+        : (widget.shadowOffset ?? const Offset(3, 3));
 
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -50,11 +49,12 @@ class _NeoCardState extends State<NeoCard> {
         color: widget.color,
         borderRadius: BorderRadius.circular(widget.borderRadius),
         border: Border.all(
-            color: widget.borderColor,
-            width: widget.borderWidth < 2 ? 3 : widget.borderWidth),
+          color: widget.borderColor,
+          width: widget.borderWidth,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy,
+            color: const Color(0xFF111111),
             offset: offset,
             blurRadius: 0, // Hard shadow
             spreadRadius: 0,

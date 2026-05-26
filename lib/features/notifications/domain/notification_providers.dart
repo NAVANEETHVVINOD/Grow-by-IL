@@ -11,14 +11,14 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(supabase);
 });
 
-final notificationsProvider = StateNotifierProvider.autoDispose<
+final notificationsProvider = StateNotifierProvider<
     NotificationListNotifier, AsyncValue<List<NotificationModel>>>((ref) {
   final user = ref.watch(currentUserProvider).valueOrNull;
   final repo = ref.watch(notificationRepositoryProvider);
   return NotificationListNotifier(repo, user?.id);
 });
 
-final unreadNotificationCountProvider = Provider.autoDispose<int>((ref) {
+final unreadNotificationCountProvider = Provider<int>((ref) {
   final notifications = ref.watch(notificationsProvider).valueOrNull ?? [];
   return notifications.where((n) => !n.isRead).length;
 });
@@ -73,22 +73,27 @@ class NotificationListNotifier
   }
 
   Future<void> loadInitial() async {
+    if (!mounted) return;
     state = const AsyncLoading();
     try {
       final items = await repository.getNotifications(userId!,
           offset: 0, limit: _pageSize);
+      if (!mounted) return;
       _hasMore = items.length == _pageSize;
       state = AsyncData(items);
     } catch (e, st) {
+      if (!mounted) return;
       state = AsyncError(e, st);
     }
   }
 
   Future<void> refresh() async {
     if (userId == null) return;
+    if (!mounted) return;
     try {
       final items = await repository.getNotifications(userId!,
           offset: 0, limit: _pageSize);
+      if (!mounted) return;
       _hasMore = items.length == _pageSize;
       state = AsyncData(items);
     } catch (e, st) {
@@ -100,6 +105,7 @@ class NotificationListNotifier
   }
 
   Future<void> loadMore() async {
+    if (!mounted) return;
     if (!_hasMore ||
         state.isLoading ||
         state.isRefreshing ||
@@ -116,6 +122,7 @@ class NotificationListNotifier
         limit: _pageSize,
       );
 
+      if (!mounted) return;
       _hasMore = newItems.length == _pageSize;
       state = AsyncData([...currentItems, ...newItems]);
     } catch (e, st) {

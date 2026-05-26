@@ -16,7 +16,7 @@ class RC5Theme {
       useMaterial3: true,
       scaffoldBackgroundColor: RC5DesignTokens.background,
       colorScheme: const ColorScheme.light(
-        primary: RC5DesignTokens.primary,
+        primary: RC5DesignTokens.ink,
         onPrimary: Colors.white,
         secondary: RC5DesignTokens.accent,
         onSecondary: Colors.white,
@@ -24,6 +24,23 @@ class RC5Theme {
         onSurface: RC5DesignTokens.ink,
         error: RC5DesignTokens.error,
         onError: Colors.white,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: RC5DesignTokens.ink,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return RC5DesignTokens.ink;
+          }
+          return RC5DesignTokens.muted;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return RC5DesignTokens.ink.withValues(alpha: 0.3);
+          }
+          return RC5DesignTokens.neutralSurface;
+        }),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: RC5DesignTokens.background,
@@ -127,7 +144,7 @@ class RC5Theme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
           borderSide: const BorderSide(
-            color: RC5DesignTokens.primary,
+            color: RC5DesignTokens.ink,
             width: 2,
           ),
         ),

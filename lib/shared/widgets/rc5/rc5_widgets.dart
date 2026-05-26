@@ -1,5 +1,6 @@
 export 'rc5_avatar.dart';
 export 'rc5_bottom_nav.dart';
+export 'rc5_grow_logo.dart';
 export 'rc5_button.dart';
 export 'rc5_card.dart';
 export 'rc5_chip.dart';

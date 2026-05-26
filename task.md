@@ -208,9 +208,9 @@ Status: in progress
 - [x] Volunteering tab placeholder
 - [x] Skills/interests display
 - [x] Edit profile hub
-- [ ] Basic profile edit page
-- [ ] Portfolio public/private toggle
-- [ ] Social links display
+- [x] Basic profile edit page
+- [x] Portfolio public/private toggle
+- [x] Social links display
 - [ ] Share profile action
 - [x] Settings page foundation (bottom sheet)
 
@@ -313,8 +313,7 @@ Status: not started
 - [ ] Audit log planning
 
 ### Phase 13 - Visual QA and Performance
-
-Status: not started
+Status: in progress
 
 - [ ] Screenshot pass for Home
 - [ ] Screenshot pass for Akathalam
@@ -325,6 +324,23 @@ Status: not started
 - [ ] Active stream count review
 - [ ] Profile mode performance test
 - [ ] Release APK visual smoke test
+
+## Next Immediate Milestone: RC5 Profile System Stabilized
+
+**STEP 1 — Device QA (Manual Verification Required)**
+- Auth + Onboarding (fresh install, route forcing, resume after kill)
+- Routing Safety (deep link intercepts)
+- Profile Edit UX (skills, interests, education, social, privacy persistence)
+- Performance (tab switching, scroll speed, rebuild logs)
+- Regression Safety (booking, notifications, admin, events, check-in, sign-out)
+
+**STEP 2 — Merge Discipline**
+1. Merge PR #38
+2. Retarget PR #39 to main and merge
+3. Create new PR for Slice 4B (Profile Edit Experience & Migration Prep)
+
+**STEP 3 — Phase 4 - RC5 Schema Migration (Slice 5)**
+- Do not start until Steps 1 and 2 are complete.
 
 ### Phase 14 - Release Readiness
 

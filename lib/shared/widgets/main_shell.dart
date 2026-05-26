@@ -11,8 +11,6 @@ import '../../features/notifications/domain/notification_providers.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/theme/rc5_design_tokens.dart';
 import '../../core/utils/app_logger.dart';
 import '../../features/lab/domain/lab_providers.dart';
 
@@ -112,90 +110,52 @@ class _MainShellState extends ConsumerState<MainShell>
         if (didPop) return;
         final currentIndex = widget.navigationShell.currentIndex;
         if (currentIndex != 0) {
-          // Not on home tab → go to home tab
           widget.navigationShell.goBranch(0);
         } else {
-          // On home tab → show exit dialog
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              backgroundColor: RC5DesignTokens.background,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
-                side: const BorderSide(color: RC5DesignTokens.ink, width: 2),
-              ),
-              title: const Text(
-                'Exit Grow~?',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              content: const Text('Are you sure you want to exit?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                ),
-                RC5Button(
-                  label: 'Exit',
-                  variant: RC5ButtonVariant.destructive,
-                  height: 42,
-                  onPressed: () => SystemNavigator.pop(),
-                ),
-              ],
-            ),
-          );
+          SystemNavigator.pop();
         }
       },
       child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
         body: Stack(
           children: [
-            GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity == null) return;
-                final currentIndex = widget.navigationShell.currentIndex;
-                if (details.primaryVelocity! < 0) {
-                  // Swipe Left → Go Right
-                  if (currentIndex < 2) {
-                    widget.navigationShell.goBranch(currentIndex + 1);
-                  }
-                } else if (details.primaryVelocity! > 0) {
-                  // Swipe Right → Go Left
-                  if (currentIndex > 0) {
-                    widget.navigationShell.goBranch(currentIndex - 1);
-                  }
-                }
-              },
-              child: widget.navigationShell,
+            widget.navigationShell,
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _TopToastOverlay(),
             ),
-            // Top Toast System
-            _TopToastOverlay(),
           ],
         ),
-        bottomNavigationBar: RC5BottomNav(
-          selectedIndex: widget.navigationShell.currentIndex,
-          onTap: widget.navigationShell.goBranch,
-          items: [
-            const RC5BottomNavItem(
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home_rounded,
-              label: AppStrings.tabHome,
+        bottomNavigationBar: Container(
+          color: Colors.transparent,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          child: SafeArea(
+            top: false,
+            child: RC5BottomNav(
+              selectedIndex: widget.navigationShell.currentIndex,
+              onTap: widget.navigationShell.goBranch,
+              items: const [
+                RC5BottomNavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'Home',
+                ),
+                RC5BottomNavItem(
+                  icon: Icons.explore_outlined,
+                  activeIcon: Icons.explore_rounded,
+                  label: 'Akathalam',
+                ),
+                RC5BottomNavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'Profile',
+                ),
+              ],
             ),
-            RC5BottomNavItem(
-              icon: Icons.public_outlined,
-              activeIcon: Icons.public_rounded,
-              label: AppStrings.tabAkathalam,
-              iconBuilder: (color, size) {
-                return RC5KeralaMarkIcon(color: color, size: size);
-              },
-            ),
-            const RC5BottomNavItem(
-              icon: Icons.person_outline_rounded,
-              activeIcon: Icons.person_rounded,
-              label: AppStrings.tabProfile,
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// RC5 visual tokens for Grow's soft neo-brutalist redesign.
 ///
@@ -7,30 +8,40 @@ import 'package:flutter/material.dart';
 class RC5DesignTokens {
   RC5DesignTokens._();
 
-  static const background = Color(0xFFFFFFFF);
-  static const surface = Color(0xFFF8F7FF);
-  static const surfaceAlt = Color(0xFFF3F4F6);
-  static const ink = Color(0xFF09090B);
+  static const background = Color(0xFFFCFCFA);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceAlt = Color(0xFFFFF7A1);
+  static const ink = Color(0xFF111111);
   static const textSecondary = Color(0xFF71717A);
-  static const border = Color(0xFFE4E4E7);
-  static const primary = Color(0xFF7C3AED);
-  static const primaryEnd = Color(0xFFA855F7);
-  static const accent = Color(0xFFEC4899);
-  static const success = Color(0xFF10B981);
-  static const warning = Color(0xFFF59E0B);
+  static const border = Color(0xFF111111);
+  static const primary = Color(0xFFF5D6F7);
+  static const primaryEnd = Color(0xFFF5D6F7);
+  static const accent = Color(0xFFDFF4FF);
+  static const success = Color(0xFFDDF5D7);
+  static const warning = Color(0xFFFFF7A1);
   static const error = Color(0xFFEF4444);
   static const muted = Color(0xFFA1A1AA);
+
+  static const inkPrimary = Color(0xFF111111);
+  static const neutralSurface = Color(0xFFF3F4F6);
+  static const darkSurface = Color(0xFF3F3F46);
 
   static const primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, primaryEnd, accent],
+    colors: [primary, accent, success],
+  );
+
+  static const monochromeGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF111111), Color(0xFF2D2D2D)],
   );
 
   static const softGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFF8F7FF), Color(0xFFFFF1F7)],
+    colors: [Color(0xFFFFFFFF), Color(0xFFF3F4F6)],
   );
 
   static const double space1 = 4;
@@ -40,12 +51,12 @@ class RC5DesignTokens {
   static const double space5 = 24;
   static const double space6 = 32;
 
-  static const double radiusSm = 8;
-  static const double radiusMd = 12;
-  static const double radiusLg = 16;
+  static const double radiusSm = 12;
+  static const double radiusMd = 24;
+  static const double radiusLg = 24;
   static const double radiusPill = 999;
 
-  static const double borderWidth = 1.5;
+  static const double borderWidth = 2.0;
   static const Offset shadowOffset = Offset(3, 3);
 
   static const Duration motionFast = Duration(milliseconds: 120);
@@ -68,4 +79,31 @@ class RC5DesignTokens {
       ),
     ];
   }
+
+  static TextStyle get hero => GoogleFonts.spaceGrotesk(
+        fontWeight: FontWeight.w800,
+        fontSize: 32,
+        color: ink,
+        letterSpacing: -1.0,
+      );
+
+  static TextStyle get sectionTitle => GoogleFonts.spaceGrotesk(
+        fontWeight: FontWeight.w700,
+        fontSize: 22,
+        color: ink,
+        letterSpacing: -0.5,
+      );
+
+  static TextStyle get cardTitle => GoogleFonts.spaceGrotesk(
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        color: ink,
+      );
+
+  static TextStyle get body => GoogleFonts.dmSans(
+        fontWeight: FontWeight.w500,
+        fontSize: 14,
+        color: ink,
+        height: 1.4,
+      );
 }

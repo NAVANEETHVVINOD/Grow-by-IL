@@ -1,3 +1,4 @@
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/shared/models/event_model.dart';
@@ -14,22 +15,26 @@ class EventRepository {
       LogCategory.events,
       'QUERY_COLUMNS | id, title, description, event_type, event_date, end_date, status, venue, created_by, created_at, capacity, rsvp_count',
     );
-
+    final sw = Stopwatch()..start();
     try {
       final data = await _client
           .from('events')
           .select()
-          .filter(
-            'status',
-            'in',
-            '("upcoming","ongoing","completed")',
-          )
-          .order('event_date', ascending: true);
-      return (data as List).map((row) => EventModel.fromJson(row)).toList();
+          .inFilter('status', ['upcoming', 'ongoing', 'completed'])
+          .order('event_date', ascending: true)
+          .timeout(const Duration(seconds: 15));
+      
+      sw.stop();
+      AppLogger.info(
+        LogCategory.events,
+        'QUERY getEvents SUCCESS | ${sw.elapsedMilliseconds}ms | ${data.length} rows',
+      );
+      return data.map((row) => EventModel.fromJson(row)).toList();
     } catch (e, st) {
+      sw.stop();
       AppLogger.error(
         LogCategory.events,
-        'getEvents failed',
+        'getEvents failed | ${sw.elapsedMilliseconds}ms',
         error: e,
         stack: st,
       );

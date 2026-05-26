@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
-import 'package:grow/features/lab/domain/tool_providers.dart';
 import 'package:grow/features/notifications/domain/notification_providers.dart';
 import 'package:grow/features/projects/domain/project_providers.dart';
-import 'package:grow/shared/models/booking_model.dart';
-import 'package:grow/shared/models/event_model.dart';
-import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/user_model.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 
 class RC5HomeScreen extends StatelessWidget {
@@ -29,29 +28,63 @@ class RC5HomeScreen extends StatelessWidget {
             final container = ProviderScope.containerOf(context);
             container.invalidate(currentUserProvider);
             container.invalidate(activeSessionProvider);
-            container.invalidate(activeBookingProvider);
             container.invalidate(activeEventsProvider);
             container.invalidate(userProjectsProvider);
           },
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
-            children: const [
-              HomeTopBar(),
-              SizedBox(height: RC5DesignTokens.space5),
-              LiveStatusStrip(),
-              SizedBox(height: RC5DesignTokens.space5),
-              QuickActionsGrid(),
-              SizedBox(height: RC5DesignTokens.space6),
-              UpcomingEventsCarousel(),
-              SizedBox(height: RC5DesignTokens.space6),
-              OpportunitiesPreview(),
-              SizedBox(height: RC5DesignTokens.space6),
-              MentorshipSupportPreview(),
-              SizedBox(height: RC5DesignTokens.space6),
-              ActiveProjectsPreview(),
-              SizedBox(height: RC5DesignTokens.space6),
-              KnowledgePreview(),
-              SizedBox(height: 80),
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.fromLTRB(0, 18, 0, 120),
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: HomeHeader(),
+              ),
+              const SizedBox(height: 16),
+              Transform.rotate(
+                angle: 0.035,
+                child: const ScrollingTicker(
+                  text: '/// LATEST NEWS: New CNC Mill is now operational! Check out the updated safety guide in the Knowledge Base...',
+                  backgroundColor: RC5DesignTokens.surfaceAlt,
+                  textColor: RC5DesignTokens.ink,
+                  speedMultiplier: 1.0,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: HomeHandleCard(),
+              ),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: CompactActionsBox(),
+              ),
+              const SizedBox(height: 20),
+              const SlashDivider(),
+              const SizedBox(height: 20),
+              const FeaturedActivitiesSection(),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: OpportunitiesSection(),
+              ),
+              const SizedBox(height: 24),
+              const SlashDivider(),
+              const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: ThreeNavigationButtons(),
+              ),
+              const SizedBox(height: 32),
+              Transform.rotate(
+                angle: -0.035,
+                child: const ScrollingTicker(
+                  text: '/// BUILD. BREAK. GROW. /// SHIP IDEAS. NOT EXCUSES. /// CREATE > CONSUME ///',
+                  backgroundColor: RC5DesignTokens.ink,
+                  textColor: Colors.white,
+                  speedMultiplier: 0.5,
+                ),
+              ),
             ],
           ),
         ),
@@ -60,277 +93,241 @@ class RC5HomeScreen extends StatelessWidget {
   }
 }
 
-class HomeTopBar extends ConsumerWidget {
-  const HomeTopBar({super.key});
+class SlashDivider extends StatelessWidget {
+  const SlashDivider({super.key, this.color = AppColors.navy, this.height = 20});
+
+  final Color color;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              25,
+              (index) => Text(
+                ' //  ',
+                style: TextStyle(
+                  color: color.withValues(alpha: 0.35),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeHeader extends ConsumerWidget {
+  const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
-    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
-    return userAsync.when(
-      data: (user) {
-        if (user == null) {
-          return const RC5Skeleton(width: double.infinity, height: 82);
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () => context.go('/profile'),
-              child: RC5Avatar(
-                imageUrl: user.avatarUrl,
-                displayName: user.name,
-                size: 58,
-              ),
-            ),
-            const SizedBox(width: RC5DesignTokens.space3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hello, ${_firstName(user.name)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: RC5DesignTokens.ink,
-                        ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _profileHandle(user),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: RC5DesignTokens.textSecondary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: RC5DesignTokens.space2),
-                  Wrap(
-                    spacing: RC5DesignTokens.space2,
-                    runSpacing: RC5DesignTokens.space2,
-                    children: [
-                      RC5Chip(
-                        label: 'Level ${user.level}',
-                        icon: Icons.auto_awesome_rounded,
-                        compact: true,
-                        color: RC5DesignTokens.primary,
-                        isSelected: true,
-                      ),
-                      RC5Chip(
-                        label: '${user.xp} XP',
-                        icon: Icons.bolt_rounded,
-                        compact: true,
-                      ),
-                    ],
+    return Row(
+      children: [
+        const RC5GrowLogo(size: 32),
+        const SizedBox(width: 10),
+        Text(
+          'Grow~',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF111111),
+            letterSpacing: -1.0,
+          ),
+        ),
+        const Spacer(),
+        userAsync.maybeWhen(
+          data: (user) {
+            if (user == null) return const SizedBox.shrink();
+            return Row(
+              children: [
+                const _NotificationBadge(),
+                if (AppRole.isAdminRole(user.role)) ...[
+                  const SizedBox(width: 10),
+                  RC5Button(
+                    label: 'Admin',
+                    icon: Icons.admin_panel_settings_outlined,
+                    variant: RC5ButtonVariant.secondary,
+                    onPressed: () => context.push('/admin'),
                   ),
                 ],
-              ),
-            ),
-            _IconBadgeButton(
-              icon: Icons.notifications_outlined,
-              count: unreadCount,
-              onTap: () => context.push('/notifications'),
-            ),
-            if (AppRole.isAdminRole(user.role)) ...[
-              const SizedBox(width: RC5DesignTokens.space2),
-              _IconBadgeButton(
-                icon: Icons.admin_panel_settings_outlined,
-                onTap: () => context.push('/admin'),
-              ),
-            ],
-          ],
-        );
-      },
-      loading: () => const Row(
-        children: [
-          RC5Skeleton(width: 58, height: 58, radius: 29),
-          SizedBox(width: RC5DesignTokens.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RC5Skeleton(width: 170, height: 26),
-                SizedBox(height: RC5DesignTokens.space2),
-                RC5Skeleton(width: 120, height: 16),
               ],
-            ),
-          ),
-        ],
-      ),
-      error: (_, __) => const RC5EmptyState(
-        icon: Icons.person_off_rounded,
-        title: 'Profile could not load',
-        message: 'Pull down to retry your dashboard.',
-      ),
+            );
+          },
+          orElse: () => const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }
 
-class LiveStatusStrip extends ConsumerWidget {
-  const LiveStatusStrip({super.key});
+class _NotificationBadge extends ConsumerWidget {
+  const _NotificationBadge();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final visitorCount = ref.watch(liveLabVisitorCountProvider);
-    final session = ref.watch(activeSessionProvider);
-    final booking = ref.watch(activeBookingProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+    
+    return _IconBadgeButton(
+      icon: Icons.notifications_outlined,
+      count: unreadCount,
+      onTap: () => context.push('/notifications'),
+    );
+  }
+}
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionHeader(
-          title: 'Now at IDEA Lab',
-          actionLabel: 'Open',
-          onAction: () => context.go('/akathalam'),
-        ),
-        const SizedBox(height: RC5DesignTokens.space3),
-        SizedBox(
-          height: 116,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+class HomeHandleCard extends ConsumerWidget {
+  const HomeHandleCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(currentUserProvider);
+
+    return userAsync.when(
+      data: (user) {
+        if (user == null) return const SizedBox.shrink();
+        return NeoCard(
+          color: Colors.white,
+          onTap: () => context.go('/profile'),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
             children: [
-              _LiveStatusCard(
-                icon: Icons.groups_rounded,
-                title: visitorCount.maybeWhen(
-                  data: (count) => '$count active now',
-                  orElse: () => 'Live count',
+              RC5Avatar(
+                imageUrl: user.avatarUrl,
+                displayName: user.name,
+                size: 32,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'idealab.org/${_profileHandle(user)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    color: AppColors.navy,
+                  ),
                 ),
-                subtitle: 'Realtime lab occupancy',
-                color: RC5DesignTokens.primary,
               ),
-              _LiveStatusCard(
-                icon: session.valueOrNull == null
-                    ? Icons.qr_code_scanner_rounded
-                    : Icons.verified_rounded,
-                title: session.valueOrNull == null
-                    ? 'Ready to check in'
-                    : 'You are checked in',
-                subtitle: session.valueOrNull == null
-                    ? 'Scan the QR at the lab'
-                    : 'Remember to check out',
-                color: session.valueOrNull == null
-                    ? RC5DesignTokens.ink
-                    : RC5DesignTokens.success,
-              ),
-              _LiveStatusCard(
-                icon: Icons.construction_rounded,
-                title: _bookingTitle(booking.valueOrNull),
-                subtitle: _bookingSubtitle(booking.valueOrNull),
-                color: RC5DesignTokens.accent,
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.navy,
+                size: 18,
               ),
             ],
           ),
-        ),
-      ],
+        );
+      },
+      loading: () => const RC5Skeleton(width: double.infinity, height: 56),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
 
-class QuickActionsGrid extends StatelessWidget {
-  const QuickActionsGrid({super.key});
+class CompactActionsBox extends StatelessWidget {
+  const CompactActionsBox({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const actions = [
-      _QuickAction(
-        icon: Icons.qr_code_scanner_rounded,
-        title: 'Check In',
-        subtitle: 'Start lab session',
-        route: '/lab/scan',
-      ),
-      _QuickAction(
-        icon: Icons.construction_rounded,
-        title: 'Book Tool',
-        subtitle: 'Reserve machines',
-        route: '/tools',
-      ),
-      _QuickAction(
-        icon: Icons.folder_copy_rounded,
-        title: 'Projects',
-        subtitle: 'Continue builds',
-        route: '/projects',
-      ),
-      _QuickAction(
-        icon: Icons.event_rounded,
-        title: 'Events',
-        subtitle: 'Workshops & meetups',
-        route: '/events',
-      ),
-      _QuickAction(
-        icon: Icons.work_rounded,
-        title: 'Opportunities',
-        subtitle: 'Internships & roles',
-        route: '/home',
-      ),
-      _QuickAction(
-        icon: Icons.handshake_rounded,
-        title: 'Mentorship',
-        subtitle: 'Ask for support',
-        route: '/home',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionHeader(title: 'Quick actions'),
-        const SizedBox(height: RC5DesignTokens.space3),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: actions.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: RC5DesignTokens.space3,
-            crossAxisSpacing: RC5DesignTokens.space3,
-            childAspectRatio: 1.14,
+    return NeoCard(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _CompactActionItem(
+            icon: Icons.qr_code_scanner_rounded,
+            label: 'Check In',
+            color: const Color(0xFFFFEA00), // Pure/Vibrant yellow
+            onTap: () => context.push('/lab'),
           ),
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return RC5Card(
-              onTap: () => action.route == '/home'
-                  ? _showComingSoon(context, action.title)
-                  : context.push(action.route),
-              backgroundColor: Colors.white,
-              shadowOpacity: 0.8,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(action.icon, color: RC5DesignTokens.primary, size: 28),
-                  const Spacer(),
-                  Text(
-                    action.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    action.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: RC5DesignTokens.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
+          _CompactActionItem(
+            icon: Icons.construction_rounded,
+            label: 'Book Tools',
+            color: const Color(0xFF38BDF8), // Cyan
+            onTap: () => context.push('/tools'),
+          ),
+          _CompactActionItem(
+            icon: Icons.folder_copy_rounded,
+            label: 'Projects',
+            color: const Color(0xFF2ECC71), // Green
+            onTap: () => context.push('/projects'),
+          ),
+          _CompactActionItem(
+            icon: Icons.event_rounded,
+            label: 'Events',
+            color: const Color(0xFFFF8EFA), // Pink
+            onTap: () => context.push('/events'),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class UpcomingEventsCarousel extends ConsumerWidget {
-  const UpcomingEventsCarousel({super.key});
+class _CompactActionItem extends StatelessWidget {
+  const _CompactActionItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.navy, width: 2.2),
+              ),
+              child: Icon(icon, color: AppColors.navy, size: 20),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: AppColors.navy,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FeaturedActivitiesSection extends ConsumerWidget {
+  const FeaturedActivitiesSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -339,50 +336,146 @@ class UpcomingEventsCarousel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(
-          title: 'Upcoming events',
-          actionLabel: 'View all',
-          onAction: () => context.push('/events'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'Featured activities',
+            style: RC5DesignTokens.sectionTitle,
+          ),
         ),
-        const SizedBox(height: RC5DesignTokens.space3),
+        const SizedBox(height: 16),
         events.when(
           data: (items) {
-            final upcoming = items.where((event) => !event.isPast).take(8);
+            final upcoming = items.where((event) => !event.isPast).toList();
+            
             if (upcoming.isEmpty) {
-              return const RC5EmptyState(
-                icon: Icons.event_available_rounded,
-                title: 'No events yet',
-                message: 'Upcoming workshops and meetups will appear here.',
+              return const SizedBox(
+                height: 120,
+                child: Center(
+                  child: Text(
+                    'No activities queued right now.',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               );
             }
+
             return SizedBox(
-              height: 238,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: upcoming.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: RC5DesignTokens.space3),
-                itemBuilder: (context, index) {
-                  final event = upcoming.elementAt(index);
-                  return _EventPosterCard(event: event);
+              height: 330,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: upcoming.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                  final event = upcoming[index];
+                  
+                  return SizedBox(
+                    width: 280,
+                    child: NeoCard(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(16),
+                      onTap: () {
+                        context.push('/events/${event.id}');
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: AppColors.navy,
+                              height: 1.25,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  '${_formatDate(event.eventDate)} · ${_timeOnly(event.eventDate)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  event.venue ?? 'IDEA Lab',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _SmallTag(label: event.type.toUpperCase()),
+                              const SizedBox(width: 6),
+                              const _SmallTag(label: 'OPEN'),
+                            ],
+                          ),
+                          const Spacer(),
+                          // Poster image at bottom of card
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              height: 90,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F0),
+                                border: Border.all(color: AppColors.navy, width: 1.5),
+                              ),
+                              child: event.imageUrl != null && event.imageUrl!.isNotEmpty
+                                  ? Image.network(
+                                      event.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const _PosterPlaceholder(),
+                                    )
+                                  : const _PosterPlaceholder(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 },
               ),
             );
           },
           loading: () => const SizedBox(
-            height: 238,
-            child: Row(
-              children: [
-                RC5Skeleton(width: 168, height: 238),
-                SizedBox(width: RC5DesignTokens.space3),
-                RC5Skeleton(width: 168, height: 238),
-              ],
-            ),
+            height: 330,
+            child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const RC5EmptyState(
-            icon: Icons.wifi_off_rounded,
-            title: 'Events could not load',
-            message: 'Pull down to refresh your dashboard.',
+          error: (_, __) => const SizedBox(
+            height: 330,
+            child: Center(child: Text('Could not load events.')),
           ),
         ),
       ],
@@ -390,460 +483,360 @@ class UpcomingEventsCarousel extends ConsumerWidget {
   }
 }
 
-class OpportunitiesPreview extends StatelessWidget {
-  const OpportunitiesPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const items = [
-      _PreviewItem(
-        title: 'Embedded systems intern',
-        subtitle: 'MakerGram • Internship • Remote',
-        icon: Icons.memory_rounded,
-      ),
-      _PreviewItem(
-        title: 'Design volunteer crew',
-        subtitle: 'IDEA Lab • Volunteering • Onsite',
-        icon: Icons.palette_rounded,
-      ),
-    ];
-
-    return _PreviewSection(
-      title: 'Opportunities',
-      actionLabel: 'Soon',
-      items: items,
-      emptyIcon: Icons.work_outline_rounded,
-      onTap: (item) => _showComingSoon(context, 'Opportunities'),
-    );
-  }
-}
-
-class MentorshipSupportPreview extends StatelessWidget {
-  const MentorshipSupportPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return RC5Card(
-      gradient: RC5DesignTokens.softGradient,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.handshake_rounded, color: RC5DesignTokens.ink),
-              const SizedBox(width: RC5DesignTokens.space2),
-              Expanded(
-                child: Text(
-                  'Mentorship & Support',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: RC5DesignTokens.space3),
-          Text(
-            'Request help with team members, technical blockers, materials, or project guidance.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: RC5DesignTokens.textSecondary,
-                ),
-          ),
-          const SizedBox(height: RC5DesignTokens.space4),
-          RC5Button(
-            label: 'Request support',
-            icon: Icons.arrow_forward_rounded,
-            onPressed: () => _showComingSoon(context, 'Mentorship & Support'),
-            fullWidth: true,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ActiveProjectsPreview extends ConsumerWidget {
-  const ActiveProjectsPreview({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final projects = ref.watch(userProjectsProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionHeader(
-          title: 'Active projects',
-          actionLabel: 'View all',
-          onAction: () => context.push('/projects'),
-        ),
-        const SizedBox(height: RC5DesignTokens.space3),
-        projects.when(
-          data: (items) {
-            final activeProjects = items.take(3).toList();
-            if (activeProjects.isEmpty) {
-              return RC5EmptyState(
-                icon: Icons.folder_open_rounded,
-                title: 'No active projects',
-                message: 'Create or join a project to start building.',
-                primaryActionLabel: 'Browse projects',
-                onPrimaryAction: () => context.push('/projects'),
-              );
-            }
-            return Column(
-              children: activeProjects.map((project) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: RC5DesignTokens.space3),
-                  child: _ProjectPreviewCard(project: project),
-                );
-              }).toList(),
-            );
-          },
-          loading: () => const RC5SkeletonList(itemCount: 3),
-          error: (_, __) => const RC5EmptyState(
-            icon: Icons.cloud_off_rounded,
-            title: 'Projects could not load',
-            message: 'Pull down to refresh and try again.',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class KnowledgePreview extends StatelessWidget {
-  const KnowledgePreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const items = [
-      _PreviewItem(
-        title: 'Laser cutter safety basics',
-        subtitle: 'Machine guide • 5 min read',
-        icon: Icons.local_fire_department_rounded,
-      ),
-      _PreviewItem(
-        title: 'How to prepare files for CNC',
-        subtitle: 'Fabrication guide • Draft',
-        icon: Icons.architecture_rounded,
-      ),
-      _PreviewItem(
-        title: 'Arduino project checklist',
-        subtitle: 'Electronics • Community article',
-        icon: Icons.developer_board_rounded,
-      ),
-    ];
-
-    return _PreviewSection(
-      title: 'Knowledge base',
-      actionLabel: 'Soon',
-      items: items,
-      emptyIcon: Icons.menu_book_rounded,
-      onTap: (item) => _showComingSoon(context, 'Knowledge Base'),
-    );
-  }
-}
-
-class _LiveStatusCard extends StatelessWidget {
-  const _LiveStatusCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
+class _PosterPlaceholder extends StatelessWidget {
+  const _PosterPlaceholder();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 190,
-      margin: const EdgeInsets.only(right: RC5DesignTokens.space3),
-      child: RC5Card(
-        backgroundColor: Colors.white,
-        shadowOpacity: 0.7,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const Spacer(),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: RC5DesignTokens.textSecondary,
-                  ),
-            ),
-          ],
+      color: const Color(0xFFE0F2FE),
+      child: const Center(
+        child: Icon(Icons.image_outlined, color: AppColors.navy, size: 32),
+      ),
+    );
+  }
+}
+
+class _SmallTag extends StatelessWidget {
+  const _SmallTag({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.navy, width: 1.2),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          color: AppColors.navy,
         ),
       ),
     );
   }
 }
 
-class _EventPosterCard extends StatelessWidget {
-  const _EventPosterCard({required this.event});
-
-  final EventModel event;
+class OpportunitiesSection extends StatelessWidget {
+  const OpportunitiesSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 168,
-      child: RC5Card(
-        padding: EdgeInsets.zero,
-        onTap: () => context.push('/events/${event.id}'),
-        shadowOpacity: 0.85,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd - 1),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (event.imageUrl != null && event.imageUrl!.isNotEmpty)
-                Image.network(
-                  event.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const _PosterFallback(),
-                )
-              else
-                const _PosterFallback(),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      RC5DesignTokens.ink.withValues(alpha: 0.76),
+    final opportunities = [
+      _OppItem(
+        creator: 'FOSS United',
+        title: 'Call for volunteers-IndiaFOSS 2026',
+        tags: 'Part Time · Remote · Volunteering',
+        logoColor: const Color(0xFFDFF4FF),
+        logoText: 'FOSS',
+      ),
+      _OppItem(
+        creator: 'TinkerHub Foundation',
+        title: 'Operations Lead',
+        tags: 'Full Time · Onsite · Job',
+        logoColor: const Color(0xFFE5E7EB),
+        logoText: 'TH',
+      ),
+      _OppItem(
+        creator: 'MakerGram',
+        title: 'Embedded Systems Engineer',
+        tags: 'Full Time · Hybrid · Role',
+        logoColor: const Color(0xFFF7EEB4),
+        logoText: 'MG',
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Opportunities',
+          style: RC5DesignTokens.sectionTitle,
+        ),
+        const SizedBox(height: 16),
+        // Minimal list items
+        ...opportunities.map((opp) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        opp.creator,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF71717A),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        opp.title,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111111),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        opp.tags,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF71717A),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RC5Chip(
-                      label: _formatDate(event.eventDate),
-                      compact: true,
-                      isSelected: true,
-                      color: RC5DesignTokens.primary,
+                const SizedBox(width: 16),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: opp.logoColor,
+                    border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      opp.logoText,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: opp.logoColor == Colors.black ? Colors.white : const Color(0xFF111111),
+                        fontWeight: FontWeight.bold,
+                        fontSize: opp.logoText.contains('\n') ? 9 : 12,
+                        height: 1.1,
+                      ),
                     ),
-                    const SizedBox(height: RC5DesignTokens.space2),
-                    Text(
-                      event.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      event.venue ?? 'IDEA Lab',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.82),
-                          ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 }
 
-class _ProjectPreviewCard extends StatelessWidget {
-  const _ProjectPreviewCard({required this.project});
-
-  final ProjectModel project;
+class ThreeNavigationButtons extends StatelessWidget {
+  const ThreeNavigationButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return RC5Card(
-      backgroundColor: Colors.white,
-      shadowOpacity: 0.65,
-      onTap: () => context.push('/projects/${project.id}'),
+    return Column(
+      children: [
+        _RowButton(
+          title: 'Mentorship & Support',
+          subtitle: 'Request help with blockers, designs, or guidance',
+          icon: Icons.groups_rounded,
+          circleColor: const Color(0xFF2ECC71), // Green
+          onTap: () => context.push('/mentorship'),
+        ),
+        const SizedBox(height: 16),
+        _RowButton(
+          title: 'Learning & Knowledge Base',
+          subtitle: 'A library with safety guides, roadmaps & resources',
+          icon: Icons.menu_book_rounded,
+          circleColor: const Color(0xFFFF8EFA), // Pink
+          onTap: () => context.push('/knowledge'),
+        ),
+        const SizedBox(height: 16),
+        _RowButton(
+          title: "Don't just dream of a better future",
+          subtitle: 'Help create it. Donate to support our space.',
+          icon: Icons.diamond_rounded,
+          circleColor: const Color(0xFFFFEA00), // Bright Yellow
+          onTap: () => context.push('/donate'),
+        ),
+      ],
+    );
+  }
+}
+
+class _RowButton extends StatelessWidget {
+  const _RowButton({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.circleColor,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color circleColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              gradient: RC5DesignTokens.primaryGradient,
-              borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.navy, width: 2),
             ),
-            child: const Icon(Icons.rocket_launch_rounded, color: Colors.white),
+            child: Center(
+              child: Icon(icon, color: circleColor, size: 22),
+            ),
           ),
-          const SizedBox(width: RC5DesignTokens.space3),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  project.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: AppColors.navy,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${project.status} • ${project.visibility}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: RC5DesignTokens.textSecondary,
-                      ),
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded),
         ],
       ),
     );
   }
 }
 
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection({
-    required this.title,
-    required this.actionLabel,
-    required this.items,
-    required this.emptyIcon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String actionLabel;
-  final List<_PreviewItem> items;
-  final IconData emptyIcon;
-  final ValueChanged<_PreviewItem> onTap;
+class QuotesFooter extends StatelessWidget {
+  const QuotesFooter({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionHeader(title: title, actionLabel: actionLabel),
-        const SizedBox(height: RC5DesignTokens.space3),
-        if (items.isEmpty)
-          RC5EmptyState(
-            icon: emptyIcon,
-            title: 'Nothing here yet',
-            message: 'New items will appear as the community grows.',
-          )
-        else
-          Column(
-            children: items.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: RC5DesignTokens.space3),
-                child: RC5Card(
-                  backgroundColor: Colors.white,
-                  shadowOpacity: 0.6,
-                  onTap: () => onTap(item),
-                  child: Row(
-                    children: [
-                      Icon(item.icon, color: RC5DesignTokens.primary, size: 26),
-                      const SizedBox(width: RC5DesignTokens.space3),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w900),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.subtitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: RC5DesignTokens.textSecondary,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right_rounded),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
+    return Transform.rotate(
+      angle: -0.02, // Opposite and slightly softer tilt
+      child: const ScrollingTicker(
+        text: '/// BUILD. LEARN. SHARE. REPEAT. /// LIVE TO INNOVATE, LEAVE AN IMPACT. /// HAKUNA MATATA /// WORKSHOP TODAY AT 4PM.',
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        speedMultiplier: 0.6, // Slower movement
+      ),
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.actionLabel,
-    this.onAction,
+class ScrollingTicker extends StatefulWidget {
+  const ScrollingTicker({
+    super.key,
+    required this.text,
+    required this.backgroundColor,
+    required this.textColor,
+    this.speedMultiplier = 1.0,
   });
 
-  final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
+  final String text;
+  final Color backgroundColor;
+  final Color textColor;
+  final double speedMultiplier;
+
+  @override
+  State<ScrollingTicker> createState() => _ScrollingTickerState();
+}
+
+class _ScrollingTickerState extends State<ScrollingTicker> {
+  late ScrollController _scrollController;
+  bool _scrolling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startScrolling());
+  }
+
+  void _startScrolling() async {
+    if (!mounted) return;
+    setState(() => _scrolling = true);
+
+    while (mounted && _scrolling) {
+      if (!_scrollController.hasClients) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        continue;
+      }
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      if (maxScroll <= 0) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        continue;
+      }
+
+      final duration = Duration(milliseconds: (maxScroll * 35 / widget.speedMultiplier).toInt());
+      await _scrollController.animateTo(
+        maxScroll,
+        duration: duration,
+        curve: Curves.linear,
+      );
+      if (!mounted) return;
+      _scrollController.jumpTo(0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrolling = false;
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: RC5DesignTokens.ink,
-                ),
-          ),
-        ),
-        if (actionLabel != null)
-          TextButton(
-            onPressed: onAction,
-            child: Text(
-              actionLabel!,
-              style: const TextStyle(fontWeight: FontWeight.w900),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: widget.backgroundColor,
+        border: Border.all(color: AppColors.navy, width: 2),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        child: Row(
+          children: [
+            Text(
+              '${widget.text}   •   ${widget.text}   •   ${widget.text}   •   ${widget.text}   ',
+              style: GoogleFonts.pressStart2p(
+                fontSize: 12,
+                color: widget.textColor,
+                letterSpacing: 1.5,
+              ),
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -864,30 +857,42 @@ class _IconBadgeButton extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        IconButton.filledTonal(
-          onPressed: onTap,
-          style: IconButton.styleFrom(
-            backgroundColor: RC5DesignTokens.surface,
-            foregroundColor: RC5DesignTokens.ink,
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.navy, width: 2),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.navy,
+                  offset: Offset(2, 2),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Icon(icon, color: AppColors.navy, size: 22),
           ),
-          icon: Icon(icon),
         ),
         if (count > 0)
           Positioned(
-            right: 2,
-            top: 2,
+            right: -4,
+            top: -4,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
-                color: RC5DesignTokens.error,
-                borderRadius: BorderRadius.circular(RC5DesignTokens.radiusPill),
-                border: Border.all(color: Colors.white, width: 1.5),
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.navy, width: 1.5),
               ),
               child: Text(
                 count > 99 ? '99+' : '$count',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -898,55 +903,23 @@ class _IconBadgeButton extends StatelessWidget {
   }
 }
 
-class _PosterFallback extends StatelessWidget {
-  const _PosterFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(gradient: RC5DesignTokens.primaryGradient),
-      child: Center(
-        child: Icon(
-          Icons.auto_awesome_rounded,
-          color: Colors.white,
-          size: 44,
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickAction {
-  const _QuickAction({
-    required this.icon,
+class _OppItem {
+  const _OppItem({
+    required this.creator,
     required this.title,
-    required this.subtitle,
-    required this.route,
+    required this.tags,
+    required this.logoColor,
+    required this.logoText,
   });
 
-  final IconData icon;
+  final String creator;
   final String title;
-  final String subtitle;
-  final String route;
+  final String tags;
+  final Color logoColor;
+  final String logoText;
 }
 
-class _PreviewItem {
-  const _PreviewItem({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-}
-
-String _firstName(String value) {
-  final trimmed = value.trim();
-  if (trimmed.isEmpty) return 'Maker';
-  return trimmed.split(RegExp(r'\s+')).first;
-}
+// Mocks removed
 
 String _profileHandle(UserModel user) {
   final localPart = user.email.split('@').first;
@@ -958,30 +931,10 @@ String _profileHandle(UserModel user) {
   return '@${normalized.isEmpty ? user.id.substring(0, 6) : normalized}';
 }
 
-String _bookingTitle(BookingModel? booking) {
-  if (booking == null) return 'No active booking';
-  return booking.toolName ?? 'Tool booking';
-}
-
-String _bookingSubtitle(BookingModel? booking) {
-  if (booking == null) return 'Book tools when you need them';
-  return '${booking.status} until ${_timeOnly(booking.slotEnd)}';
-}
-
 String _formatDate(DateTime value) {
   const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
   final local = value.toLocal();
   return '${months[local.month - 1]} ${local.day}';
@@ -993,13 +946,4 @@ String _timeOnly(DateTime value) {
   final minute = local.minute.toString().padLeft(2, '0');
   final suffix = local.hour >= 12 ? 'PM' : 'AM';
   return '$hour:$minute $suffix';
-}
-
-void _showComingSoon(BuildContext context, String feature) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('$feature is coming in the next RC5 slice.'),
-      behavior: SnackBarBehavior.floating,
-    ),
-  );
 }

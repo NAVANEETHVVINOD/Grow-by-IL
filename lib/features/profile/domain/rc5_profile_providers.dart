@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
-import 'package:grow/features/profile/domain/profile_providers.dart';
+
 import 'package:grow/features/projects/domain/project_providers.dart';
 import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/user_model.dart';
+import 'package:grow/shared/repositories/supabase_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Rc5ProfileHeaderData {
@@ -82,10 +83,23 @@ final rc5ProfileHeaderProvider =
 });
 
 final rc5ProfileStatsProvider = FutureProvider<Rc5ProfileStats>((ref) async {
-  final visits = await ref.watch(userLabVisitsCountProvider.future);
-  final tools = await ref.watch(userToolsUsedCountProvider.future);
-  final events = await ref.watch(userEventsCountProvider.future);
-  final projects = await ref.watch(userProjectsCountProvider.future);
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  if (user == null) {
+    return const Rc5ProfileStats(visits: 0, tools: 0, events: 0, projects: 0);
+  }
+
+  // Fetch all counts in parallel
+  final responses = await Future.wait([
+    supabase.from('lab_sessions').select('id').eq('user_id', user.id),
+    supabase.from('tool_bookings').select('tool_id').eq('user_id', user.id).eq('status', 'returned'),
+    supabase.from('rsvps').select('id').eq('user_id', user.id),
+    supabase.from('project_members').select('id').eq('user_id', user.id),
+  ]);
+
+  final visits = (responses[0] as List).length;
+  final tools = (responses[1] as List).map((row) => row['tool_id'] as String).toSet().length;
+  final events = (responses[2] as List).length;
+  final projects = (responses[3] as List).length;
 
   return Rc5ProfileStats(
     visits: visits,
@@ -95,42 +109,49 @@ final rc5ProfileStatsProvider = FutureProvider<Rc5ProfileStats>((ref) async {
   );
 });
 
-final rc5ProfileProjectsProvider =
-    FutureProvider<List<ProjectModel>>((ref) async {
-  final projects = await ref.watch(userProjectsProvider.future);
-  return projects.take(12).toList();
-});
+final rc5ProfileProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+  final projectsAsync = ref.watch(userProjectsProvider);
+  return projectsAsync.whenData((projects) => projects.take(12).toList());
+}, name: 'rc5ProfileProjectsProvider');
 
-final rc5PublicProjectsProvider =
-    FutureProvider<List<ProjectModel>>((ref) async {
-  final projects = await ref.watch(rc5ProfileProjectsProvider.future);
-  return projects.where((project) => project.isPublic).toList();
-});
+final rc5PublicProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+  final projectsAsync = ref.watch(rc5ProfileProjectsProvider);
+  return projectsAsync.whenData(
+      (projects) => projects.where((project) => project.isPublic).toList());
+}, name: 'rc5PublicProjectsProvider');
+
+final rc5PrivateProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+  final projectsAsync = ref.watch(rc5ProfileProjectsProvider);
+  return projectsAsync.whenData(
+      (projects) => projects.where((project) => !project.isPublic).toList());
+}, name: 'rc5PrivateProjectsProvider');
 
 final rc5ProfileEventParticipationProvider =
-    FutureProvider<List<Rc5ProfileEventItem>>((ref) async {
-  final items = await ref.watch(myRsvpsWithEventsProvider.future);
-  return items
-      .take(10)
-      .map(
-        (entry) => Rc5ProfileEventItem(
-          eventId: entry.event.id,
-          title: entry.event.title,
-          venue: entry.event.venue,
-          status: entry.rsvp.status,
-        ),
-      )
-      .toList();
-});
+    Provider<AsyncValue<List<Rc5ProfileEventItem>>>((ref) {
+  final itemsAsync = ref.watch(myRsvpsWithEventsProvider);
+  return itemsAsync.whenData((items) {
+    return items
+        .take(10)
+        .map(
+          (entry) => Rc5ProfileEventItem(
+            eventId: entry.event.id,
+            title: entry.event.title,
+            venue: entry.event.venue,
+            status: entry.rsvp.status,
+          ),
+        )
+        .toList();
+  });
+}, name: 'rc5ProfileEventParticipationProvider');
 
-final rc5ProfileInterestsProvider = FutureProvider<List<String>>((ref) async {
-  final header = await ref.watch(rc5ProfileHeaderProvider.future);
-  return header?.interests ?? const <String>[];
-});
+final rc5ProfileInterestsProvider = Provider<AsyncValue<List<String>>>((ref) {
+  final headerAsync = ref.watch(rc5ProfileHeaderProvider);
+  return headerAsync.whenData((header) => header?.interests ?? const <String>[]);
+}, name: 'rc5ProfileInterestsProvider');
 
-final rc5ProfileSkillsProvider = FutureProvider<Map<String, int>>((ref) async {
-  final header = await ref.watch(rc5ProfileHeaderProvider.future);
-  return header?.skills ?? const <String, int>{};
+final rc5ProfileSkillsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
+  final headerAsync = ref.watch(rc5ProfileHeaderProvider);
+  return headerAsync.whenData((header) => header?.skills ?? const <String, int>{});
 });
 
 class _DraftData {

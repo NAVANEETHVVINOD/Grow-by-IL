@@ -8,7 +8,7 @@ final adminRepositoryProvider = Provider<AdminRepository>((ref) {
 });
 
 final pendingBookingsStreamProvider =
-    StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
   return supabase
       .from('tool_bookings')
       .stream(primaryKey: ['id']).eq('status', 'pending');

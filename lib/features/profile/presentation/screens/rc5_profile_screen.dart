@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_roles.dart';
-import 'package:grow/core/constants/feature_flags.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
 import 'package:grow/features/profile/domain/rc5_profile_providers.dart';
+import 'package:grow/features/profile/presentation/widgets/digital_id_card.dart';
 import 'package:grow/shared/models/project_model.dart';
+import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
+import 'package:grow/features/home/presentation/screens/rc5_home_screen.dart';
+
+/// Set to `false` to disable the ticker during DevTools profiling.
+/// Compare raster thread timing with ticker ON vs OFF.
+const _kEnableProfileTicker = true;
 
 class RC5ProfileScreen extends ConsumerStatefulWidget {
   const RC5ProfileScreen({super.key});
@@ -19,64 +26,56 @@ class RC5ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _RC5ProfileScreenState extends ConsumerState<RC5ProfileScreen> {
-  static const _tabs = [
-    'Overview',
-    'Projects',
-    'Experience',
-    'Education',
-    'Volunteering',
-  ];
-
-  int _activeTabIndex = 0;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RC5DesignTokens.background,
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: RC5DesignTokens.primary,
-          onRefresh: _refresh,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-            children: [
-              _TopActions(
-                onShare: _shareProfile,
-                onSettings: _openSettingsSheet,
-                onOverflowSelect: _handleOverflowAction,
-              ),
-              const SizedBox(height: RC5DesignTokens.space3),
-              const _ProfileHeaderCard(),
-              const SizedBox(height: RC5DesignTokens.space4),
-              const _PrivacyBoundaryCard(),
-              const SizedBox(height: RC5DesignTokens.space4),
-              _ProfileTabs(
-                tabs: _tabs,
-                activeIndex: _activeTabIndex,
-                onSelect: (index) => setState(() => _activeTabIndex = index),
-              ),
-              const SizedBox(height: RC5DesignTokens.space4),
-              AnimatedSwitcher(
-                duration: RC5DesignTokens.motionBase,
-                child: _buildTabBody(),
-              ),
-            ],
+    final header = ref.watch(rc5ProfileHeaderProvider).valueOrNull;
+    final tabs = [
+      header?.username != null && header!.username.isNotEmpty ? '@${header.username}' : 'Overview',
+      'Projects',
+      'Experience',
+      'Education',
+      'Volunteering',
+    ];
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] TabBarView Container / Root');
+      return true;
+    }());
+    return DefaultTabController(
+      length: tabs.length,
+      child: Scaffold(
+        backgroundColor: RC5DesignTokens.background,
+        appBar: AppBar(
+          backgroundColor: RC5DesignTokens.background,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleSpacing: 0,
+          toolbarHeight: 56,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+            child: _TopActions(
+              onShare: _shareProfile,
+              onSettings: _openSettingsSheet,
+            ),
+          ),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            indicatorColor: RC5DesignTokens.ink,
+            labelColor: RC5DesignTokens.ink,
+            unselectedLabelColor: RC5DesignTokens.textSecondary,
+            labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
+            unselectedLabelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600, fontSize: 13),
+            tabs: tabs.map((t) => Tab(text: t)).toList(),
+          ),
+        ),
+        body: SafeArea(
+          child: RefreshIndicator(
+            color: RC5DesignTokens.ink,
+            onRefresh: _refresh,
+            child: const _LazyTabBarView(),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTabBody() {
-    return KeyedSubtree(
-      key: ValueKey<int>(_activeTabIndex),
-      child: switch (_activeTabIndex) {
-        0 => const _OverviewTab(),
-        1 => const _ProjectsTab(),
-        2 => const _ExperienceTab(),
-        3 => const _EducationTab(),
-        _ => const _VolunteeringTab(),
-      },
     );
   }
 
@@ -155,21 +154,30 @@ class _RC5ProfileScreenState extends ConsumerState<RC5ProfileScreen> {
                   _showComingSoon('Vouch a friend');
                 },
               ),
+              const Divider(),
+              _SettingsTile(
+                icon: Icons.delete_outline_rounded,
+                title: 'Delete account',
+                textColor: RC5DesignTokens.error,
+                onTap: () {
+                  Navigator.pop(context);
+                  _showComingSoon('Delete account');
+                },
+              ),
+              _SettingsTile(
+                icon: Icons.logout_rounded,
+                title: 'Log out',
+                onTap: () {
+                  Navigator.pop(context);
+                  _signOut();
+                },
+              ),
               const SizedBox(height: RC5DesignTokens.space4),
             ],
           ),
         );
       },
     );
-  }
-
-  Future<void> _handleOverflowAction(_ProfileOverflowAction action) async {
-    switch (action) {
-      case _ProfileOverflowAction.deleteAccount:
-        _showComingSoon('Delete account');
-      case _ProfileOverflowAction.logout:
-        await _signOut();
-    }
   }
 
   Future<void> _signOut() async {
@@ -235,19 +243,17 @@ class _TopActions extends StatelessWidget {
   const _TopActions({
     required this.onShare,
     required this.onSettings,
-    required this.onOverflowSelect,
   });
 
   final VoidCallback onShare;
   final VoidCallback onSettings;
-  final ValueChanged<_ProfileOverflowAction> onOverflowSelect;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Text(
-          'Profile',
+          '/// Profile',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 color: RC5DesignTokens.ink,
@@ -271,27 +277,6 @@ class _TopActions extends StatelessWidget {
           ),
           icon: const Icon(Icons.settings_outlined),
         ),
-        const SizedBox(width: RC5DesignTokens.space2),
-        PopupMenuButton<_ProfileOverflowAction>(
-          onSelected: onOverflowSelect,
-          itemBuilder: (context) => const [
-            PopupMenuItem(
-              value: _ProfileOverflowAction.deleteAccount,
-              child: Text(
-                'Delete account',
-                style: TextStyle(color: RC5DesignTokens.error),
-              ),
-            ),
-            PopupMenuItem(
-              value: _ProfileOverflowAction.logout,
-              child: Text('Log out'),
-            ),
-          ],
-          child: const Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(Icons.more_horiz_rounded),
-          ),
-        ),
       ],
     );
   }
@@ -302,8 +287,11 @@ class _ProfileHeaderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] ProfileHeaderCard');
+      return true;
+    }());
     final headerAsync = ref.watch(rc5ProfileHeaderProvider);
-    final statsAsync = ref.watch(rc5ProfileStatsProvider);
 
     return headerAsync.when(
       data: (header) {
@@ -315,107 +303,58 @@ class _ProfileHeaderCard extends ConsumerWidget {
           );
         }
 
-        return RC5Card(
-          gradient: RC5DesignTokens.softGradient,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            RepaintBoundary(child: DigitalIdCard(user: header.user)),
+            const SizedBox(height: RC5DesignTokens.space4),
+            NeoCard(
+              color: Colors.white,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RC5Avatar(
-                    imageUrl: header.user.avatarUrl,
-                    displayName: header.user.name,
-                    size: 72,
-                  ),
-                  const SizedBox(width: RC5DesignTokens.space3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          header.user.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          '@${header.username}',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: RC5DesignTokens.textSecondary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                        const SizedBox(height: RC5DesignTokens.space2),
-                        Wrap(
-                          spacing: RC5DesignTokens.space2,
-                          runSpacing: RC5DesignTokens.space2,
-                          children: [
-                            RC5Chip(
-                              label: header.departmentOrRole,
-                              compact: true,
-                            ),
-                            if (FeatureFlags.enableVouches)
-                              const RC5Chip(
-                                label: 'Vouches: coming soon',
-                                icon: Icons.verified_outlined,
-                                compact: true,
-                              ),
-                          ],
-                        ),
-                      ],
+                  Text(
+                    'ABOUT ME',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: RC5DesignTokens.textSecondary,
+                      letterSpacing: 1.0,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: RC5DesignTokens.space4),
-              Text(
-                header.bio,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.45,
-                    ),
-              ),
-              const SizedBox(height: RC5DesignTokens.space4),
-              Row(
-                children: [
-                  Expanded(
-                    child: RC5Button(
-                      label: 'Edit profile',
-                      icon: Icons.edit_rounded,
-                      variant: RC5ButtonVariant.secondary,
-                      onPressed: () => context.push('/profile/edit'),
-                    ),
+                  const SizedBox(height: 8),
+                  Text(
+                    header.bio.isNotEmpty ? header.bio : 'Builder at IDEA Lab, exploring projects and collaboration.',
+                    style: RC5DesignTokens.body,
                   ),
-                  const SizedBox(width: RC5DesignTokens.space3),
-                  Expanded(
-                    child: statsAsync.when(
-                      data: (stats) => _StatPill(
-                        text:
-                            '${stats.projects} projects • ${stats.events} events',
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: RC5Button(
+                          label: 'Edit Profile',
+                          icon: Icons.edit_rounded,
+                          variant: RC5ButtonVariant.secondary,
+                          onPressed: () => context.push('/profile/edit'),
+                        ),
                       ),
-                      loading: () => const _StatPill(text: 'Loading stats...'),
-                      error: (_, __) =>
-                          const _StatPill(text: 'Stats unavailable'),
-                    ),
+                    ],
                   ),
+                  if (AppRole.isAdminRole(header.user.role)) ...[
+                    const SizedBox(height: RC5DesignTokens.space3),
+                    RC5Button(
+                      label: 'Open Admin Dashboard',
+                      icon: Icons.admin_panel_settings_outlined,
+                      variant: RC5ButtonVariant.ghost,
+                      fullWidth: true,
+                      onPressed: () => context.push('/admin'),
+                    ),
+                  ],
                 ],
               ),
-              if (AppRole.isAdminRole(header.user.role)) ...[
-                const SizedBox(height: RC5DesignTokens.space3),
-                RC5Button(
-                  label: 'Open admin dashboard',
-                  icon: Icons.admin_panel_settings_outlined,
-                  variant: RC5ButtonVariant.ghost,
-                  fullWidth: true,
-                  onPressed: () => context.push('/admin'),
-                ),
-              ],
-            ],
-          ),
+            ),
+          ],
         );
       },
       loading: () => const RC5Skeleton(width: double.infinity, height: 280),
@@ -441,7 +380,7 @@ class _PrivacyBoundaryCard extends StatelessWidget {
         children: [
           const Icon(
             Icons.lock_outline_rounded,
-            color: RC5DesignTokens.primary,
+            color: RC5DesignTokens.textSecondary,
           ),
           const SizedBox(width: RC5DesignTokens.space3),
           Expanded(
@@ -460,43 +399,16 @@ class _PrivacyBoundaryCard extends StatelessWidget {
   }
 }
 
-class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs({
-    required this.tabs,
-    required this.activeIndex,
-    required this.onSelect,
-  });
-
-  final List<String> tabs;
-  final int activeIndex;
-  final ValueChanged<int> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: tabs.length,
-        separatorBuilder: (_, __) =>
-            const SizedBox(width: RC5DesignTokens.space2),
-        itemBuilder: (context, index) {
-          return RC5Chip(
-            label: tabs[index],
-            isSelected: index == activeIndex,
-            onTap: () => onSelect(index),
-          );
-        },
-      ),
-    );
-  }
-}
-
+// _ProfileTabs removed
 class _OverviewTab extends ConsumerWidget {
   const _OverviewTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] OverviewTab');
+      return true;
+    }());
     final interestsAsync = ref.watch(rc5ProfileInterestsProvider);
     final skillsAsync = ref.watch(rc5ProfileSkillsProvider);
     final eventsAsync = ref.watch(rc5ProfileEventParticipationProvider);
@@ -504,8 +416,51 @@ class _OverviewTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _TabSection(
-          title: 'Interests',
+        const SizedBox(height: RC5DesignTokens.space3),
+        if (_kEnableProfileTicker)
+          Transform.rotate(
+            angle: 0.02,
+            child: const RepaintBoundary(
+              child: ScrollingTicker(
+                text: '/// MAKER PROFILE · KEEP BUILDING · UPDATE YOUR SKILLS IN SECTIONS BELOW · CONNECT WITH MENTORS ///',
+                backgroundColor: Color(0xFFFFEA00), // Yellow
+                textColor: Colors.black,
+              ),
+            ),
+          ),
+        const SizedBox(height: RC5DesignTokens.space4),
+        const RepaintBoundary(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: _ProfileHeaderCard(),
+          ),
+        ),
+        const SizedBox(height: RC5DesignTokens.space5),
+        const RepaintBoundary(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: _CollectibleBadgesSection(),
+          ),
+        ),
+        const SizedBox(height: RC5DesignTokens.space5),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _ContributionStatsGrid(),
+        ),
+        const SizedBox(height: RC5DesignTokens.space5),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _PrivacyBoundaryCard(),
+        ),
+        const SizedBox(height: RC5DesignTokens.space5),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _TabSection(
+                title: 'Interests',
           child: interestsAsync.when(
             data: (interests) {
               if (interests.isEmpty) {
@@ -513,6 +468,7 @@ class _OverviewTab extends ConsumerWidget {
                   icon: Icons.interests_rounded,
                   title: 'No interests yet',
                   message: 'Add interests from Edit Profile.',
+                  accentColor: RC5DesignTokens.accent,
                 );
               }
               return Wrap(
@@ -538,6 +494,7 @@ class _OverviewTab extends ConsumerWidget {
                   icon: Icons.code_rounded,
                   title: 'No skills added yet',
                   message: 'You can add skills and familiarity later.',
+                  accentColor: RC5DesignTokens.success,
                 );
               }
               return Wrap(
@@ -566,6 +523,7 @@ class _OverviewTab extends ConsumerWidget {
                   icon: Icons.event_busy_rounded,
                   title: 'No event participation yet',
                   message: 'Upcoming workshop participation will show up here.',
+                  accentColor: RC5DesignTokens.warning,
                 );
               }
               return Column(
@@ -580,7 +538,7 @@ class _OverviewTab extends ConsumerWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.event_rounded,
-                              color: RC5DesignTokens.primary),
+                              color: RC5DesignTokens.textSecondary),
                           const SizedBox(width: RC5DesignTokens.space3),
                           Expanded(
                             child: Column(
@@ -621,6 +579,9 @@ class _OverviewTab extends ConsumerWidget {
             error: (_, __) => const Text('Could not load events.'),
           ),
         ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -631,6 +592,10 @@ class _ProjectsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] ProjectsTab');
+      return true;
+    }());
     final projectsAsync = ref.watch(rc5ProfileProjectsProvider);
     final publicAsync = ref.watch(rc5PublicProjectsProvider);
 
@@ -647,22 +612,45 @@ class _ProjectsTab extends ConsumerWidget {
               message: 'Create or join projects to start your portfolio.',
               primaryActionLabel: 'Browse projects',
               onPrimaryAction: () => context.push('/projects'),
+              accentColor: RC5DesignTokens.accent,
             );
           }
 
-          final publicIds =
-              publicAsync.valueOrNull?.map((p) => p.id).toSet() ?? <String>{};
+          final publicProjects = publicAsync.valueOrNull ?? [];
+          final otherProjects = ref.watch(rc5PrivateProjectsProvider).valueOrNull ?? [];
 
           return Column(
-            children: projects.take(8).map((project) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: RC5DesignTokens.space3),
-                child: _ProjectCard(
-                  project: project,
-                  isPublic: publicIds.contains(project.id),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (publicProjects.isNotEmpty) ...[
+                Text(
+                  'Pinned',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: RC5DesignTokens.ink,
+                      ),
                 ),
-              );
-            }).toList(),
+                const SizedBox(height: RC5DesignTokens.space2),
+                _ProjectCard(
+                  project: publicProjects.first,
+                  isPublic: true,
+                  isPinned: true,
+                ),
+                const SizedBox(height: RC5DesignTokens.space4),
+              ],
+              ...[...publicProjects.skip(1), ...otherProjects]
+                  .take(7)
+                  .map((project) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: RC5DesignTokens.space3),
+                  child: _ProjectCard(
+                    project: project,
+                    isPublic: false,
+                  ),
+                );
+              }),
+            ],
           );
         },
         loading: () => const RC5SkeletonList(itemCount: 4),
@@ -681,6 +669,10 @@ class _ExperienceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] ExperienceTab');
+      return true;
+    }());
     return _TabSection(
       title: 'Experience',
       subtitle: 'Internships, part-time roles, and practical work.',
@@ -690,6 +682,7 @@ class _ExperienceTab extends StatelessWidget {
         message: 'Add internships and work roles from Edit Profile.',
         primaryActionLabel: 'Add experience',
         onPrimaryAction: () => context.push('/profile/edit'),
+        accentColor: RC5DesignTokens.warning,
       ),
     );
   }
@@ -700,6 +693,10 @@ class _EducationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] EducationTab');
+      return true;
+    }());
     return _TabSection(
       title: 'Education',
       subtitle: 'Current and past learning timeline.',
@@ -709,6 +706,7 @@ class _EducationTab extends StatelessWidget {
         message: 'Add your department, batch, and education history.',
         primaryActionLabel: 'Add education',
         onPrimaryAction: () => context.push('/profile/edit'),
+        accentColor: RC5DesignTokens.accent,
       ),
     );
   }
@@ -719,6 +717,10 @@ class _VolunteeringTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] VolunteeringTab');
+      return true;
+    }());
     return _TabSection(
       title: 'Volunteering',
       subtitle: 'Community and social contributions.',
@@ -728,6 +730,7 @@ class _VolunteeringTab extends StatelessWidget {
         message: 'You can add volunteering details now or later.',
         primaryActionLabel: 'Add volunteering',
         onPrimaryAction: () => context.push('/profile/edit'),
+        accentColor: RC5DesignTokens.success,
       ),
     );
   }
@@ -782,19 +785,21 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.subtitle,
+    this.textColor,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: RC5DesignTokens.primary),
-      title: Text(title),
+      leading: Icon(icon, color: textColor ?? RC5DesignTokens.textSecondary),
+      title: Text(title, style: TextStyle(color: textColor)),
       subtitle: subtitle == null ? null : Text(subtitle!),
       trailing: const Icon(Icons.chevron_right_rounded),
     );
@@ -805,63 +810,106 @@ class _ProjectCard extends StatelessWidget {
   const _ProjectCard({
     required this.project,
     required this.isPublic,
+    this.isPinned = false,
   });
 
   final ProjectModel project;
   final bool isPublic;
+  final bool isPinned;
 
   @override
   Widget build(BuildContext context) {
-    return RC5Card(
-      backgroundColor: RC5DesignTokens.surface,
-      shadowOpacity: 0.55,
-      onTap: () => context.push('/projects/${project.id}'),
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              gradient: RC5DesignTokens.primaryGradient,
-              borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
-            ),
-            child: const Icon(Icons.rocket_launch_rounded, color: Colors.white),
-          ),
-          const SizedBox(width: RC5DesignTokens.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  project.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w900),
+    return Container(
+      decoration: BoxDecoration(
+        color: RC5DesignTokens.surface,
+        borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
+        border: Border.all(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth),
+        boxShadow: RC5DesignTokens.neoShadow(offset: const Offset(3, 3)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push('/projects/${project.id}'),
+          borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Banner zone ──
+              Container(
+                height: 100,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: RC5DesignTokens.surfaceAlt,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(RC5DesignTokens.radiusMd - RC5DesignTokens.borderWidth)),
+                  border: Border(bottom: BorderSide(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth)),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${project.status} • ${project.visibility}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: RC5DesignTokens.textSecondary,
+                child: const Center(
+                  child: Icon(Icons.rocket_launch_rounded, size: 36, color: RC5DesignTokens.ink),
+                ),
+              ),
+              // ── Content zone ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(RC5DesignTokens.space4, RC5DesignTokens.space3, RC5DesignTokens.space4, RC5DesignTokens.space3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      project.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: RC5DesignTokens.ink,
                       ),
+                    ),
+                    if (project.description != null && project.description!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        project.description!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          color: RC5DesignTokens.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ),
+              ),
+              // ── Footer zone (compact) ──
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: RC5DesignTokens.space4, vertical: RC5DesignTokens.space2),
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth)),
+                ),
+                child: Row(
+                  children: [
+                    if (isPinned) ...[
+                      const Icon(Icons.push_pin_rounded, size: 12, color: RC5DesignTokens.ink),
+                      const SizedBox(width: 3),
+                      Text('PINNED', style: GoogleFonts.spaceGrotesk(fontSize: 9, fontWeight: FontWeight.w700, color: RC5DesignTokens.ink, letterSpacing: 0.5)),
+                      const SizedBox(width: RC5DesignTokens.space3),
+                    ],
+                    Icon(isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 12, color: RC5DesignTokens.muted),
+                    const SizedBox(width: 3),
+                    Text(isPublic ? 'PUBLIC' : 'PRIVATE', style: GoogleFonts.spaceGrotesk(fontSize: 9, fontWeight: FontWeight.w700, color: RC5DesignTokens.muted, letterSpacing: 0.5)),
+                    const Spacer(),
+                    const Icon(Icons.arrow_forward_rounded, size: 14, color: RC5DesignTokens.muted),
+                  ],
+                ),
+              ),
+            ],
           ),
-          RC5Chip(
-            label: isPublic ? 'Public' : 'Private',
-            compact: true,
-            isSelected: isPublic,
-            color: isPublic ? RC5DesignTokens.success : RC5DesignTokens.ink,
-          ),
-        ],
+        ),
       ),
     );
   }
 }
+
 
 class _SkillLevelPill extends StatelessWidget {
   const _SkillLevelPill({
@@ -912,34 +960,6 @@ class _SkillLevelPill extends StatelessWidget {
   }
 }
 
-class _StatPill extends StatelessWidget {
-  const _StatPill({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
-        border: Border.all(color: RC5DesignTokens.border),
-      ),
-      child: Text(
-        text,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: RC5DesignTokens.textSecondary,
-              fontWeight: FontWeight.w700,
-            ),
-      ),
-    );
-  }
-}
-
 Color _skillDotColor(int index) {
   return switch (index) {
     0 => const Color(0xFF86EFAC),
@@ -948,7 +968,306 @@ Color _skillDotColor(int index) {
   };
 }
 
-enum _ProfileOverflowAction {
-  deleteAccount,
-  logout,
+// Empty
+class _CollectibleBadgesSection extends StatelessWidget {
+  const _CollectibleBadgesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'Collectible Badges',
+            style: RC5DesignTokens.sectionTitle,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Wrap(
+            spacing: 14,
+            runSpacing: 16,
+            children: const [
+              _StickerBadge(
+                icon: Icons.build_rounded,
+                label: 'Builder',
+                color: Color(0xFFDFF4FF),
+                angle: -0.04,
+              ),
+              _StickerBadge(
+                icon: Icons.precision_manufacturing_rounded,
+                label: 'Robotics',
+                color: Color(0xFFF7EEB4),
+                angle: 0.02,
+              ),
+              _StickerBadge(
+                icon: Icons.lightbulb_outline_rounded,
+                label: 'Innovator',
+                color: Color(0xFFE5E7EB),
+                angle: -0.01,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+class _StickerBadge extends StatelessWidget {
+  const _StickerBadge({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.angle,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: angle,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF111111), width: 2),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF111111),
+              offset: Offset(2, 2),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: const Color(0xFF111111)),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111111),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ContributionStatsGrid extends ConsumerWidget {
+  const _ContributionStatsGrid();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] ContributionStatsGrid');
+      return true;
+    }());
+    final statsAsync = ref.watch(rc5ProfileStatsProvider);
+
+    return statsAsync.when(
+      data: (stats) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 12),
+              child: Text(
+                'Contribution Stats',
+                style: RC5DesignTokens.sectionTitle,
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: _StatCard(
+                    label: 'Projects Created',
+                    value: stats.projects.toString(),
+                    icon: Icons.rocket_launch_outlined,
+                    color: const Color(0xFFDFF4FF),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _StatCard(
+                    label: 'Events Attended',
+                    value: stats.events.toString(),
+                    icon: Icons.event_outlined,
+                    color: const Color(0xFFE5E7EB),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _StatCard(
+                    label: 'Tools Booked',
+                    value: stats.tools.toString(),
+                    icon: Icons.construction_outlined,
+                    color: const Color(0xFFF7EEB4),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _StatCard(
+                    label: 'Lab Check-ins',
+                    value: stats.visits.toString(),
+                    icon: Icons.login_outlined,
+                    color: const Color(0xFFDDF5D7),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+      loading: () => const RC5Skeleton(width: double.infinity, height: 160),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                ),
+                child: Icon(icon, size: 16, color: const Color(0xFF111111)),
+              ),
+              Text(
+                value,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF111111),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            label,
+            style: GoogleFonts.dmSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF71717A),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LazyTabBarView extends StatefulWidget {
+  const _LazyTabBarView();
+
+  @override
+  State<_LazyTabBarView> createState() => _LazyTabBarViewState();
+}
+
+class _LazyTabBarViewState extends State<_LazyTabBarView> {
+  int _currentIndex = 0;
+  final Set<int> _visited = {0};
+  TabController? _tabController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newController = DefaultTabController.of(context);
+    if (newController != _tabController) {
+      _tabController?.removeListener(_handleTabChange);
+      _tabController = newController;
+      _tabController?.addListener(_handleTabChange);
+
+      if (_tabController != null) {
+        _currentIndex = _tabController!.index;
+        _visited.add(_currentIndex);
+      }
+    }
+  }
+
+  void _handleTabChange() {
+    if (mounted && _tabController != null) {
+      if (_tabController!.index != _currentIndex) {
+        setState(() {
+          _currentIndex = _tabController!.index;
+          _visited.add(_currentIndex);
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_handleTabChange);
+    super.dispose();
+  }
+
+  Widget _buildTab(int index, Widget child) {
+    if (!_visited.contains(index)) {
+      return const SizedBox.shrink();
+    }
+    assert(() {
+      debugPrint('[PROFILE TAB BUILD] LazyTabBarView rendering (Index $index)');
+      return true;
+    }());
+    return child;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: _currentIndex,
+      children: [
+        _buildTab(0, const SingleChildScrollView(child: _OverviewTab())),
+        _buildTab(1, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _ProjectsTab())),
+        _buildTab(2, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _ExperienceTab())),
+        _buildTab(3, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _EducationTab())),
+        _buildTab(4, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _VolunteeringTab())),
+      ],
+    );
+  }
+}
+

@@ -73,7 +73,7 @@ class _RC5ButtonState extends State<RC5Button> {
               color: _isEnabled ? palette.border : RC5DesignTokens.border,
               width: RC5DesignTokens.borderWidth,
             ),
-            boxShadow: _isPressed || !_isEnabled
+            boxShadow: _isPressed || !_isEnabled || widget.variant == RC5ButtonVariant.ghost
                 ? []
                 : RC5DesignTokens.neoShadow(opacity: 0.95),
           ),
@@ -148,10 +148,9 @@ class _RC5ButtonPalette {
   static _RC5ButtonPalette forVariant(RC5ButtonVariant variant) {
     return switch (variant) {
       RC5ButtonVariant.primary => const _RC5ButtonPalette(
-          background: RC5DesignTokens.primary,
+          background: RC5DesignTokens.ink,
           foreground: Colors.white,
           border: RC5DesignTokens.ink,
-          gradient: RC5DesignTokens.primaryGradient,
         ),
       RC5ButtonVariant.secondary => const _RC5ButtonPalette(
           background: Colors.white,
