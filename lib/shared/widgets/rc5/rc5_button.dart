@@ -67,7 +67,6 @@ class _RC5ButtonState extends State<RC5Button> {
           ),
           decoration: BoxDecoration(
             color: _isEnabled ? palette.background : RC5DesignTokens.surfaceAlt,
-            gradient: _isEnabled ? palette.gradient : null,
             borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
             border: Border.all(
               color: _isEnabled ? palette.border : RC5DesignTokens.border,
@@ -137,13 +136,11 @@ class _RC5ButtonPalette {
     required this.background,
     required this.foreground,
     required this.border,
-    this.gradient,
   });
 
   final Color background;
   final Color foreground;
   final Color border;
-  final Gradient? gradient;
 
   static _RC5ButtonPalette forVariant(RC5ButtonVariant variant) {
     return switch (variant) {

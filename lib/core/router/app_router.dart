@@ -67,8 +67,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final filteredAuthStream = supabase.auth.onAuthStateChange.where((event) {
     return event.event == AuthChangeEvent.signedIn ||
         event.event == AuthChangeEvent.signedOut ||
-        event.event == AuthChangeEvent.initialSession ||
-        event.event == AuthChangeEvent.userDeleted;
+        event.event == AuthChangeEvent.initialSession;
   });
 
   return GoRouter(
