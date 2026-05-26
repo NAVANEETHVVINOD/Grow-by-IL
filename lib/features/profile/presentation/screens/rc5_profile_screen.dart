@@ -30,7 +30,9 @@ class _RC5ProfileScreenState extends ConsumerState<RC5ProfileScreen> {
   Widget build(BuildContext context) {
     final header = ref.watch(rc5ProfileHeaderProvider).valueOrNull;
     final tabs = [
-      header?.username != null && header!.username.isNotEmpty ? '@${header.username}' : 'Overview',
+      header?.username != null && header!.username.isNotEmpty
+          ? '@${header.username}'
+          : 'Overview',
       'Projects',
       'Experience',
       'Education',
@@ -63,8 +65,10 @@ class _RC5ProfileScreenState extends ConsumerState<RC5ProfileScreen> {
             indicatorColor: RC5DesignTokens.ink,
             labelColor: RC5DesignTokens.ink,
             unselectedLabelColor: RC5DesignTokens.textSecondary,
-            labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, fontSize: 13),
-            unselectedLabelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600, fontSize: 13),
+            labelStyle: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.bold, fontSize: 13),
+            unselectedLabelStyle: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w600, fontSize: 13),
             tabs: tabs.map((t) => Tab(text: t)).toList(),
           ),
         ),
@@ -325,7 +329,9 @@ class _ProfileHeaderCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    header.bio.isNotEmpty ? header.bio : 'Builder at IDEA Lab, exploring projects and collaboration.',
+                    header.bio.isNotEmpty
+                        ? header.bio
+                        : 'Builder at IDEA Lab, exploring projects and collaboration.',
                     style: RC5DesignTokens.body,
                   ),
                   const SizedBox(height: 20),
@@ -422,7 +428,8 @@ class _OverviewTab extends ConsumerWidget {
             angle: 0.02,
             child: const RepaintBoundary(
               child: ScrollingTicker(
-                text: '/// MAKER PROFILE · KEEP BUILDING · UPDATE YOUR SKILLS IN SECTIONS BELOW · CONNECT WITH MENTORS ///',
+                text:
+                    '/// MAKER PROFILE · KEEP BUILDING · UPDATE YOUR SKILLS IN SECTIONS BELOW · CONNECT WITH MENTORS ///',
                 backgroundColor: Color(0xFFFFEA00), // Yellow
                 textColor: Colors.black,
               ),
@@ -453,7 +460,6 @@ class _OverviewTab extends ConsumerWidget {
           child: _PrivacyBoundaryCard(),
         ),
         const SizedBox(height: RC5DesignTokens.space5),
-
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
           child: Column(
@@ -461,124 +467,129 @@ class _OverviewTab extends ConsumerWidget {
             children: [
               _TabSection(
                 title: 'Interests',
-          child: interestsAsync.when(
-            data: (interests) {
-              if (interests.isEmpty) {
-                return const RC5EmptyState(
-                  icon: Icons.interests_rounded,
-                  title: 'No interests yet',
-                  message: 'Add interests from Edit Profile.',
-                  accentColor: RC5DesignTokens.accent,
-                );
-              }
-              return Wrap(
-                spacing: RC5DesignTokens.space2,
-                runSpacing: RC5DesignTokens.space2,
-                children: interests
-                    .map((item) => RC5Chip(label: item, compact: true))
-                    .toList(),
-              );
-            },
-            loading: () =>
-                const RC5Skeleton(width: double.infinity, height: 72),
-            error: (_, __) => const Text('Could not load interests.'),
-          ),
-        ),
-        const SizedBox(height: RC5DesignTokens.space4),
-        _TabSection(
-          title: 'Skills',
-          child: skillsAsync.when(
-            data: (skills) {
-              if (skills.isEmpty) {
-                return const RC5EmptyState(
-                  icon: Icons.code_rounded,
-                  title: 'No skills added yet',
-                  message: 'You can add skills and familiarity later.',
-                  accentColor: RC5DesignTokens.success,
-                );
-              }
-              return Wrap(
-                spacing: RC5DesignTokens.space2,
-                runSpacing: RC5DesignTokens.space2,
-                children: skills.entries.map((entry) {
-                  return _SkillLevelPill(
-                    skill: entry.key,
-                    level: entry.value.clamp(1, 3),
-                  );
-                }).toList(),
-              );
-            },
-            loading: () =>
-                const RC5Skeleton(width: double.infinity, height: 72),
-            error: (_, __) => const Text('Could not load skills.'),
-          ),
-        ),
-        const SizedBox(height: RC5DesignTokens.space4),
-        _TabSection(
-          title: 'Public event participation',
-          child: eventsAsync.when(
-            data: (items) {
-              if (items.isEmpty) {
-                return const RC5EmptyState(
-                  icon: Icons.event_busy_rounded,
-                  title: 'No event participation yet',
-                  message: 'Upcoming workshop participation will show up here.',
-                  accentColor: RC5DesignTokens.warning,
-                );
-              }
-              return Column(
-                children: items.take(5).map((event) {
-                  return Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: RC5DesignTokens.space2),
-                    child: RC5Card(
-                      backgroundColor: Colors.white,
-                      shadowOpacity: 0.5,
-                      onTap: () => context.push('/events/${event.eventId}'),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.event_rounded,
-                              color: RC5DesignTokens.textSecondary),
-                          const SizedBox(width: RC5DesignTokens.space3),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                child: interestsAsync.when(
+                  data: (interests) {
+                    if (interests.isEmpty) {
+                      return const RC5EmptyState(
+                        icon: Icons.interests_rounded,
+                        title: 'No interests yet',
+                        message: 'Add interests from Edit Profile.',
+                        accentColor: RC5DesignTokens.accent,
+                      );
+                    }
+                    return Wrap(
+                      spacing: RC5DesignTokens.space2,
+                      runSpacing: RC5DesignTokens.space2,
+                      children: interests
+                          .map((item) => RC5Chip(label: item, compact: true))
+                          .toList(),
+                    );
+                  },
+                  loading: () =>
+                      const RC5Skeleton(width: double.infinity, height: 72),
+                  error: (_, __) => const Text('Could not load interests.'),
+                ),
+              ),
+              const SizedBox(height: RC5DesignTokens.space4),
+              _TabSection(
+                title: 'Skills',
+                child: skillsAsync.when(
+                  data: (skills) {
+                    if (skills.isEmpty) {
+                      return const RC5EmptyState(
+                        icon: Icons.code_rounded,
+                        title: 'No skills added yet',
+                        message: 'You can add skills and familiarity later.',
+                        accentColor: RC5DesignTokens.success,
+                      );
+                    }
+                    return Wrap(
+                      spacing: RC5DesignTokens.space2,
+                      runSpacing: RC5DesignTokens.space2,
+                      children: skills.entries.map((entry) {
+                        return _SkillLevelPill(
+                          skill: entry.key,
+                          level: entry.value.clamp(1, 3),
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () =>
+                      const RC5Skeleton(width: double.infinity, height: 72),
+                  error: (_, __) => const Text('Could not load skills.'),
+                ),
+              ),
+              const SizedBox(height: RC5DesignTokens.space4),
+              _TabSection(
+                title: 'Public event participation',
+                child: eventsAsync.when(
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return const RC5EmptyState(
+                        icon: Icons.event_busy_rounded,
+                        title: 'No event participation yet',
+                        message:
+                            'Upcoming workshop participation will show up here.',
+                        accentColor: RC5DesignTokens.warning,
+                      );
+                    }
+                    return Column(
+                      children: items.take(5).map((event) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: RC5DesignTokens.space2),
+                          child: RC5Card(
+                            backgroundColor: Colors.white,
+                            shadowOpacity: 0.5,
+                            onTap: () =>
+                                context.push('/events/${event.eventId}'),
+                            child: Row(
                               children: [
-                                Text(
-                                  event.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w900),
-                                ),
-                                Text(
-                                  '${event.status} • ${event.venue ?? 'IDEA Lab'}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: RC5DesignTokens.textSecondary,
+                                const Icon(Icons.event_rounded,
+                                    color: RC5DesignTokens.textSecondary),
+                                const SizedBox(width: RC5DesignTokens.space3),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        event.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w900),
                                       ),
+                                      Text(
+                                        '${event.status} • ${event.venue ?? 'IDEA Lab'}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color:
+                                                  RC5DesignTokens.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                const Icon(Icons.chevron_right_rounded),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-            loading: () => const RC5SkeletonList(itemCount: 3),
-            error: (_, __) => const Text('Could not load events.'),
-          ),
-        ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const RC5SkeletonList(itemCount: 3),
+                  error: (_, __) => const Text('Could not load events.'),
+                ),
+              ),
             ],
           ),
         ),
@@ -617,7 +628,8 @@ class _ProjectsTab extends ConsumerWidget {
           }
 
           final publicProjects = publicAsync.valueOrNull ?? [];
-          final otherProjects = ref.watch(rc5PrivateProjectsProvider).valueOrNull ?? [];
+          final otherProjects =
+              ref.watch(rc5PrivateProjectsProvider).valueOrNull ?? [];
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -823,7 +835,8 @@ class _ProjectCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: RC5DesignTokens.surface,
         borderRadius: BorderRadius.circular(RC5DesignTokens.radiusMd),
-        border: Border.all(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth),
+        border: Border.all(
+            color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth),
         boxShadow: RC5DesignTokens.neoShadow(offset: const Offset(3, 3)),
       ),
       child: Material(
@@ -841,16 +854,26 @@ class _ProjectCard extends StatelessWidget {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: RC5DesignTokens.surfaceAlt,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(RC5DesignTokens.radiusMd - RC5DesignTokens.borderWidth)),
-                  border: Border(bottom: BorderSide(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth)),
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(RC5DesignTokens.radiusMd -
+                          RC5DesignTokens.borderWidth)),
+                  border: Border(
+                      bottom: BorderSide(
+                          color: RC5DesignTokens.border,
+                          width: RC5DesignTokens.borderWidth)),
                 ),
                 child: const Center(
-                  child: Icon(Icons.rocket_launch_rounded, size: 36, color: RC5DesignTokens.ink),
+                  child: Icon(Icons.rocket_launch_rounded,
+                      size: 36, color: RC5DesignTokens.ink),
                 ),
               ),
               // ── Content zone ──
               Padding(
-                padding: const EdgeInsets.fromLTRB(RC5DesignTokens.space4, RC5DesignTokens.space3, RC5DesignTokens.space4, RC5DesignTokens.space3),
+                padding: const EdgeInsets.fromLTRB(
+                    RC5DesignTokens.space4,
+                    RC5DesignTokens.space3,
+                    RC5DesignTokens.space4,
+                    RC5DesignTokens.space3),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -864,7 +887,8 @@ class _ProjectCard extends StatelessWidget {
                         color: RC5DesignTokens.ink,
                       ),
                     ),
-                    if (project.description != null && project.description!.isNotEmpty) ...[
+                    if (project.description != null &&
+                        project.description!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         project.description!,
@@ -882,23 +906,41 @@ class _ProjectCard extends StatelessWidget {
               ),
               // ── Footer zone (compact) ──
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: RC5DesignTokens.space4, vertical: RC5DesignTokens.space2),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: RC5DesignTokens.space4,
+                    vertical: RC5DesignTokens.space2),
                 decoration: const BoxDecoration(
-                  border: Border(top: BorderSide(color: RC5DesignTokens.border, width: RC5DesignTokens.borderWidth)),
+                  border: Border(
+                      top: BorderSide(
+                          color: RC5DesignTokens.border,
+                          width: RC5DesignTokens.borderWidth)),
                 ),
                 child: Row(
                   children: [
                     if (isPinned) ...[
-                      const Icon(Icons.push_pin_rounded, size: 12, color: RC5DesignTokens.ink),
+                      const Icon(Icons.push_pin_rounded,
+                          size: 12, color: RC5DesignTokens.ink),
                       const SizedBox(width: 3),
-                      Text('PINNED', style: GoogleFonts.spaceGrotesk(fontSize: 9, fontWeight: FontWeight.w700, color: RC5DesignTokens.ink, letterSpacing: 0.5)),
+                      Text('PINNED',
+                          style: GoogleFonts.spaceGrotesk(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: RC5DesignTokens.ink,
+                              letterSpacing: 0.5)),
                       const SizedBox(width: RC5DesignTokens.space3),
                     ],
-                    Icon(isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 12, color: RC5DesignTokens.muted),
+                    Icon(isPublic ? Icons.public_rounded : Icons.lock_rounded,
+                        size: 12, color: RC5DesignTokens.muted),
                     const SizedBox(width: 3),
-                    Text(isPublic ? 'PUBLIC' : 'PRIVATE', style: GoogleFonts.spaceGrotesk(fontSize: 9, fontWeight: FontWeight.w700, color: RC5DesignTokens.muted, letterSpacing: 0.5)),
+                    Text(isPublic ? 'PUBLIC' : 'PRIVATE',
+                        style: GoogleFonts.spaceGrotesk(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: RC5DesignTokens.muted,
+                            letterSpacing: 0.5)),
                     const Spacer(),
-                    const Icon(Icons.arrow_forward_rounded, size: 14, color: RC5DesignTokens.muted),
+                    const Icon(Icons.arrow_forward_rounded,
+                        size: 14, color: RC5DesignTokens.muted),
                   ],
                 ),
               ),
@@ -909,7 +951,6 @@ class _ProjectCard extends StatelessWidget {
     );
   }
 }
-
 
 class _SkillLevelPill extends StatelessWidget {
   const _SkillLevelPill({
@@ -1171,7 +1212,8 @@ class _StatCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                  border:
+                      Border.all(color: const Color(0xFF111111), width: 1.5),
                 ),
                 child: Icon(icon, size: 16, color: const Color(0xFF111111)),
               ),
@@ -1262,12 +1304,27 @@ class _LazyTabBarViewState extends State<_LazyTabBarView> {
       index: _currentIndex,
       children: [
         _buildTab(0, const SingleChildScrollView(child: _OverviewTab())),
-        _buildTab(1, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _ProjectsTab())),
-        _buildTab(2, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _ExperienceTab())),
-        _buildTab(3, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _EducationTab())),
-        _buildTab(4, const SingleChildScrollView(padding: EdgeInsets.fromLTRB(20, 24, 20, 40), child: _VolunteeringTab())),
+        _buildTab(
+            1,
+            const SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 40),
+                child: _ProjectsTab())),
+        _buildTab(
+            2,
+            const SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 40),
+                child: _ExperienceTab())),
+        _buildTab(
+            3,
+            const SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 40),
+                child: _EducationTab())),
+        _buildTab(
+            4,
+            const SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 40),
+                child: _VolunteeringTab())),
       ],
     );
   }
 }
-

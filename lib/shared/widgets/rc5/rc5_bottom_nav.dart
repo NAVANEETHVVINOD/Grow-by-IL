@@ -88,7 +88,8 @@ class _RC5BottomNavButton extends StatelessWidget {
                 color: isSelected ? RC5DesignTokens.ink : Colors.white,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(color: RC5DesignTokens.ink, width: 2.0),
-                boxShadow: RC5DesignTokens.neoShadow(offset: const Offset(3, 3)),
+                boxShadow:
+                    RC5DesignTokens.neoShadow(offset: const Offset(3, 3)),
               ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -103,7 +104,8 @@ class _RC5BottomNavButton extends StatelessWidget {
                         ) ??
                         Icon(
                           isSelected ? item.activeIcon ?? item.icon : item.icon,
-                          color: isSelected ? Colors.white : RC5DesignTokens.ink,
+                          color:
+                              isSelected ? Colors.white : RC5DesignTokens.ink,
                           size: 20,
                         ),
                     if (isSelected) ...[
@@ -122,9 +124,9 @@ class _RC5BottomNavButton extends StatelessWidget {
                 ),
               ),
             ),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

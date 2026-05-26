@@ -14,7 +14,8 @@ final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
 
 /// ─── EXPERIENCE ──────────────────────────────────────
 
-final userExperienceProvider = FutureProvider<List<UserExperienceModel>>((ref) async {
+final userExperienceProvider =
+    FutureProvider<List<UserExperienceModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return const [];
   final repo = ref.read(profileEcosystemRepositoryProvider);
@@ -23,7 +24,8 @@ final userExperienceProvider = FutureProvider<List<UserExperienceModel>>((ref) a
 
 /// ─── EDUCATION ───────────────────────────────────────
 
-final userEducationProvider = FutureProvider<List<UserEducationModel>>((ref) async {
+final userEducationProvider =
+    FutureProvider<List<UserEducationModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return const [];
   final repo = ref.read(profileEcosystemRepositoryProvider);
@@ -32,7 +34,8 @@ final userEducationProvider = FutureProvider<List<UserEducationModel>>((ref) asy
 
 /// ─── PORTFOLIO PROJECTS ──────────────────────────────
 
-final userPortfolioProjectsProvider = FutureProvider<List<UserPortfolioProjectModel>>((ref) async {
+final userPortfolioProjectsProvider =
+    FutureProvider<List<UserPortfolioProjectModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return const [];
   final repo = ref.read(profileEcosystemRepositoryProvider);
@@ -41,7 +44,8 @@ final userPortfolioProjectsProvider = FutureProvider<List<UserPortfolioProjectMo
 
 /// ─── VOLUNTEERING ────────────────────────────────────
 
-final userVolunteeringProvider = FutureProvider<List<UserVolunteeringModel>>((ref) async {
+final userVolunteeringProvider =
+    FutureProvider<List<UserVolunteeringModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return const [];
   final repo = ref.read(profileEcosystemRepositoryProvider);
@@ -50,7 +54,8 @@ final userVolunteeringProvider = FutureProvider<List<UserVolunteeringModel>>((re
 
 /// ─── SOCIAL LINKS ────────────────────────────────────
 
-final userSocialLinksProvider = FutureProvider<List<UserSocialLinkModel>>((ref) async {
+final userSocialLinksProvider =
+    FutureProvider<List<UserSocialLinkModel>>((ref) async {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return const [];
   final repo = ref.read(profileEcosystemRepositoryProvider);

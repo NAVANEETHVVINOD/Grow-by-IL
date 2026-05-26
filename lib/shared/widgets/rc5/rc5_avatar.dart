@@ -97,16 +97,16 @@ class _FallbackAvatar extends StatelessWidget {
     if (str.isEmpty) return Icons.smart_toy_rounded;
     final hash = str.codeUnits.fold<int>(0, (prev, curr) => prev + curr);
     final icons = [
-      Icons.smart_toy_rounded,         // Robot
-      Icons.sports_esports_rounded,    // Gamer
-      Icons.rocket_launch_rounded,     // Rocket
-      Icons.auto_awesome_rounded,      // Sparkles
-      Icons.construction_rounded,      // Builder
-      Icons.brush_rounded,             // Designer
-      Icons.science_rounded,           // Scientist
+      Icons.smart_toy_rounded, // Robot
+      Icons.sports_esports_rounded, // Gamer
+      Icons.rocket_launch_rounded, // Rocket
+      Icons.auto_awesome_rounded, // Sparkles
+      Icons.construction_rounded, // Builder
+      Icons.brush_rounded, // Designer
+      Icons.science_rounded, // Scientist
       Icons.lightbulb_outline_rounded, // Inventor
-      Icons.psychology_rounded,        // Thinker
-      Icons.videogame_asset_rounded,   // Retro arcade
+      Icons.psychology_rounded, // Thinker
+      Icons.videogame_asset_rounded, // Retro arcade
     ];
     return icons[hash % icons.length];
   }

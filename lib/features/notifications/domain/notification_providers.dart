@@ -11,8 +11,8 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return NotificationRepository(supabase);
 });
 
-final notificationsProvider = StateNotifierProvider<
-    NotificationListNotifier, AsyncValue<List<NotificationModel>>>((ref) {
+final notificationsProvider = StateNotifierProvider<NotificationListNotifier,
+    AsyncValue<List<NotificationModel>>>((ref) {
   final user = ref.watch(currentUserProvider).valueOrNull;
   final repo = ref.watch(notificationRepositoryProvider);
   return NotificationListNotifier(repo, user?.id);

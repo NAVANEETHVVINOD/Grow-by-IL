@@ -47,8 +47,12 @@ class UserProfileModel {
       showEmail: json['show_email'] as bool? ?? false,
       showPhone: json['show_phone'] as bool? ?? false,
       showStats: json['show_stats'] as bool? ?? true,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 
@@ -124,8 +128,12 @@ class UserExperienceModel {
       title: json['title'] as String,
       organization: json['organization'] as String,
       description: json['description'] as String? ?? '',
-      startDate: json['start_date'] != null ? DateTime.parse(json['start_date'] as String) : null,
-      endDate: json['end_date'] != null ? DateTime.parse(json['end_date'] as String) : null,
+      startDate: json['start_date'] != null
+          ? DateTime.parse(json['start_date'] as String)
+          : null,
+      endDate: json['end_date'] != null
+          ? DateTime.parse(json['end_date'] as String)
+          : null,
       isCurrent: json['is_current'] as bool? ?? false,
       sortOrder: json['sort_order'] as int? ?? 0,
     );
@@ -226,7 +234,8 @@ class UserPortfolioProjectModel {
       projectUrl: json['project_url'] as String?,
       sourceUrl: json['source_url'] as String?,
       bannerUrl: json['banner_url'] as String?,
-      technologies: (json['technologies'] as List<dynamic>?)?.cast<String>() ?? const [],
+      technologies:
+          (json['technologies'] as List<dynamic>?)?.cast<String>() ?? const [],
       isFeatured: json['is_featured'] as bool? ?? false,
       sortOrder: json['sort_order'] as int? ?? 0,
     );
@@ -275,8 +284,12 @@ class UserVolunteeringModel {
       role: json['role'] as String,
       organization: json['organization'] as String,
       description: json['description'] as String? ?? '',
-      startDate: json['start_date'] != null ? DateTime.parse(json['start_date'] as String) : null,
-      endDate: json['end_date'] != null ? DateTime.parse(json['end_date'] as String) : null,
+      startDate: json['start_date'] != null
+          ? DateTime.parse(json['start_date'] as String)
+          : null,
+      endDate: json['end_date'] != null
+          ? DateTime.parse(json['end_date'] as String)
+          : null,
       isCurrent: json['is_current'] as bool? ?? false,
       sortOrder: json['sort_order'] as int? ?? 0,
     );

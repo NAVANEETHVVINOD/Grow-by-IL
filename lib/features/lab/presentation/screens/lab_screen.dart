@@ -357,7 +357,6 @@ class _CheckedInView extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(AppSizes.lg),
         children: [
-
           // Status card
           NeoCard(
             color: AppColors.yellow,

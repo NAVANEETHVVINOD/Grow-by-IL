@@ -123,7 +123,8 @@ class _DonationScreenState extends State<DonationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.volunteer_activism_rounded, color: AppColors.navy),
+                    Icon(Icons.volunteer_activism_rounded,
+                        color: AppColors.navy),
                     SizedBox(width: 8),
                     Text(
                       'Donate & Support Now',

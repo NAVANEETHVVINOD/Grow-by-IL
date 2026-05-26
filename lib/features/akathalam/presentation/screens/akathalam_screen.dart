@@ -89,7 +89,8 @@ class _FacilityStatusChips extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.icon, required this.label, required this.color});
+  const _StatusChip(
+      {required this.icon, required this.label, required this.color});
   final IconData icon;
   final String label;
   final Color color;
@@ -137,35 +138,40 @@ class _InstitutionalSection extends StatelessWidget {
           subtitle: 'Our mission, vision, and history',
           icon: Icons.auto_stories_rounded,
           color: const Color(0xFFDFF4FF),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('About IDEA Lab coming soon'))),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('About IDEA Lab coming soon'))),
         ),
         _EditorialItem(
           title: 'Faculty & Mentors',
           subtitle: 'The minds guiding the lab',
           icon: Icons.people_alt_rounded,
           color: const Color(0xFFF7EEB4),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Faculty Directory coming soon'))),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Faculty Directory coming soon'))),
         ),
         _EditorialItem(
           title: 'Facilities & Zones',
           subtitle: 'Equipment areas and floor plan',
           icon: Icons.map_rounded,
           color: const Color(0xFFE5E7EB),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Facilities coming soon'))),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Facilities coming soon'))),
         ),
         _EditorialItem(
           title: 'Lab Rules & Safety',
           subtitle: 'Guidelines for a safe workspace',
           icon: Icons.rule_rounded,
           color: const Color(0xFFFFD6D6),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lab Rules coming soon'))),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Lab Rules coming soon'))),
         ),
         _EditorialItem(
           title: 'Contact',
           subtitle: 'Reach out to the core team',
           icon: Icons.contact_support_rounded,
           color: const Color(0xFFE5E7EB),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact details coming soon'))),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Contact details coming soon'))),
         ),
       ],
     );
@@ -224,7 +230,8 @@ class _EditorialItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_rounded, color: Color(0xFF111111), size: 16),
+            const Icon(Icons.arrow_forward_rounded,
+                color: Color(0xFF111111), size: 16),
           ],
         ),
       ),
@@ -254,7 +261,8 @@ class _LiveStatusCards extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.groups_outlined, color: Color(0xFF111111), size: 24),
+                const Icon(Icons.groups_outlined,
+                    color: Color(0xFF111111), size: 24),
                 const SizedBox(height: 16),
                 Text(
                   visitorCount.maybeWhen(
@@ -283,10 +291,13 @@ class _LiveStatusCards extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.construction_outlined, color: Color(0xFF111111), size: 24),
+                const Icon(Icons.construction_outlined,
+                    color: Color(0xFF111111), size: 24),
                 const SizedBox(height: 16),
                 Text(
-                  activeBooking == null ? 'No Booking' : (activeBooking.toolName ?? 'Active'),
+                  activeBooking == null
+                      ? 'No Booking'
+                      : (activeBooking.toolName ?? 'Active'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: RC5DesignTokens.cardTitle,
@@ -320,7 +331,9 @@ class _CheckInCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NeoCard(
-      color: isCheckedIn ? const Color(0xFFDDF5D7) : Colors.white, // Soft Green or White
+      color: isCheckedIn
+          ? const Color(0xFFDDF5D7)
+          : Colors.white, // Soft Green or White
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,13 +343,17 @@ class _CheckInCard extends StatelessWidget {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: isCheckedIn ? const Color(0xFF111111) : const Color(0xFF71717A),
+              color: isCheckedIn
+                  ? const Color(0xFF111111)
+                  : const Color(0xFF71717A),
               letterSpacing: 1.0,
-          ),
+            ),
           ),
           const SizedBox(height: 12),
           Text(
-            isCheckedIn ? 'You are checked in to the IDEA Lab.' : 'Access the Creative Space',
+            isCheckedIn
+                ? 'You are checked in to the IDEA Lab.'
+                : 'Access the Creative Space',
             style: RC5DesignTokens.cardTitle,
           ),
           const SizedBox(height: 8),
@@ -344,13 +361,18 @@ class _CheckInCard extends StatelessWidget {
             isCheckedIn
                 ? 'Your session is active. Remember to check out when you leave the lab.'
                 : 'Scan the Lab QR code to start a session and reserve tools.',
-            style: RC5DesignTokens.body.copyWith(color: const Color(0xFF71717A)),
+            style:
+                RC5DesignTokens.body.copyWith(color: const Color(0xFF71717A)),
           ),
           const SizedBox(height: 24),
           RC5Button(
             label: isCheckedIn ? 'Check Out' : 'Scan QR to Check In',
-            icon: isCheckedIn ? Icons.logout_rounded : Icons.qr_code_scanner_rounded,
-            variant: isCheckedIn ? RC5ButtonVariant.destructive : RC5ButtonVariant.secondary,
+            icon: isCheckedIn
+                ? Icons.logout_rounded
+                : Icons.qr_code_scanner_rounded,
+            variant: isCheckedIn
+                ? RC5ButtonVariant.destructive
+                : RC5ButtonVariant.secondary,
             fullWidth: true,
             onPressed: () => context.push('/lab/scan'),
           ),
@@ -394,7 +416,8 @@ class _UpcomingEvents extends StatelessWidget {
         const SizedBox(height: 16),
         events.when(
           data: (items) {
-            final eventList = items.where((event) => !event.isPast).take(3).toList();
+            final eventList =
+                items.where((event) => !event.isPast).take(3).toList();
             if (eventList.isEmpty) {
               return const NeoCard(
                 color: Colors.white,
@@ -403,7 +426,9 @@ class _UpcomingEvents extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Text(
                       'No events queued right now.',
-                      style: TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF71717A)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF71717A)),
                     ),
                   ),
                 ),
@@ -426,7 +451,8 @@ class _UpcomingEvents extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: const Color(0xFFE5E7EB), // Soft Gray
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                            border: Border.all(
+                                color: const Color(0xFF111111), width: 1.5),
                           ),
                           child: const Icon(
                             Icons.auto_awesome_outlined,
@@ -458,7 +484,8 @@ class _UpcomingEvents extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_rounded, color: Color(0xFF111111), size: 18),
+                        const Icon(Icons.arrow_forward_rounded,
+                            color: Color(0xFF111111), size: 18),
                       ],
                     ),
                   ),
@@ -472,7 +499,8 @@ class _UpcomingEvents extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text('Events could not load.', style: TextStyle(fontWeight: FontWeight.w500)),
+                child: Text('Events could not load.',
+                    style: TextStyle(fontWeight: FontWeight.w500)),
               ),
             ),
           ),

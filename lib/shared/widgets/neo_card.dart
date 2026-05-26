@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-
-
 /// Neobrutalist card — the core container widget for Grow~.
 /// Refined with premium soft shadows and dynamic borders.
 class NeoCard extends StatefulWidget {

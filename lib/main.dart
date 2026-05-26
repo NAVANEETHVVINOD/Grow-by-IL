@@ -13,11 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'core/utils/provider_observer.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
 
   // ── Firebase initialization ──────────────────────────────
   try {

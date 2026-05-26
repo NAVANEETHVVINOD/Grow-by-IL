@@ -91,13 +91,20 @@ final rc5ProfileStatsProvider = FutureProvider<Rc5ProfileStats>((ref) async {
   // Fetch all counts in parallel
   final responses = await Future.wait([
     supabase.from('lab_sessions').select('id').eq('user_id', user.id),
-    supabase.from('tool_bookings').select('tool_id').eq('user_id', user.id).eq('status', 'returned'),
+    supabase
+        .from('tool_bookings')
+        .select('tool_id')
+        .eq('user_id', user.id)
+        .eq('status', 'returned'),
     supabase.from('rsvps').select('id').eq('user_id', user.id),
     supabase.from('project_members').select('id').eq('user_id', user.id),
   ]);
 
   final visits = (responses[0] as List).length;
-  final tools = (responses[1] as List).map((row) => row['tool_id'] as String).toSet().length;
+  final tools = (responses[1] as List)
+      .map((row) => row['tool_id'] as String)
+      .toSet()
+      .length;
   final events = (responses[2] as List).length;
   final projects = (responses[3] as List).length;
 
@@ -109,18 +116,21 @@ final rc5ProfileStatsProvider = FutureProvider<Rc5ProfileStats>((ref) async {
   );
 });
 
-final rc5ProfileProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+final rc5ProfileProjectsProvider =
+    Provider<AsyncValue<List<ProjectModel>>>((ref) {
   final projectsAsync = ref.watch(userProjectsProvider);
   return projectsAsync.whenData((projects) => projects.take(12).toList());
 }, name: 'rc5ProfileProjectsProvider');
 
-final rc5PublicProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+final rc5PublicProjectsProvider =
+    Provider<AsyncValue<List<ProjectModel>>>((ref) {
   final projectsAsync = ref.watch(rc5ProfileProjectsProvider);
   return projectsAsync.whenData(
       (projects) => projects.where((project) => project.isPublic).toList());
 }, name: 'rc5PublicProjectsProvider');
 
-final rc5PrivateProjectsProvider = Provider<AsyncValue<List<ProjectModel>>>((ref) {
+final rc5PrivateProjectsProvider =
+    Provider<AsyncValue<List<ProjectModel>>>((ref) {
   final projectsAsync = ref.watch(rc5ProfileProjectsProvider);
   return projectsAsync.whenData(
       (projects) => projects.where((project) => !project.isPublic).toList());
@@ -146,12 +156,14 @@ final rc5ProfileEventParticipationProvider =
 
 final rc5ProfileInterestsProvider = Provider<AsyncValue<List<String>>>((ref) {
   final headerAsync = ref.watch(rc5ProfileHeaderProvider);
-  return headerAsync.whenData((header) => header?.interests ?? const <String>[]);
+  return headerAsync
+      .whenData((header) => header?.interests ?? const <String>[]);
 }, name: 'rc5ProfileInterestsProvider');
 
 final rc5ProfileSkillsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
   final headerAsync = ref.watch(rc5ProfileHeaderProvider);
-  return headerAsync.whenData((header) => header?.skills ?? const <String, int>{});
+  return headerAsync
+      .whenData((header) => header?.skills ?? const <String, int>{});
 });
 
 class _DraftData {

@@ -43,7 +43,8 @@ class RC5HomeScreen extends StatelessWidget {
               Transform.rotate(
                 angle: 0.035,
                 child: const ScrollingTicker(
-                  text: '/// LATEST NEWS: New CNC Mill is now operational! Check out the updated safety guide in the Knowledge Base...',
+                  text:
+                      '/// LATEST NEWS: New CNC Mill is now operational! Check out the updated safety guide in the Knowledge Base...',
                   backgroundColor: RC5DesignTokens.surfaceAlt,
                   textColor: RC5DesignTokens.ink,
                   speedMultiplier: 1.0,
@@ -79,7 +80,8 @@ class RC5HomeScreen extends StatelessWidget {
               Transform.rotate(
                 angle: -0.035,
                 child: const ScrollingTicker(
-                  text: '/// BUILD. BREAK. GROW. /// SHIP IDEAS. NOT EXCUSES. /// CREATE > CONSUME ///',
+                  text:
+                      '/// BUILD. BREAK. GROW. /// SHIP IDEAS. NOT EXCUSES. /// CREATE > CONSUME ///',
                   backgroundColor: RC5DesignTokens.ink,
                   textColor: Colors.white,
                   speedMultiplier: 0.5,
@@ -94,7 +96,8 @@ class RC5HomeScreen extends StatelessWidget {
 }
 
 class SlashDivider extends StatelessWidget {
-  const SlashDivider({super.key, this.color = AppColors.navy, this.height = 20});
+  const SlashDivider(
+      {super.key, this.color = AppColors.navy, this.height = 20});
 
   final Color color;
   final double height;
@@ -180,7 +183,7 @@ class _NotificationBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadCount = ref.watch(unreadNotificationCountProvider);
-    
+
     return _IconBadgeButton(
       icon: Icons.notifications_outlined,
       count: unreadCount,
@@ -347,7 +350,7 @@ class FeaturedActivitiesSection extends ConsumerWidget {
         events.when(
           data: (items) {
             final upcoming = items.where((event) => !event.isPast).toList();
-            
+
             if (upcoming.isEmpty) {
               return const SizedBox(
                 height: 120,
@@ -365,14 +368,14 @@ class FeaturedActivitiesSection extends ConsumerWidget {
 
             return SizedBox(
               height: 330,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: upcoming.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: upcoming.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
                   final event = upcoming[index];
-                  
+
                   return SizedBox(
                     width: 280,
                     child: NeoCard(
@@ -398,7 +401,8 @@ class FeaturedActivitiesSection extends ConsumerWidget {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textSecondary),
+                              const Icon(Icons.calendar_today_outlined,
+                                  size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -417,7 +421,8 @@ class FeaturedActivitiesSection extends ConsumerWidget {
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                              const Icon(Icons.location_on_outlined,
+                                  size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -450,13 +455,16 @@ class FeaturedActivitiesSection extends ConsumerWidget {
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF5F5F0),
-                                border: Border.all(color: AppColors.navy, width: 1.5),
+                                border: Border.all(
+                                    color: AppColors.navy, width: 1.5),
                               ),
-                              child: event.imageUrl != null && event.imageUrl!.isNotEmpty
+                              child: event.imageUrl != null &&
+                                      event.imageUrl!.isNotEmpty
                                   ? Image.network(
                                       event.imageUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const _PosterPlaceholder(),
+                                      errorBuilder: (_, __, ___) =>
+                                          const _PosterPlaceholder(),
                                     )
                                   : const _PosterPlaceholder(),
                             ),
@@ -606,7 +614,8 @@ class OpportunitiesSection extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: opp.logoColor,
-                    border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                    border:
+                        Border.all(color: const Color(0xFF111111), width: 1.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -614,7 +623,9 @@ class OpportunitiesSection extends StatelessWidget {
                       opp.logoText,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.spaceGrotesk(
-                        color: opp.logoColor == Colors.black ? Colors.white : const Color(0xFF111111),
+                        color: opp.logoColor == Colors.black
+                            ? Colors.white
+                            : const Color(0xFF111111),
                         fontWeight: FontWeight.bold,
                         fontSize: opp.logoText.contains('\n') ? 9 : 12,
                         height: 1.1,
@@ -740,7 +751,8 @@ class QuotesFooter extends StatelessWidget {
     return Transform.rotate(
       angle: -0.02, // Opposite and slightly softer tilt
       child: const ScrollingTicker(
-        text: '/// BUILD. LEARN. SHARE. REPEAT. /// LIVE TO INNOVATE, LEAVE AN IMPACT. /// HAKUNA MATATA /// WORKSHOP TODAY AT 4PM.',
+        text:
+            '/// BUILD. LEARN. SHARE. REPEAT. /// LIVE TO INNOVATE, LEAVE AN IMPACT. /// HAKUNA MATATA /// WORKSHOP TODAY AT 4PM.',
         backgroundColor: Colors.black,
         textColor: Colors.white,
         speedMultiplier: 0.6, // Slower movement
@@ -793,7 +805,8 @@ class _ScrollingTickerState extends State<ScrollingTicker> {
         continue;
       }
 
-      final duration = Duration(milliseconds: (maxScroll * 35 / widget.speedMultiplier).toInt());
+      final duration = Duration(
+          milliseconds: (maxScroll * 35 / widget.speedMultiplier).toInt());
       await _scrollController.animateTo(
         maxScroll,
         duration: duration,
@@ -933,8 +946,18 @@ String _profileHandle(UserModel user) {
 
 String _formatDate(DateTime value) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
   final local = value.toLocal();
   return '${months[local.month - 1]} ${local.day}';

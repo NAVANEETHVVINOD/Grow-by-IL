@@ -37,7 +37,8 @@ class MentorshipScreen extends StatelessWidget {
         backgroundColor: RC5DesignTokens.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: RC5DesignTokens.ink),
+          icon:
+              const Icon(Icons.arrow_back_rounded, color: RC5DesignTokens.ink),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -130,7 +131,8 @@ class MentorshipScreen extends StatelessWidget {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Support request sent to ${mentor.name}!'),
+                              content: Text(
+                                  'Support request sent to ${mentor.name}!'),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );

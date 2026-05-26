@@ -53,7 +53,6 @@ class _DigitalIdCardState extends State<DigitalIdCard>
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: _flip,
       child: AnimatedBuilder(
@@ -100,7 +99,8 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                         letterSpacing: 2,
                       ),
                 ),
-                const Icon(Icons.bolt_rounded, color: Color(0xFF111111), size: 20),
+                const Icon(Icons.bolt_rounded,
+                    color: Color(0xFF111111), size: 20),
               ],
             ),
             const SizedBox(height: 8),
@@ -185,11 +185,13 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                       ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: const Color(0xFFDDF5D7),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: const Color(0xFF111111), width: 1.5),
+                    border:
+                        Border.all(color: const Color(0xFF111111), width: 1.5),
                   ),
                   child: const Text(
                     'VERIFIED MAKER',

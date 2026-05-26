@@ -20,10 +20,10 @@ class MediaUploadService {
   }) async {
     final path = '$userId/avatar.$extension';
     await supabase.storage.from('avatars').uploadBinary(
-      path,
-      bytes,
-      fileOptions: const FileOptions(upsert: true),
-    );
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
     return supabase.storage.from('avatars').getPublicUrl(path);
   }
 
@@ -36,10 +36,10 @@ class MediaUploadService {
   }) async {
     final path = '$userId/$projectId.$extension';
     await supabase.storage.from('portfolio').uploadBinary(
-      path,
-      bytes,
-      fileOptions: const FileOptions(upsert: true),
-    );
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
     return supabase.storage.from('portfolio').getPublicUrl(path);
   }
 
@@ -52,26 +52,34 @@ class MediaUploadService {
   }) async {
     final path = '$userId/$projectId.$extension';
     await supabase.storage.from('project-banners').uploadBinary(
-      path,
-      bytes,
-      fileOptions: const FileOptions(upsert: true),
-    );
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
     return supabase.storage.from('project-banners').getPublicUrl(path);
   }
 
   /// Delete an avatar.
   Future<void> deleteAvatar(String userId, {String extension = 'jpg'}) async {
-    await supabase.storage.from('avatars').remove(['$userId/avatar.$extension']);
+    await supabase.storage
+        .from('avatars')
+        .remove(['$userId/avatar.$extension']);
   }
 
   /// Delete a portfolio image.
-  Future<void> deletePortfolioImage(String userId, String projectId, {String extension = 'jpg'}) async {
-    await supabase.storage.from('portfolio').remove(['$userId/$projectId.$extension']);
+  Future<void> deletePortfolioImage(String userId, String projectId,
+      {String extension = 'jpg'}) async {
+    await supabase.storage
+        .from('portfolio')
+        .remove(['$userId/$projectId.$extension']);
   }
 
   /// Delete a project banner.
-  Future<void> deleteProjectBanner(String userId, String projectId, {String extension = 'jpg'}) async {
-    await supabase.storage.from('project-banners').remove(['$userId/$projectId.$extension']);
+  Future<void> deleteProjectBanner(String userId, String projectId,
+      {String extension = 'jpg'}) async {
+    await supabase.storage
+        .from('project-banners')
+        .remove(['$userId/$projectId.$extension']);
   }
 }
 

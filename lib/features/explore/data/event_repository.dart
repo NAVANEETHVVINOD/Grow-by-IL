@@ -1,4 +1,3 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:grow/core/utils/app_logger.dart';
 import 'package:grow/shared/models/event_model.dart';
@@ -23,7 +22,7 @@ class EventRepository {
           .inFilter('status', ['upcoming', 'ongoing', 'completed'])
           .order('event_date', ascending: true)
           .timeout(const Duration(seconds: 15));
-      
+
       sw.stop();
       AppLogger.info(
         LogCategory.events,

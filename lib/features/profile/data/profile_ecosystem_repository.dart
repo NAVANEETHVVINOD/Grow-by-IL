@@ -36,7 +36,9 @@ class ProfileEcosystemRepository {
         .select()
         .eq('user_id', userId)
         .order('sort_order');
-    return (response as List).map((e) => UserExperienceModel.fromJson(e)).toList();
+    return (response as List)
+        .map((e) => UserExperienceModel.fromJson(e))
+        .toList();
   }
 
   Future<UserExperienceModel> addExperience(UserExperienceModel item) async {
@@ -64,7 +66,9 @@ class ProfileEcosystemRepository {
         .select()
         .eq('user_id', userId)
         .order('sort_order');
-    return (response as List).map((e) => UserEducationModel.fromJson(e)).toList();
+    return (response as List)
+        .map((e) => UserEducationModel.fromJson(e))
+        .toList();
   }
 
   Future<UserEducationModel> addEducation(UserEducationModel item) async {
@@ -86,16 +90,20 @@ class ProfileEcosystemRepository {
 
   // ─── PORTFOLIO PROJECTS ──────────────────────────────
 
-  Future<List<UserPortfolioProjectModel>> getPortfolioProjects(String userId) async {
+  Future<List<UserPortfolioProjectModel>> getPortfolioProjects(
+      String userId) async {
     final response = await supabase
         .from('user_portfolio_projects')
         .select()
         .eq('user_id', userId)
         .order('sort_order');
-    return (response as List).map((e) => UserPortfolioProjectModel.fromJson(e)).toList();
+    return (response as List)
+        .map((e) => UserPortfolioProjectModel.fromJson(e))
+        .toList();
   }
 
-  Future<UserPortfolioProjectModel> addPortfolioProject(UserPortfolioProjectModel item) async {
+  Future<UserPortfolioProjectModel> addPortfolioProject(
+      UserPortfolioProjectModel item) async {
     final response = await supabase
         .from('user_portfolio_projects')
         .insert(item.toJson())
@@ -104,7 +112,8 @@ class ProfileEcosystemRepository {
     return UserPortfolioProjectModel.fromJson(response);
   }
 
-  Future<void> updatePortfolioProject(String id, Map<String, dynamic> updates) async {
+  Future<void> updatePortfolioProject(
+      String id, Map<String, dynamic> updates) async {
     await supabase.from('user_portfolio_projects').update(updates).eq('id', id);
   }
 
@@ -120,10 +129,13 @@ class ProfileEcosystemRepository {
         .select()
         .eq('user_id', userId)
         .order('sort_order');
-    return (response as List).map((e) => UserVolunteeringModel.fromJson(e)).toList();
+    return (response as List)
+        .map((e) => UserVolunteeringModel.fromJson(e))
+        .toList();
   }
 
-  Future<UserVolunteeringModel> addVolunteering(UserVolunteeringModel item) async {
+  Future<UserVolunteeringModel> addVolunteering(
+      UserVolunteeringModel item) async {
     final response = await supabase
         .from('user_volunteering')
         .insert(item.toJson())
@@ -132,7 +144,8 @@ class ProfileEcosystemRepository {
     return UserVolunteeringModel.fromJson(response);
   }
 
-  Future<void> updateVolunteering(String id, Map<String, dynamic> updates) async {
+  Future<void> updateVolunteering(
+      String id, Map<String, dynamic> updates) async {
     await supabase.from('user_volunteering').update(updates).eq('id', id);
   }
 
@@ -148,7 +161,9 @@ class ProfileEcosystemRepository {
         .select()
         .eq('user_id', userId)
         .order('sort_order');
-    return (response as List).map((e) => UserSocialLinkModel.fromJson(e)).toList();
+    return (response as List)
+        .map((e) => UserSocialLinkModel.fromJson(e))
+        .toList();
   }
 
   Future<UserSocialLinkModel> upsertSocialLink(UserSocialLinkModel link) async {
@@ -202,12 +217,14 @@ class ProfileEcosystemRepository {
     // Delete all existing interests and re-insert
     await supabase.from('user_interests').delete().eq('user_id', userId);
     if (interests.isEmpty) return;
-    final rows = interests.map((name) => {'user_id': userId, 'name': name}).toList();
+    final rows =
+        interests.map((name) => {'user_id': userId, 'name': name}).toList();
     await supabase.from('user_interests').insert(rows);
   }
 }
 
 /// Riverpod provider for the profile ecosystem repository.
-final profileEcosystemRepositoryProvider = Provider<ProfileEcosystemRepository>((ref) {
+final profileEcosystemRepositoryProvider =
+    Provider<ProfileEcosystemRepository>((ref) {
   return const ProfileEcosystemRepository();
 });
