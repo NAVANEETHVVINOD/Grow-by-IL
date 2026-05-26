@@ -46,7 +46,8 @@ class _RC5EditVisibilityScreenState
           final prefs = await SharedPreferences.getInstance();
           final key = 'rc5_onboarding.${user.id}';
           _isPublic = prefs.getBool('$key.visibility_public') ?? true;
-          _hideActivity = prefs.getBool('$key.visibility_hide_activity') ?? false;
+          _hideActivity =
+              prefs.getBool('$key.visibility_hide_activity') ?? false;
         }
       } catch (e) {
         final prefs = await SharedPreferences.getInstance();
@@ -69,14 +70,15 @@ class _RC5EditVisibilityScreenState
       final repo = ref.read(profileEcosystemRepositoryProvider);
 
       final profile = _profile?.copyWith(
-        isPublic: _isPublic,
-        showStats: !_hideActivity,
-      ) ?? UserProfileModel(
-        id: const Uuid().v4(),
-        userId: user.id,
-        isPublic: _isPublic,
-        showStats: !_hideActivity,
-      );
+            isPublic: _isPublic,
+            showStats: !_hideActivity,
+          ) ??
+          UserProfileModel(
+            id: const Uuid().v4(),
+            userId: user.id,
+            isPublic: _isPublic,
+            showStats: !_hideActivity,
+          );
 
       try {
         // Write to Supabase

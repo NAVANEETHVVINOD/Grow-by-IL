@@ -168,8 +168,8 @@ void main() {
 
   group('Chaos Harness — Connectivity Flapping', () {
     test('FakeConnectivityFlapper emits correct number of flaps', () async {
-      final flapper = FakeConnectivityFlapper(
-          totalFlaps: 5, minFlapMs: 50, maxFlapMs: 100);
+      final flapper =
+          FakeConnectivityFlapper(totalFlaps: 5, minFlapMs: 50, maxFlapMs: 100);
       final states = <bool>[];
 
       flapper.connectivityStream.listen(states.add);

@@ -8,6 +8,7 @@ import 'package:grow/features/profile/domain/profile_migration_coordinator.dart'
 import 'package:grow/features/profile/domain/pending_profile_mutation.dart';
 import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
 import 'package:grow/shared/models/profile_ecosystem_models.dart';
+
 class MockProfileEcosystemRepository extends ProfileEcosystemRepository {
   final Map<String, UserProfileModel> profiles = {};
   final Map<String, List<UserSkillModel>> skills = {};
@@ -104,7 +105,8 @@ void main() {
       var state = await ProfileMigrationStorage.getMigrationState(userId);
       expect(state, ProfileMigrationState.localOnly);
 
-      await ProfileMigrationStorage.setMigrationState(userId, ProfileMigrationState.migrating);
+      await ProfileMigrationStorage.setMigrationState(
+          userId, ProfileMigrationState.migrating);
       state = await ProfileMigrationStorage.getMigrationState(userId);
       expect(state, ProfileMigrationState.migrating);
 
@@ -157,7 +159,7 @@ void main() {
   group('ProfileMigrationCoordinator Mutex Tests', () {
     test('Ensures mutual exclusion and duplicate start prevention', () async {
       final list = <int>[];
-      
+
       final f1 = ProfileMigrationCoordinator.run(() async {
         list.add(1);
         await Future.delayed(const Duration(milliseconds: 100));
@@ -169,7 +171,7 @@ void main() {
       });
 
       await Future.wait([f1, f2]);
-      
+
       // Because f2 is requested while f1 is active, f2 immediately awaits f1's completer.
       // Therefore, the callback for f2 is NOT executed again, it just resolves f1's future.
       expect(list, [1, 2]);
@@ -197,11 +199,16 @@ void main() {
 
     test('Exponential backoff delay calculation', () async {
       expect(PendingProfileMutationQueue.getRetryDelay(0), Duration.zero);
-      expect(PendingProfileMutationQueue.getRetryDelay(1), const Duration(seconds: 2));
-      expect(PendingProfileMutationQueue.getRetryDelay(2), const Duration(seconds: 4));
-      expect(PendingProfileMutationQueue.getRetryDelay(3), const Duration(seconds: 8));
-      expect(PendingProfileMutationQueue.getRetryDelay(5), const Duration(seconds: 32));
-      expect(PendingProfileMutationQueue.getRetryDelay(6), const Duration(seconds: 60)); // capped at 60s
+      expect(PendingProfileMutationQueue.getRetryDelay(1),
+          const Duration(seconds: 2));
+      expect(PendingProfileMutationQueue.getRetryDelay(2),
+          const Duration(seconds: 4));
+      expect(PendingProfileMutationQueue.getRetryDelay(3),
+          const Duration(seconds: 8));
+      expect(PendingProfileMutationQueue.getRetryDelay(5),
+          const Duration(seconds: 32));
+      expect(PendingProfileMutationQueue.getRetryDelay(6),
+          const Duration(seconds: 60)); // capped at 60s
     });
 
     test('Stale write detection field propagation', () async {
@@ -215,7 +222,8 @@ void main() {
 
       final queue = await PendingProfileMutationQueue.loadQueue();
       expect(queue.first.lastKnownServerUpdatedAt, isNotNull);
-      expect(queue.first.lastKnownServerUpdatedAt!.toIso8601String(), now.toIso8601String());
+      expect(queue.first.lastKnownServerUpdatedAt!.toIso8601String(),
+          now.toIso8601String());
     });
 
     test('Partial queue replay preservation and failure increment', () async {
@@ -283,11 +291,13 @@ void main() {
 
       when(() => mockSupabase.auth).thenReturn(mockAuth);
       when(() => mockSupabase.from(any())).thenAnswer((_) => mockQuery);
-      
+
       repo = ProfileEcosystemRepository(mockSupabase);
     });
 
-    test('Replay suspends sync when auth is expired / null session, keeping queue intact', () async {
+    test(
+        'Replay suspends sync when auth is expired / null session, keeping queue intact',
+        () async {
       when(() => mockAuth.currentSession).thenReturn(null);
 
       // Queue a mutation
@@ -310,7 +320,8 @@ void main() {
       verifyNever(() => mockSupabase.from(any()));
     });
 
-    test('Stale write detection discards stale updates when remote is newer', () async {
+    test('Stale write detection discards stale updates when remote is newer',
+        () async {
       final now = DateTime.now().toUtc();
       final baseTime = now.subtract(const Duration(minutes: 10));
       final serverTime = now.subtract(const Duration(minutes: 2));
@@ -335,9 +346,8 @@ void main() {
       when(() => mockAuth.currentSession).thenReturn(fakeSession);
 
       // Setup server check mock return: updated_at is serverTime (newer than baseTime)
-      final fakeFilter = FakePostgrestFilterBuilder<List<Map<String, dynamic>>>({
-        'updated_at': serverTime.toIso8601String()
-      });
+      final fakeFilter = FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+          {'updated_at': serverTime.toIso8601String()});
       when(() => mockQuery.select('updated_at')).thenAnswer((_) => fakeFilter);
 
       // Queue a mutation with baseTime
@@ -362,7 +372,9 @@ void main() {
       verifyNever(() => mockQuery.upsert(any()));
     });
 
-    test('Successful replay of delete_by_name and delete_by_platform removes them from queue', () async {
+    test(
+        'Successful replay of delete_by_name and delete_by_platform removes them from queue',
+        () async {
       final fakeUser = User(
         id: 'user-123',
         appMetadata: {},
@@ -381,7 +393,9 @@ void main() {
       );
 
       when(() => mockAuth.currentSession).thenReturn(fakeSession);
-      when(() => mockQuery.delete()).thenAnswer((_) => FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(<Map<String, dynamic>>[]));
+      when(() => mockQuery.delete()).thenAnswer((_) =>
+          FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+              <Map<String, dynamic>>[]));
 
       // 1. Queue a delete_by_name
       await PendingProfileMutationQueue.addMutation(
@@ -417,10 +431,13 @@ void main() {
 }
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
+
 class MockGoTrueClient extends Mock implements GoTrueClient {}
+
 class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 
-class FakePostgrestTransformBuilder<T> extends Fake implements PostgrestTransformBuilder<T> {
+class FakePostgrestTransformBuilder<T> extends Fake
+    implements PostgrestTransformBuilder<T> {
   FakePostgrestTransformBuilder(this._value);
   final T _value;
 
@@ -430,7 +447,8 @@ class FakePostgrestTransformBuilder<T> extends Fake implements PostgrestTransfor
   }
 }
 
-class FakePostgrestFilterBuilder<T> extends Fake implements PostgrestFilterBuilder<T> {
+class FakePostgrestFilterBuilder<T> extends Fake
+    implements PostgrestFilterBuilder<T> {
   FakePostgrestFilterBuilder(this._value);
   final Object? _value;
 
@@ -439,7 +457,8 @@ class FakePostgrestFilterBuilder<T> extends Fake implements PostgrestFilterBuild
 
   @override
   PostgrestTransformBuilder<Map<String, dynamic>?> maybeSingle() {
-    return FakePostgrestTransformBuilder<Map<String, dynamic>?>(_value as Map<String, dynamic>?);
+    return FakePostgrestTransformBuilder<Map<String, dynamic>?>(
+        _value as Map<String, dynamic>?);
   }
 
   @override

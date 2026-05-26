@@ -48,10 +48,22 @@ class _RC5EditSocialLinksScreenState
 
       try {
         final serverLinks = await repo.getSocialLinks(user.id);
-        
-        final github = serverLinks.firstWhere((l) => l.platform == 'github', orElse: () => const UserSocialLinkModel(id: '', userId: '', platform: 'github', url: '')).url;
-        final linkedin = serverLinks.firstWhere((l) => l.platform == 'linkedin', orElse: () => const UserSocialLinkModel(id: '', userId: '', platform: 'linkedin', url: '')).url;
-        final website = serverLinks.firstWhere((l) => l.platform == 'website', orElse: () => const UserSocialLinkModel(id: '', userId: '', platform: 'website', url: '')).url;
+
+        final github = serverLinks
+            .firstWhere((l) => l.platform == 'github',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'github', url: ''))
+            .url;
+        final linkedin = serverLinks
+            .firstWhere((l) => l.platform == 'linkedin',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'linkedin', url: ''))
+            .url;
+        final website = serverLinks
+            .firstWhere((l) => l.platform == 'website',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'website', url: ''))
+            .url;
 
         _githubController.text = _cleanGithubUsername(github);
         _linkedinController.text = linkedin;
@@ -61,14 +73,17 @@ class _RC5EditSocialLinksScreenState
           final prefs = await SharedPreferences.getInstance();
           final key = 'rc5_onboarding.${user.id}';
           _githubController.text = prefs.getString('$key.social_github') ?? '';
-          _linkedinController.text = prefs.getString('$key.social_linkedin') ?? '';
-          _websiteController.text = prefs.getString('$key.social_website') ?? '';
+          _linkedinController.text =
+              prefs.getString('$key.social_linkedin') ?? '';
+          _websiteController.text =
+              prefs.getString('$key.social_website') ?? '';
         }
       } catch (e) {
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
         _githubController.text = prefs.getString('$key.social_github') ?? '';
-        _linkedinController.text = prefs.getString('$key.social_linkedin') ?? '';
+        _linkedinController.text =
+            prefs.getString('$key.social_linkedin') ?? '';
         _websiteController.text = prefs.getString('$key.social_website') ?? '';
       }
     }
@@ -88,7 +103,11 @@ class _RC5EditSocialLinksScreenState
 
       final liVal = _linkedinController.text.trim();
       final linkedinUrl = liVal.isNotEmpty
-          ? (liVal.startsWith('http') ? liVal : (liVal.startsWith('in/') ? 'https://linkedin.com/$liVal' : 'https://linkedin.com/in/$liVal'))
+          ? (liVal.startsWith('http')
+              ? liVal
+              : (liVal.startsWith('in/')
+                  ? 'https://linkedin.com/$liVal'
+                  : 'https://linkedin.com/in/$liVal'))
           : '';
 
       final wsVal = _websiteController.text.trim();

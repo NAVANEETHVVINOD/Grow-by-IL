@@ -17,7 +17,7 @@ class ProfileMigrationStorage {
   static const String _stateKey = 'profile_migration_state';
   static const String _versionKey = 'profile_schema_version';
   static const String _checkpointKey = 'profile_migration_checkpoint';
-  
+
   /// The current schema version of user profile definitions.
   static const int currentProfileSchemaVersion = 2;
 
@@ -33,7 +33,8 @@ class ProfileMigrationStorage {
   }
 
   /// Sets the migration state for a user.
-  static Future<void> setMigrationState(String userId, ProfileMigrationState state) async {
+  static Future<void> setMigrationState(
+      String userId, ProfileMigrationState state) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('${_stateKey}_$userId', state.name);
   }
@@ -65,7 +66,8 @@ class ProfileMigrationStorage {
   }
 
   /// Saves the checkpoints map of successfully migrated sub-tables.
-  static Future<void> setCheckpoints(String userId, Map<String, bool> checkpoints) async {
+  static Future<void> setCheckpoints(
+      String userId, Map<String, bool> checkpoints) async {
     final prefs = await SharedPreferences.getInstance();
     final list = checkpoints.entries.map((e) => '${e.key}:${e.value}').toList();
     await prefs.setStringList('${_checkpointKey}_$userId', list);
@@ -89,7 +91,8 @@ class ProfileMigrationStorage {
     required Map<String, int> skills,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final serializedSkills = skills.entries.map((e) => '${e.key}:${e.value}').toList();
+    final serializedSkills =
+        skills.entries.map((e) => '${e.key}:${e.value}').toList();
     final map = {
       'username': username,
       'departmentOrRole': departmentOrRole,
@@ -101,7 +104,8 @@ class ProfileMigrationStorage {
   }
 
   /// Loads cached profile data locally (used during offline fallbacks).
-  static Future<Map<String, dynamic>?> getCachedProfileData(String userId) async {
+  static Future<Map<String, dynamic>?> getCachedProfileData(
+      String userId) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('${_profileCacheKey}_$userId');
     if (raw == null) return null;

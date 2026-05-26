@@ -47,7 +47,7 @@ class _RC5EditBasicProfileScreenState
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
       final repo = ref.read(profileEcosystemRepositoryProvider);
-      
+
       final profileModel = UserProfileModel(
         id: const Uuid().v4(),
         userId: user.id,
@@ -58,12 +58,13 @@ class _RC5EditBasicProfileScreenState
 
       try {
         await repo.upsertProfile(profileModel);
-        
+
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
         await prefs.setString('$key.username', _usernameController.text.trim());
         await prefs.setString('$key.bio', _bioController.text.trim());
-        await prefs.setString('$key.department', _departmentController.text.trim());
+        await prefs.setString(
+            '$key.department', _departmentController.text.trim());
 
         ref.invalidate(rc5ProfileHeaderProvider);
         if (mounted) {
@@ -80,7 +81,8 @@ class _RC5EditBasicProfileScreenState
         final key = 'rc5_onboarding.${user.id}';
         await prefs.setString('$key.username', _usernameController.text.trim());
         await prefs.setString('$key.bio', _bioController.text.trim());
-        await prefs.setString('$key.department', _departmentController.text.trim());
+        await prefs.setString(
+            '$key.department', _departmentController.text.trim());
 
         ref.invalidate(rc5ProfileHeaderProvider);
         if (mounted) {

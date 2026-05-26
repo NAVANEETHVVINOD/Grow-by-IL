@@ -96,7 +96,8 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
         // 3. Save locally to SharedPreferences onboarding draft
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
-        final serialized = _skills.entries.map((e) => '${e.key}:${e.value}').toList();
+        final serialized =
+            _skills.entries.map((e) => '${e.key}:${e.value}').toList();
         await prefs.setStringList('$key.skills', serialized);
 
         ref.invalidate(rc5ProfileHeaderProvider);
@@ -114,7 +115,8 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
         // Cache locally in SharedPreferences onboarding draft
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
-        final serialized = _skills.entries.map((e) => '${e.key}:${e.value}').toList();
+        final serialized =
+            _skills.entries.map((e) => '${e.key}:${e.value}').toList();
         await prefs.setStringList('$key.skills', serialized);
 
         ref.invalidate(rc5ProfileHeaderProvider);

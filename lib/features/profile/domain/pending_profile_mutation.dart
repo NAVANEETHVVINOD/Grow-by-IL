@@ -76,7 +76,8 @@ class PendingProfileMutation {
       retryCount: retryCount ?? this.retryCount,
       lastAttemptAt: lastAttemptAt ?? this.lastAttemptAt,
       failedPermanently: failedPermanently ?? this.failedPermanently,
-      lastKnownServerUpdatedAt: lastKnownServerUpdatedAt ?? this.lastKnownServerUpdatedAt,
+      lastKnownServerUpdatedAt:
+          lastKnownServerUpdatedAt ?? this.lastKnownServerUpdatedAt,
     );
   }
 }
@@ -95,7 +96,8 @@ class PendingProfileMutationQueue {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_queueKey) ?? [];
     return list
-        .map((item) => PendingProfileMutation.fromJson(json.decode(item) as Map<String, dynamic>))
+        .map((item) => PendingProfileMutation.fromJson(
+            json.decode(item) as Map<String, dynamic>))
         .toList();
   }
 
@@ -115,10 +117,10 @@ class PendingProfileMutationQueue {
     DateTime? lastKnownServerUpdatedAt,
   }) async {
     final queue = await loadQueue();
-    
+
     // Deduplication: Collapse edits by removing old matching mutations
     queue.removeWhere((item) => item.table == table && item.rowId == rowId);
-    
+
     final newMutation = PendingProfileMutation(
       id: const Uuid().v4(),
       table: table,
@@ -128,7 +130,7 @@ class PendingProfileMutationQueue {
       createdAt: DateTime.now().toUtc(),
       lastKnownServerUpdatedAt: lastKnownServerUpdatedAt,
     );
-    
+
     queue.add(newMutation);
     await saveQueue(queue);
   }
@@ -149,7 +151,7 @@ class PendingProfileMutationQueue {
       final item = queue[index];
       final newRetryCount = item.retryCount + 1;
       final isPermanentlyFailed = newRetryCount >= 5;
-      
+
       queue[index] = item.copyWith(
         retryCount: newRetryCount,
         lastAttemptAt: DateTime.now().toUtc(),

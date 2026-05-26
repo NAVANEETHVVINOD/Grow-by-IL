@@ -39,7 +39,7 @@ class _RC5EditEducationScreenState
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
       final repo = ref.read(profileEcosystemRepositoryProvider);
-      
+
       // Pre-fill KTU ID from user model if available
       _ktuIdController.text = user.collegeRoll ?? '';
 
@@ -60,7 +60,8 @@ class _RC5EditEducationScreenState
           if (eduDept.isNotEmpty) {
             _departmentController.text = eduDept;
           } else {
-            _departmentController.text = prefs.getString('$key.department') ?? '';
+            _departmentController.text =
+                prefs.getString('$key.department') ?? '';
           }
           _yearController.text = prefs.getString('$key.edu_year') ?? '';
           if (_ktuIdController.text.isEmpty) {
@@ -117,12 +118,15 @@ class _RC5EditEducationScreenState
         // Save locally to SharedPreferences onboarding draft
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
-        await prefs.setString('$key.edu_college', _collegeController.text.trim());
-        await prefs.setString('$key.edu_department', _departmentController.text.trim());
+        await prefs.setString(
+            '$key.edu_college', _collegeController.text.trim());
+        await prefs.setString(
+            '$key.edu_department', _departmentController.text.trim());
         await prefs.setString('$key.edu_year', _yearController.text.trim());
         await prefs.setString('$key.edu_ktuid', _ktuIdController.text.trim());
         if (_departmentController.text.trim().isNotEmpty) {
-          await prefs.setString('$key.department', _departmentController.text.trim());
+          await prefs.setString(
+              '$key.department', _departmentController.text.trim());
         }
 
         ref.invalidate(rc5ProfileHeaderProvider);
@@ -141,12 +145,15 @@ class _RC5EditEducationScreenState
         // Cache locally on offline queue exception
         final prefs = await SharedPreferences.getInstance();
         final key = 'rc5_onboarding.${user.id}';
-        await prefs.setString('$key.edu_college', _collegeController.text.trim());
-        await prefs.setString('$key.edu_department', _departmentController.text.trim());
+        await prefs.setString(
+            '$key.edu_college', _collegeController.text.trim());
+        await prefs.setString(
+            '$key.edu_department', _departmentController.text.trim());
         await prefs.setString('$key.edu_year', _yearController.text.trim());
         await prefs.setString('$key.edu_ktuid', _ktuIdController.text.trim());
         if (_departmentController.text.trim().isNotEmpty) {
-          await prefs.setString('$key.department', _departmentController.text.trim());
+          await prefs.setString(
+              '$key.department', _departmentController.text.trim());
         }
 
         ref.invalidate(rc5ProfileHeaderProvider);

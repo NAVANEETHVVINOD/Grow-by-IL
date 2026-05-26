@@ -79,12 +79,13 @@ final rc5ProfileHeaderProvider =
     if (serverProfile == null && FeatureFlags.kEnableProfileMigration) {
       final state = await ProfileMigrationStorage.getMigrationState(user.id);
       if (state != ProfileMigrationState.migrated) {
-        AppLogger.info(LogCategory.profile, '[PROFILE_MIGRATION] Profile not found in Supabase. Checking migration state...');
-        
+        AppLogger.info(LogCategory.profile,
+            '[PROFILE_MIGRATION] Profile not found in Supabase. Checking migration state...');
+
         await ProfileMigrationCoordinator.run(() async {
           await migrationService.migrate(user.id);
         });
-        
+
         // Refetch the migrated profile
         serverProfile = await repo.getProfile(user.id);
       }
@@ -100,10 +101,13 @@ final rc5ProfileHeaderProvider =
       skillsMap = tempSkills;
     }
   } catch (e, st) {
-    AppLogger.error(LogCategory.profile, 'Error loading profile from Supabase, attempting local cache fallback...', error: e, stack: st);
-    
+    AppLogger.error(LogCategory.profile,
+        'Error loading profile from Supabase, attempting local cache fallback...',
+        error: e, stack: st);
+
     // Offline Cache Fallback: Try loading from local SharedPreferences cache
-    final cachedData = await ProfileMigrationStorage.getCachedProfileData(user.id);
+    final cachedData =
+        await ProfileMigrationStorage.getCachedProfileData(user.id);
     if (cachedData != null) {
       final cachedSkillsList = (cachedData['skills'] as List).cast<String>();
       final cachedSkillsMap = <String, int>{};
@@ -125,10 +129,14 @@ final rc5ProfileHeaderProvider =
   }
 
   // 3. Construct header data and cache it locally
-  final username = serverProfile?.username ?? _deriveUsernameFromEmail(user.email);
-  final bio = serverProfile?.bio ?? 'Builder at IDEA Lab, exploring projects and collaboration.';
+  final username =
+      serverProfile?.username ?? _deriveUsernameFromEmail(user.email);
+  final bio = serverProfile?.bio ??
+      'Builder at IDEA Lab, exploring projects and collaboration.';
   final department = serverProfile?.department ??
-      (serverProfile?.userType == 'professional' ? 'Professional' : 'Student, IDEA Lab');
+      (serverProfile?.userType == 'professional'
+          ? 'Professional'
+          : 'Student, IDEA Lab');
 
   final headerData = Rc5ProfileHeaderData(
     user: user,
