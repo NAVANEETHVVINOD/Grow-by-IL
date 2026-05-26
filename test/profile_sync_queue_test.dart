@@ -1,27 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:grow/features/profile/domain/pending_profile_mutation.dart';
 
 // Import chaos harness
-import '../test/chaos_harness_utilities.dart';
+import 'chaos_harness_utilities.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   group('Profile Sync Queue — Happy Path', () {
     setUp(() async {
-      // Clear any existing queue before each test
       SharedPreferences.setMockInitialValues({});
     });
 
-    testWidgets('Queue starts empty', (tester) async {
+    test('Queue starts empty', () async {
       final queue = await PendingProfileMutationQueue.loadQueue();
       expect(queue, isEmpty);
     });
 
-    testWidgets('Adding a mutation persists to queue', (tester) async {
+    test('Adding a mutation persists to queue', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_profiles',
         rowId: 'test_user_001',
@@ -35,7 +31,7 @@ void main() {
       expect(queue.first.rowId, 'test_user_001');
     });
 
-    testWidgets('Deduplication collapses same (table, rowId)', (tester) async {
+    test('Deduplication collapses same (table, rowId)', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_profiles',
         rowId: 'test_user_001',
@@ -54,7 +50,7 @@ void main() {
       expect(queue.first.payload['display_name'], 'Version 2');
     });
 
-    testWidgets('Different rowIds create separate entries', (tester) async {
+    test('Different rowIds create separate entries', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_skills',
         rowId: 'skill_001',
@@ -72,7 +68,7 @@ void main() {
       expect(queue.length, 2);
     });
 
-    testWidgets('Remove mutation clears from queue', (tester) async {
+    test('Remove mutation clears from queue', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_profiles',
         rowId: 'test_rm',
@@ -95,7 +91,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    testWidgets('Retry count increments on failure report', (tester) async {
+    test('Retry count increments on failure report', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_profiles',
         rowId: 'fail_test',
@@ -112,8 +108,7 @@ void main() {
       expect(queue.first.failedPermanently, false);
     });
 
-    testWidgets('Mutation marked permanently failed after 5 retries',
-        (tester) async {
+    test('Mutation marked permanently failed after 5 retries', () async {
       await PendingProfileMutationQueue.addMutation(
         table: 'user_profiles',
         rowId: 'perm_fail',
@@ -124,7 +119,6 @@ void main() {
       var queue = await PendingProfileMutationQueue.loadQueue();
       final id = queue.first.id;
 
-      // Report failure 5 times
       for (int i = 0; i < 5; i++) {
         await PendingProfileMutationQueue.reportFailure(id);
       }
@@ -134,17 +128,13 @@ void main() {
       expect(queue.first.failedPermanently, true);
     });
 
-    testWidgets('Replay paused flag prevents queue processing', (tester) async {
+    test('Replay paused flag prevents queue processing', () {
       PendingProfileMutationQueue.isReplayPaused = true;
-
-      // The pause flag should be true
       expect(PendingProfileMutationQueue.isReplayPaused, true);
-
-      // Reset for other tests
       PendingProfileMutationQueue.isReplayPaused = false;
     });
 
-    testWidgets('Exponential backoff delay calculation', (tester) async {
+    test('Exponential backoff delay calculation', () {
       expect(PendingProfileMutationQueue.getRetryDelay(0), Duration.zero);
       expect(PendingProfileMutationQueue.getRetryDelay(1),
           const Duration(seconds: 2));
@@ -152,13 +142,11 @@ void main() {
           const Duration(seconds: 4));
       expect(PendingProfileMutationQueue.getRetryDelay(3),
           const Duration(seconds: 8));
-      // Capped at 60s
       expect(PendingProfileMutationQueue.getRetryDelay(10),
           const Duration(seconds: 60));
     });
 
-    testWidgets('Clear queue removes all mutations', (tester) async {
-      // Add multiple mutations
+    test('Clear queue removes all mutations', () async {
       for (int i = 0; i < 5; i++) {
         await PendingProfileMutationQueue.addMutation(
           table: 'user_skills',
@@ -179,16 +167,14 @@ void main() {
   });
 
   group('Chaos Harness — Connectivity Flapping', () {
-    testWidgets('FakeConnectivityFlapper emits correct number of flaps',
-        (tester) async {
-      final flapper =
-          FakeConnectivityFlapper(totalFlaps: 5, minFlapMs: 50, maxFlapMs: 100);
+    test('FakeConnectivityFlapper emits correct number of flaps', () async {
+      final flapper = FakeConnectivityFlapper(
+          totalFlaps: 5, minFlapMs: 50, maxFlapMs: 100);
       final states = <bool>[];
 
       flapper.connectivityStream.listen(states.add);
       flapper.start();
 
-      // Wait for all flaps to complete
       await Future.delayed(const Duration(seconds: 2));
 
       expect(states.length, 5);
@@ -197,17 +183,17 @@ void main() {
   });
 
   group('Chaos Harness — Session Expiry', () {
-    testWidgets('FakeExpiredSession expires after threshold', (tester) async {
+    test('FakeExpiredSession expires after threshold', () {
       final session = FakeExpiredSession(expireAfterCalls: 3);
 
       expect(session.checkSession(), true);
       expect(session.checkSession(), true);
       expect(session.checkSession(), true);
-      expect(session.checkSession(), false); // 4th call exceeds limit
+      expect(session.checkSession(), false);
       expect(session.isExpired, true);
     });
 
-    testWidgets('FakeExpiredSession resets correctly', (tester) async {
+    test('FakeExpiredSession resets correctly', () {
       final session = FakeExpiredSession(expireAfterCalls: 1);
       session.checkSession();
       session.checkSession();
@@ -221,22 +207,21 @@ void main() {
   });
 
   group('Chaos Harness — Replay Interruption', () {
-    testWidgets('FakeReplayInterruption throws after index', (tester) async {
+    test('FakeReplayInterruption throws after index', () {
       final interruptor = FakeReplayInterruption(interruptAfterIndex: 2);
 
-      // First two succeed
       interruptor.beforeMutationReplay();
       interruptor.beforeMutationReplay();
 
-      // Third throws
       expect(
         () => interruptor.beforeMutationReplay(),
         throwsA(isA<ReplayInterruptedException>()),
       );
       expect(interruptor.wasInterrupted, true);
+      expect(interruptor.processedCount, 2);
     });
 
-    testWidgets('FakeReplayInterruption resets correctly', (tester) async {
+    test('FakeReplayInterruption resets correctly', () {
       final interruptor = FakeReplayInterruption(interruptAfterIndex: 1);
       interruptor.beforeMutationReplay();
       try {
@@ -250,27 +235,26 @@ void main() {
   });
 
   group('Chaos Harness — Queue Corruption', () {
-    testWidgets('FakeQueueCorruptor generates valid corrupted payloads',
-        (tester) async {
+    test('FakeQueueCorruptor generates valid corrupted payloads', () {
       final corruptor = FakeQueueCorruptor();
 
       final corrupted = corruptor.corruptedPayload();
       expect(corrupted['table'], '__nonexistent_table__');
       expect(corrupted.containsKey('payload'), true);
+      expect(corrupted['type'], 'upsert');
 
       final rlsPayload = corruptor.rlsViolationPayload('fake_user_999');
       expect(rlsPayload['table'], 'user_profiles');
       expect(rlsPayload['payload']['user_id'], 'fake_user_999');
 
       final mismatch = corruptor.typeMismatchPayload();
-      expect(mismatch['payload']['user_id'],
-          isA<int>()); // Wrong type deliberately
+      expect(mismatch['payload']['user_id'], isA<int>());
+      expect(mismatch['payload']['name'], isA<bool>());
     });
   });
 
   group('Chaos Harness — Migration Timeout', () {
-    testWidgets('FakeMigrationTimeout acquires lock with timeout',
-        (tester) async {
+    test('FakeMigrationTimeout acquires lock with timeout', () async {
       final timeout = FakeMigrationTimeout(timeoutMs: 100);
       final result = await timeout.acquireLockWithTimeout();
 
@@ -279,7 +263,7 @@ void main() {
       expect(timeout.lockAcquired, false);
     });
 
-    testWidgets('FakeMigrationTimeout resets correctly', (tester) async {
+    test('FakeMigrationTimeout resets correctly', () {
       final timeout = FakeMigrationTimeout();
       timeout.reset();
       expect(timeout.lockAcquired, false);
