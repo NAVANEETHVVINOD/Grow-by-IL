@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:grow/core/constants/feature_flags.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
+import 'package:grow/features/profile/presentation/screens/rc5_developer_sync_dashboard.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 
 class RC5EditProfileHub extends StatelessWidget {
@@ -74,6 +76,21 @@ class RC5EditProfileHub extends StatelessWidget {
             fullWidth: true,
             onPressed: () => Navigator.of(context).pop(),
           ),
+          if (FeatureFlags.kEnableDebugSyncDashboard) ...[
+            const SizedBox(height: RC5DesignTokens.space5),
+            const Divider(),
+            const SizedBox(height: RC5DesignTokens.space3),
+            _HubTile(
+              icon: Icons.developer_mode_rounded,
+              title: 'Sync Dashboard',
+              subtitle: 'Queue diagnostics, replay controls, build metadata',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const RC5DeveloperSyncDashboard(),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

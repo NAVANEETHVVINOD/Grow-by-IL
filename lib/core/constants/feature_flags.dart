@@ -15,4 +15,7 @@ class FeatureFlags {
 
   /// Safe onboarding & profile migration flag.
   static const bool kEnableProfileMigration = true;
+
+  /// Debug diagnostics dashboard visibility toggle.
+  static const bool kEnableDebugSyncDashboard = true;
 }

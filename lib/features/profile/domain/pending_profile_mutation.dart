@@ -87,6 +87,9 @@ class PendingProfileMutationQueue {
 
   static const String _queueKey = 'pending_profile_mutations';
 
+  /// Global state to pause/resume queue replays during diagnostics/chaos testing.
+  static bool isReplayPaused = false;
+
   /// Loads all pending mutations from disk.
   static Future<List<PendingProfileMutation>> loadQueue() async {
     final prefs = await SharedPreferences.getInstance();

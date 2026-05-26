@@ -10,7 +10,8 @@ import 'package:grow/shared/repositories/supabase_client.dart';
 class OfflineQueueException implements Exception {
   const OfflineQueueException();
   @override
-  String toString() => 'Offline: Changes queued on device. They will sync automatically.';
+  String toString() =>
+      'Offline: Changes queued on device. They will sync automatically.';
 }
 
 /// Repository for the profile ecosystem tables.
@@ -33,7 +34,8 @@ class ProfileEcosystemRepository {
   }) async {
     try {
       final result = await supabaseCall();
-      AppLogger.info(LogCategory.profile, '[QUEUE_SYNC] Successful $type on $table for row $rowId');
+      AppLogger.info(LogCategory.profile,
+          '[QUEUE_SYNC] Successful $type on $table for row $rowId');
       return result;
     } catch (e, st) {
       final errStr = e.toString();
@@ -42,8 +44,9 @@ class ProfileEcosystemRepository {
           errStr.contains('Failed host lookup') ||
           errStr.contains('Network') ||
           errStr.contains('timeout')) {
-        AppLogger.info(LogCategory.profile, '[PROFILE_QUEUE_RETRY] Device offline. Queueing $type on $table for row $rowId');
-        
+        AppLogger.info(LogCategory.profile,
+            '[PROFILE_QUEUE_RETRY] Device offline. Queueing $type on $table for row $rowId');
+
         await PendingProfileMutationQueue.addMutation(
           table: table,
           rowId: rowId,
@@ -53,7 +56,9 @@ class ProfileEcosystemRepository {
         );
         throw const OfflineQueueException();
       }
-      AppLogger.error(LogCategory.profile, 'Failed write on $table for row $rowId', error: e, stack: st);
+      AppLogger.error(
+          LogCategory.profile, 'Failed write on $table for row $rowId',
+          error: e, stack: st);
       rethrow;
     }
   }
@@ -64,17 +69,27 @@ class ProfileEcosystemRepository {
     final queue = await PendingProfileMutationQueue.loadQueue();
     if (queue.isEmpty) return;
 
-    AppLogger.info(LogCategory.profile, '[QUEUE_SYNC] Starting offline queue replay of ${queue.length} mutations');
+    // Diagnostics: respect manual pause toggle
+    if (PendingProfileMutationQueue.isReplayPaused) {
+      AppLogger.info(LogCategory.profile,
+          '[QUEUE_SYNC] Replay paused by diagnostics toggle');
+      return;
+    }
+
+    AppLogger.info(LogCategory.profile,
+        '[QUEUE_SYNC] Starting offline queue replay of ${queue.length} mutations');
 
     for (final mutation in queue) {
       if (mutation.failedPermanently) {
-        AppLogger.warn(LogCategory.profile, '[QUEUE_SYNC] Skipping permanently failed mutation ${mutation.id} on table ${mutation.table}');
+        AppLogger.warn(LogCategory.profile,
+            '[QUEUE_SYNC] Skipping permanently failed mutation ${mutation.id} on table ${mutation.table}');
         continue;
       }
 
       // Check authentication
       if (client.auth.currentSession == null) {
-        AppLogger.warn(LogCategory.profile, '[QUEUE_SYNC] Sync suspended: No active authenticated session');
+        AppLogger.warn(LogCategory.profile,
+            '[QUEUE_SYNC] Sync suspended: No active authenticated session');
         return; // Suspend replay, preserve queue
       }
 
@@ -89,7 +104,8 @@ class ProfileEcosystemRepository {
               .maybeSingle();
 
           if (serverRow != null && serverRow['updated_at'] != null) {
-            final serverUpdatedAt = DateTime.parse(serverRow['updated_at'] as String);
+            final serverUpdatedAt =
+                DateTime.parse(serverRow['updated_at'] as String);
             if (mutation.lastKnownServerUpdatedAt != null &&
                 serverUpdatedAt.isAfter(mutation.lastKnownServerUpdatedAt!)) {
               isStale = true;
@@ -101,16 +117,20 @@ class ProfileEcosystemRepository {
           }
         } catch (e) {
           // If the select fails (e.g. column updated_at doesn't exist on this table), we proceed with write
-          AppLogger.info(LogCategory.profile, '[QUEUE_SYNC] Skipped stale check for ${mutation.table}: $e');
+          AppLogger.info(LogCategory.profile,
+              '[QUEUE_SYNC] Skipped stale check for ${mutation.table}: $e');
         }
 
         if (!isStale) {
           if (mutation.table == 'user_interests') {
-            final interestsList = (mutation.payload['interests'] as List).cast<String>();
+            final interestsList =
+                (mutation.payload['interests'] as List).cast<String>();
             final userId = mutation.rowId.replaceFirst('interests_', '');
             await client.from('user_interests').delete().eq('user_id', userId);
             if (interestsList.isNotEmpty) {
-              final rows = interestsList.map((name) => {'user_id': userId, 'name': name}).toList();
+              final rows = interestsList
+                  .map((name) => {'user_id': userId, 'name': name})
+                  .toList();
               await client.from('user_interests').insert(rows);
             }
           } else if (mutation.type == 'upsert') {
@@ -130,7 +150,8 @@ class ProfileEcosystemRepository {
                 .eq('user_id', mutation.payload['user_id'] as String)
                 .eq('platform', mutation.payload['platform'] as String);
           }
-          AppLogger.success(LogCategory.profile, '[QUEUE_SYNC] Successfully replayed mutation ${mutation.id} on table ${mutation.table}');
+          AppLogger.success(LogCategory.profile,
+              '[QUEUE_SYNC] Successfully replayed mutation ${mutation.id} on table ${mutation.table}');
         }
 
         await PendingProfileMutationQueue.removeMutation(mutation.id);
@@ -141,7 +162,8 @@ class ProfileEcosystemRepository {
             errStr.contains('Failed host lookup') ||
             errStr.contains('Network') ||
             errStr.contains('timeout')) {
-          AppLogger.warn(LogCategory.profile, '[QUEUE_SYNC] Replay paused due to network connectivity failure.');
+          AppLogger.warn(LogCategory.profile,
+              '[QUEUE_SYNC] Replay paused due to network connectivity failure.');
           return; // Stop processing queue to preserve order
         }
 
@@ -335,7 +357,10 @@ class ProfileEcosystemRepository {
       payload: {'id': id, ...updates},
       type: 'upsert',
       supabaseCall: () async {
-        await client.from('user_portfolio_projects').update(updates).eq('id', id);
+        await client
+            .from('user_portfolio_projects')
+            .update(updates)
+            .eq('id', id);
       },
     );
   }
@@ -450,7 +475,8 @@ class ProfileEcosystemRepository {
     );
   }
 
-  Future<void> deleteSocialLinkByPlatform(String userId, String platform) async {
+  Future<void> deleteSocialLinkByPlatform(
+      String userId, String platform) async {
     await _executeWrite<void>(
       table: 'user_social_links',
       rowId: 'social_${userId}_$platform',
