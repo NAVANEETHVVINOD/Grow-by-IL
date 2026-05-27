@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
@@ -32,7 +31,9 @@ class ToolsScreen extends ConsumerWidget {
         ),
         title: Text(
           '/// Book a Tool',
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: AppColors.navy,
@@ -80,7 +81,12 @@ class ToolsScreen extends ConsumerWidget {
                               const SizedBox(height: AppSizes.md),
                               Text(
                                 'No tools found in this category',
-                                style: GoogleFonts.dmSans(
+                                style: TextStyle(
+                                  fontFamily: 'DMSans',
+                                  fontFamilyFallback: const [
+                                    'Roboto',
+                                    'sans-serif'
+                                  ],
                                   color: AppColors.textSecondary,
                                 ),
                               ),
@@ -190,7 +196,10 @@ class ToolsScreen extends ConsumerWidget {
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Search tools...',
-          hintStyle: GoogleFonts.dmSans(color: AppColors.textSecondary),
+          hintStyle: TextStyle(
+              fontFamily: 'DMSans',
+              fontFamilyFallback: const ['Roboto', 'sans-serif'],
+              color: AppColors.textSecondary),
           icon: const Icon(Icons.search_rounded, color: AppColors.navy),
           border: InputBorder.none,
         ),
@@ -233,7 +242,9 @@ class ToolsScreen extends ConsumerWidget {
               ),
               child: Text(
                 category,
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
+                  fontFamily: 'DMSans',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                   color: AppColors.navy,
@@ -295,7 +306,9 @@ class _ToolCard extends StatelessWidget {
             const SizedBox(height: AppSizes.sm),
             Text(
               tool.name,
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navy,
@@ -337,7 +350,9 @@ class _ToolCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.dmSans(
+        style: TextStyle(
+          fontFamily: 'DMSans',
+          fontFamilyFallback: const ['Roboto', 'sans-serif'],
           fontSize: 10,
           fontWeight: FontWeight.bold,
           color: color,

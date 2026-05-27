@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,7 +40,9 @@ class LabScreen extends ConsumerWidget {
         ),
         title: Text(
           'Lab Session',
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: AppColors.navy,
@@ -128,7 +129,9 @@ class _NotCheckedInView extends ConsumerWidget {
                     countAsync.when(
                       data: (count) => Text(
                         '$count people in the lab right now',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -137,7 +140,9 @@ class _NotCheckedInView extends ConsumerWidget {
                           const ShimmerSkeleton(width: 180, height: 18),
                       error: (err, stack) => Text(
                         'Unable to load count',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 15,
                           color: AppColors.textSecondary,
                         ),
@@ -177,7 +182,10 @@ class _NotCheckedInView extends ConsumerWidget {
         return AlertDialog(
           title: Text(
             'Check-in (Web)',
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
+                fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -185,7 +193,10 @@ class _NotCheckedInView extends ConsumerWidget {
             children: [
               Text(
                 'Check-in on web is for testing. Select purpose:',
-                style: GoogleFonts.dmSans(color: AppColors.textSecondary),
+                style: TextStyle(
+                    fontFamily: 'DMSans',
+                    fontFamilyFallback: const ['Roboto', 'sans-serif'],
+                    color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSizes.md),
               StatefulBuilder(
@@ -310,7 +321,9 @@ class _NotCheckedInView extends ConsumerWidget {
         const SizedBox(width: AppSizes.sm),
         Text(
           "Who's Here",
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.navy,
@@ -319,7 +332,9 @@ class _NotCheckedInView extends ConsumerWidget {
         const Spacer(),
         Text(
           'Lab hours: 9 AM \u2013 6 PM, Mon\u2013Sat',
-          style: GoogleFonts.dmSans(
+          style: TextStyle(
+            fontFamily: 'DMSans',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 11,
             color: AppColors.textSecondary,
           ),
@@ -373,7 +388,9 @@ class _CheckedInView extends ConsumerWidget {
                     const SizedBox(width: AppSizes.md),
                     Text(
                       "You're checked in",
-                      style: GoogleFonts.spaceGrotesk(
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.navy,
@@ -387,7 +404,9 @@ class _CheckedInView extends ConsumerWidget {
                   const SizedBox(height: AppSizes.sm),
                   Text(
                     purpose!,
-                    style: GoogleFonts.dmSans(
+                    style: TextStyle(
+                      fontFamily: 'DMSans',
+                      fontFamilyFallback: const ['Roboto', 'sans-serif'],
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
@@ -423,7 +442,9 @@ class _CheckedInView extends ConsumerWidget {
               const SizedBox(width: AppSizes.sm),
               Text(
                 'Quick Access',
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.navy,
@@ -451,7 +472,9 @@ class _CheckedInView extends ConsumerWidget {
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'Book a Tool',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -476,7 +499,9 @@ class _CheckedInView extends ConsumerWidget {
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'Report Issue',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -547,7 +572,9 @@ class _CheckedInView extends ConsumerWidget {
             children: [
               Text(
                 'Report an Issue',
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -678,7 +705,9 @@ class _SessionTimerState extends State<_SessionTimer> {
 
     return Text(
       '$hours:$minutes:$seconds',
-      style: GoogleFonts.spaceGrotesk(
+      style: TextStyle(
+        fontFamily: 'SpaceGrotesk',
+        fontFamilyFallback: const ['Roboto', 'sans-serif'],
         fontSize: 36,
         fontWeight: FontWeight.bold,
         color: AppColors.navy,
@@ -710,7 +739,9 @@ class _SessionHistorySection extends ConsumerWidget {
             const SizedBox(width: AppSizes.sm),
             Text(
               'My Sessions',
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navy,
@@ -735,7 +766,9 @@ class _SessionHistorySection extends ConsumerWidget {
                       const SizedBox(height: AppSizes.sm),
                       Text(
                         'No sessions yet. Check in to get started.',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -786,7 +819,12 @@ class _SessionHistorySection extends ConsumerWidget {
                           children: [
                             Text(
                               dateStr,
-                              style: GoogleFonts.dmSans(
+                              style: TextStyle(
+                                fontFamily: 'DMSans',
+                                fontFamilyFallback: const [
+                                  'Roboto',
+                                  'sans-serif'
+                                ],
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -796,7 +834,12 @@ class _SessionHistorySection extends ConsumerWidget {
                               timeOut != null
                                   ? '$timeIn \u2013 $timeOut'
                                   : timeIn,
-                              style: GoogleFonts.dmSans(
+                              style: TextStyle(
+                                fontFamily: 'DMSans',
+                                fontFamilyFallback: const [
+                                  'Roboto',
+                                  'sans-serif'
+                                ],
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
@@ -809,7 +852,9 @@ class _SessionHistorySection extends ConsumerWidget {
                       else
                         Text(
                           durationStr,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
+                            fontFamilyFallback: const ['Roboto', 'sans-serif'],
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: AppColors.navy,

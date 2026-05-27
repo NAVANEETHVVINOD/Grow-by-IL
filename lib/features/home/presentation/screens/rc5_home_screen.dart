@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
@@ -144,7 +143,9 @@ class HomeHeader extends ConsumerWidget {
         const SizedBox(width: 10),
         Text(
           'Grow~',
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: const Color(0xFF111111),
@@ -581,7 +582,9 @@ class OpportunitiesSection extends StatelessWidget {
                     children: [
                       Text(
                         opp.creator,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF71717A),
@@ -590,7 +593,9 @@ class OpportunitiesSection extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         opp.title,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF111111),
@@ -599,7 +604,9 @@ class OpportunitiesSection extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         opp.tags,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF71717A),
@@ -622,7 +629,9 @@ class OpportunitiesSection extends StatelessWidget {
                     child: Text(
                       opp.logoText,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         color: opp.logoColor == Colors.black
                             ? Colors.white
                             : const Color(0xFF111111),
@@ -841,7 +850,9 @@ class _ScrollingTickerState extends State<ScrollingTicker> {
           children: [
             Text(
               '${widget.text}   •   ${widget.text}   •   ${widget.text}   •   ${widget.text}   ',
-              style: GoogleFonts.pressStart2p(
+              style: TextStyle(
+                fontFamily: 'PressStart2P',
+                fontFamilyFallback: const ['monospace'],
                 fontSize: 12,
                 color: widget.textColor,
                 letterSpacing: 1.5,

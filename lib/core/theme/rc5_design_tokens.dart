@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// RC5 visual tokens for Grow's soft neo-brutalist redesign.
 ///
@@ -80,27 +79,35 @@ class RC5DesignTokens {
     ];
   }
 
-  static TextStyle get hero => GoogleFonts.spaceGrotesk(
+  static TextStyle get hero => TextStyle(
+        fontFamily: 'SpaceGrotesk',
+        fontFamilyFallback: const ['Roboto', 'sans-serif'],
         fontWeight: FontWeight.w800,
         fontSize: 32,
         color: ink,
         letterSpacing: -1.0,
       );
 
-  static TextStyle get sectionTitle => GoogleFonts.spaceGrotesk(
+  static TextStyle get sectionTitle => TextStyle(
+        fontFamily: 'SpaceGrotesk',
+        fontFamilyFallback: const ['Roboto', 'sans-serif'],
         fontWeight: FontWeight.w700,
         fontSize: 22,
         color: ink,
         letterSpacing: -0.5,
       );
 
-  static TextStyle get cardTitle => GoogleFonts.spaceGrotesk(
+  static TextStyle get cardTitle => TextStyle(
+        fontFamily: 'SpaceGrotesk',
+        fontFamilyFallback: const ['Roboto', 'sans-serif'],
         fontWeight: FontWeight.w600,
         fontSize: 18,
         color: ink,
       );
 
-  static TextStyle get body => GoogleFonts.dmSans(
+  static TextStyle get body => TextStyle(
+        fontFamily: 'DMSans',
+        fontFamilyFallback: const ['Roboto', 'sans-serif'],
         fontWeight: FontWeight.w500,
         fontSize: 14,
         color: ink,

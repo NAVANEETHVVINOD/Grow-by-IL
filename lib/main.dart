@@ -16,6 +16,8 @@ import 'core/utils/provider_observer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final sw = Stopwatch()..start();
+
   // ── Firebase initialization ──────────────────────────────
   try {
     if (DefaultFirebaseOptions.isConfigured) {
@@ -69,6 +71,10 @@ void main() async {
     url: SupabaseKeys.url,
     anonKey: SupabaseKeys.anonKey,
   );
+
+  if (kDebugMode) {
+    debugPrint('[Grow~][PERF] Startup: ${sw.elapsedMilliseconds}ms');
+  }
 
   runApp(
     ProviderScope(
