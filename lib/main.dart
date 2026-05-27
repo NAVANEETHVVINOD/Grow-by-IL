@@ -72,7 +72,7 @@ void main() async {
     anonKey: SupabaseKeys.anonKey,
   );
 
-  if (kDebugMode) {
+  if (!kReleaseMode) {
     debugPrint('[Grow~][PERF] Startup: ${sw.elapsedMilliseconds}ms');
   }
 
