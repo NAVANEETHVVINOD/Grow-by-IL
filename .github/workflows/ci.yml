@@ -40,6 +40,12 @@ jobs:
       - name: Unit & Widget Tests (flutter test)
         run: flutter test
 
+      - name: Verify Migrations (Supabase CLI)
+        run: |
+          echo "Linting database migrations..."
+          npx supabase db lint
+          npx supabase migration list
+
       - name: Schema Contract Validation
         run: |
           echo "Checking for removed or invalid database columns..."

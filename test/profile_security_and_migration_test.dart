@@ -427,6 +427,232 @@ void main() {
       verify(() => mockSupabase.from('user_social_links')).called(2);
       verify(() => mockQuery.delete()).called(2);
     });
+
+    test('Replay is idempotent and handles duplicate upsert actions safely',
+        () async {
+      final fakeUser = User(
+        id: 'user-123',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'test@grow.com',
+      );
+
+      final fakeSession = Session(
+        accessToken: 'token-abc',
+        tokenType: 'bearer',
+        user: fakeUser,
+        refreshToken: 'refresh-token',
+        expiresIn: 3600,
+      );
+
+      when(() => mockAuth.currentSession).thenReturn(fakeSession);
+      when(() => mockQuery.upsert(any(), onConflict: any(named: 'onConflict')))
+          .thenAnswer((_) =>
+              FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+                  <Map<String, dynamic>>[]));
+
+      // Add two duplicate mutations for the same profile
+      await PendingProfileMutationQueue.addMutation(
+        table: 'user_profiles',
+        rowId: 'user-123',
+        payload: {'id': 'user-123', 'user_id': 'user-123', 'bio': 'First bio'},
+      );
+      await PendingProfileMutationQueue.addMutation(
+        table: 'user_profiles',
+        rowId: 'user-123',
+        payload: {
+          'id': 'user-123',
+          'user_id': 'user-123',
+          'bio': 'Deduplicated bio'
+        },
+      );
+
+      // Verify queue only has 1 mutation due to internal deduplication on add
+      var queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue.length, 1);
+      expect(queue.first.payload['bio'], 'Deduplicated bio');
+
+      // Trigger replay
+      await repo.replayQueue();
+
+      // Verify queue is now empty
+      queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue.isEmpty, true);
+
+      verify(() => mockQuery.upsert(
+            {
+              'id': 'user-123',
+              'user_id': 'user-123',
+              'bio': 'Deduplicated bio'
+            },
+            onConflict: 'user_id',
+          )).called(1);
+    });
+
+    test('Mutations persist across app restart and replay successfully',
+        () async {
+      final fakeUser = User(
+        id: 'user-123',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'test@grow.com',
+      );
+
+      final fakeSession = Session(
+        accessToken: 'token-abc',
+        tokenType: 'bearer',
+        user: fakeUser,
+        refreshToken: 'refresh-token',
+        expiresIn: 3600,
+      );
+
+      when(() => mockAuth.currentSession).thenReturn(fakeSession);
+      when(() => mockQuery.upsert(any(), onConflict: any(named: 'onConflict')))
+          .thenAnswer((_) =>
+              FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+                  <Map<String, dynamic>>[]));
+
+      // 1. Add mutation
+      await PendingProfileMutationQueue.addMutation(
+        table: 'user_education',
+        rowId: 'edu-abc',
+        payload: {
+          'id': 'edu-abc',
+          'user_id': 'user-123',
+          'institution': 'IIT Madras',
+          'degree': 'BTech',
+        },
+      );
+
+      // 2. Load from disk to verify persistence
+      var queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue.length, 1);
+      expect(queue.first.rowId, 'edu-abc');
+
+      // 3. Re-instantiate repository to simulate app restart
+      final newRepo = ProfileEcosystemRepository(mockSupabase);
+      await newRepo.replayQueue();
+
+      // 4. Verify queue is successfully cleared
+      queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue.isEmpty, true);
+
+      verify(() => mockQuery.upsert(
+            {
+              'id': 'edu-abc',
+              'user_id': 'user-123',
+              'institution': 'IIT Madras',
+              'degree': 'BTech',
+            },
+            onConflict: 'id',
+          )).called(1);
+    });
+
+    test('Social link update syncs with onConflict user_id,platform', () async {
+      final fakeUser = User(
+        id: 'user-123',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'test@grow.com',
+      );
+
+      final fakeSession = Session(
+        accessToken: 'token-abc',
+        tokenType: 'bearer',
+        user: fakeUser,
+        refreshToken: 'refresh-token',
+        expiresIn: 3600,
+      );
+
+      when(() => mockAuth.currentSession).thenReturn(fakeSession);
+      when(() => mockQuery.upsert(any(), onConflict: any(named: 'onConflict')))
+          .thenAnswer((_) =>
+              FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+                  <Map<String, dynamic>>[]));
+
+      await PendingProfileMutationQueue.addMutation(
+        table: 'user_social_links',
+        rowId: 'link-abc',
+        payload: {
+          'id': 'link-abc',
+          'user_id': 'user-123',
+          'platform': 'github',
+          'url': 'https://github.com/new',
+        },
+      );
+
+      await repo.replayQueue();
+
+      final queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue, isEmpty);
+
+      verify(() => mockQuery.upsert(
+            {
+              'id': 'link-abc',
+              'user_id': 'user-123',
+              'platform': 'github',
+              'url': 'https://github.com/new',
+            },
+            onConflict: 'user_id,platform',
+          )).called(1);
+    });
+
+    test('Skill update syncs with onConflict user_id,name', () async {
+      final fakeUser = User(
+        id: 'user-123',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'test@grow.com',
+      );
+
+      final fakeSession = Session(
+        accessToken: 'token-abc',
+        tokenType: 'bearer',
+        user: fakeUser,
+        refreshToken: 'refresh-token',
+        expiresIn: 3600,
+      );
+
+      when(() => mockAuth.currentSession).thenReturn(fakeSession);
+      when(() => mockQuery.upsert(any(), onConflict: any(named: 'onConflict')))
+          .thenAnswer((_) =>
+              FakePostgrestFilterBuilder<List<Map<String, dynamic>>>(
+                  <Map<String, dynamic>>[]));
+
+      await PendingProfileMutationQueue.addMutation(
+        table: 'user_skills',
+        rowId: 'skill-abc',
+        payload: {
+          'id': 'skill-abc',
+          'user_id': 'user-123',
+          'name': 'Dart',
+          'level': 3,
+        },
+      );
+
+      await repo.replayQueue();
+
+      final queue = await PendingProfileMutationQueue.loadQueue();
+      expect(queue, isEmpty);
+
+      verify(() => mockQuery.upsert(
+            {
+              'id': 'skill-abc',
+              'user_id': 'user-123',
+              'name': 'Dart',
+              'level': 3,
+            },
+            onConflict: 'user_id,name',
+          )).called(1);
+    });
   });
 }
 

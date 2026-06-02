@@ -134,7 +134,22 @@ class ProfileEcosystemRepository {
               await client.from('user_interests').insert(rows);
             }
           } else if (mutation.type == 'upsert') {
-            await client.from(mutation.table).upsert(mutation.payload);
+            String? onConflict;
+            if (mutation.table == 'user_profiles') {
+              onConflict = 'user_id';
+            } else if (mutation.table == 'user_social_links') {
+              onConflict = 'user_id,platform';
+            } else if (mutation.table == 'user_skills') {
+              onConflict = 'user_id,name';
+            } else if (mutation.table == 'user_education' ||
+                mutation.table == 'user_experience' ||
+                mutation.table == 'user_portfolio_projects' ||
+                mutation.table == 'user_volunteering') {
+              onConflict = 'id';
+            }
+            await client
+                .from(mutation.table)
+                .upsert(mutation.payload, onConflict: onConflict);
           } else if (mutation.type == 'delete') {
             await client.from(mutation.table).delete().eq('id', mutation.rowId);
           } else if (mutation.type == 'delete_by_name') {

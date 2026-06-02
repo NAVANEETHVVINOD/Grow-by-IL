@@ -73,6 +73,10 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
       final repo = ref.read(profileEcosystemRepositoryProvider);
 
       try {
+        // Retrieve existing skills list to map and preserve IDs
+        final existingSkills = await repo.getSkills(user.id);
+        final skillIds = {for (final s in existingSkills) s.name: s.id};
+
         // 1. Process server deletes (skills in base but not in current selection)
         for (final baseSkill in _baseSkills.keys) {
           if (!_skills.containsKey(baseSkill)) {
@@ -84,7 +88,7 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
         for (final entry in _skills.entries) {
           if (_baseSkills[entry.key] != entry.value) {
             final skillItem = UserSkillModel(
-              id: const Uuid().v4(),
+              id: skillIds[entry.key] ?? const Uuid().v4(),
               userId: user.id,
               name: entry.key,
               level: entry.value,

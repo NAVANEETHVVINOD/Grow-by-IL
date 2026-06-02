@@ -116,10 +116,13 @@ class _RC5EditSocialLinksScreenState
           : '';
 
       try {
+        final existingLinks = await repo.getSocialLinks(user.id);
+        final linkIds = {for (final l in existingLinks) l.platform: l.id};
+
         // Write to Supabase (upsert if present, delete if cleared)
         if (githubUrl.isNotEmpty) {
           await repo.upsertSocialLink(UserSocialLinkModel(
-            id: const Uuid().v4(),
+            id: linkIds['github'] ?? const Uuid().v4(),
             userId: user.id,
             platform: 'github',
             url: githubUrl,
@@ -130,7 +133,7 @@ class _RC5EditSocialLinksScreenState
 
         if (linkedinUrl.isNotEmpty) {
           await repo.upsertSocialLink(UserSocialLinkModel(
-            id: const Uuid().v4(),
+            id: linkIds['linkedin'] ?? const Uuid().v4(),
             userId: user.id,
             platform: 'linkedin',
             url: linkedinUrl,
@@ -141,7 +144,7 @@ class _RC5EditSocialLinksScreenState
 
         if (websiteUrl.isNotEmpty) {
           await repo.upsertSocialLink(UserSocialLinkModel(
-            id: const Uuid().v4(),
+            id: linkIds['website'] ?? const Uuid().v4(),
             userId: user.id,
             platform: 'website',
             url: websiteUrl,

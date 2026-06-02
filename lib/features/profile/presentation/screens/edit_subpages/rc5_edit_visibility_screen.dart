@@ -69,16 +69,21 @@ class _RC5EditVisibilityScreenState
     if (user != null) {
       final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      final profile = _profile?.copyWith(
-            isPublic: _isPublic,
-            showStats: !_hideActivity,
-          ) ??
-          UserProfileModel(
-            id: const Uuid().v4(),
-            userId: user.id,
-            isPublic: _isPublic,
-            showStats: !_hideActivity,
-          );
+      UserProfileModel profile;
+      if (_profile != null) {
+        profile = _profile!.copyWith(
+          isPublic: _isPublic,
+          showStats: !_hideActivity,
+        );
+      } else {
+        final existingProfile = await repo.getProfile(user.id);
+        profile = UserProfileModel(
+          id: existingProfile?.id ?? const Uuid().v4(),
+          userId: user.id,
+          isPublic: _isPublic,
+          showStats: !_hideActivity,
+        );
+      }
 
       try {
         // Write to Supabase

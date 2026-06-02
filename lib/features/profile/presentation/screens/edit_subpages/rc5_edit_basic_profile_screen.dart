@@ -48,15 +48,18 @@ class _RC5EditBasicProfileScreenState
     if (user != null) {
       final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      final profileModel = UserProfileModel(
-        id: const Uuid().v4(),
-        userId: user.id,
-        username: _usernameController.text.trim(),
-        bio: _bioController.text.trim(),
-        department: _departmentController.text.trim(),
-      );
-
       try {
+        final existingProfile = await repo.getProfile(user.id);
+        final profileId = existingProfile?.id ?? const Uuid().v4();
+
+        final profileModel = UserProfileModel(
+          id: profileId,
+          userId: user.id,
+          username: _usernameController.text.trim(),
+          bio: _bioController.text.trim(),
+          department: _departmentController.text.trim(),
+        );
+
         await repo.upsertProfile(profileModel);
 
         final prefs = await SharedPreferences.getInstance();
