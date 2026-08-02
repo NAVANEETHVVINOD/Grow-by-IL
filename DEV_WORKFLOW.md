@@ -22,12 +22,37 @@ Issue / Task
 
 ## Branch Rules
 
-- No direct pushes to `main`.
+- `main` is the protected production trunk.
+- `rc5-release-candidate` is the current RC working branch until it is merged
+  through a PR into `main`.
+- Do not push directly to protected trunks (`main`, and `rc5-release-candidate`
+  if configured as protected in GitHub settings).
 - All changes must go through pull requests.
 - Use `feature/*` for product work.
 - Use `fix/*` for bug fixes.
 - Use `chore/*` for docs, tooling, CI, or cleanup.
 - Keep branches small and single-purpose.
+
+## Current RC Rule
+
+Until RC5 stabilizes, `rc5-release-candidate` is treated as a trunk-equivalent
+release candidate branch. Durable changes should be developed on short-lived
+feature/chore branches and opened as PRs against `rc5-release-candidate` or
+`main`, depending on the release target.
+
+Local commits on a feature/chore branch are normal. Direct pushes to protected
+branches are not.
+
+## Historical Exceptions
+
+The commits below were made before this PR-first rule was clarified for
+`rc5-release-candidate`:
+
+- `372d116 feat(work-requests): add operations hub foundation`
+- `11ab748 chore(workflow): add enterprise development guardrails`
+
+Do not rewrite shared history to remove them. Treat them as documented process
+exceptions and apply the PR-first rule going forward.
 
 ## Phase Gate Rules
 
@@ -76,3 +101,10 @@ A PR must include:
 - Releases must use signed artifacts.
 - Internal testing comes before public rollout.
 - Release checklist and rollback notes must be reviewed before production.
+
+## Dependency Update Rule
+
+Dependabot auto-merge is disabled at least through V1. Dependency updates
+require CI plus human review because Flutter, Firebase, Supabase, Android, and
+GitHub Actions updates can cause runtime or build regressions even when they are
+minor version updates.

@@ -33,6 +33,10 @@
 - Avoid broad realtime streams.
 - Avoid unbounded queries.
 - Add indexes with query patterns.
+- Supabase migration linting should be restored to CI when Phase 2 database
+  architecture begins and migrations become active again.
+- The current schema contract check is intentionally blacklist-based until an
+  approved generated schema contract exists.
 
 ## Testing Standards
 

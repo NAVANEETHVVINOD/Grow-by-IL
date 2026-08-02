@@ -19,6 +19,10 @@ Contact:
 
 - navaneeth2020kannan@gmail.com
 
+This contact is intentional for the current private/student-led repository. If
+the repository becomes public or institution-owned, replace this with an
+institutional security contact before launch.
+
 Include:
 
 - affected area
@@ -34,6 +38,8 @@ Include:
 - New Supabase mutations require RLS review.
 - New storage buckets require access policy review.
 - New public profile fields require privacy review.
+- CI uses a lightweight grep-based scan plus Gitleaks. Treat either failure as a
+  release blocker until reviewed.
 
 ## Current V1 Constraints
 

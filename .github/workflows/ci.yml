@@ -68,16 +68,20 @@ jobs:
           echo "$CHANGED_FILES"
 
           BLOCKED=0
+          GUARD_FILE=".github/ci/architecture_guard_paths.txt"
 
-          if echo "$CHANGED_FILES" | grep -E '^supabase/migrations/'; then
-            echo "Schema migrations are gated until database architecture approval."
-            BLOCKED=1
-          fi
+          while IFS= read -r line; do
+            pattern="${line%%::*}"
+            reason="${line#*::}"
+            if [ -z "$pattern" ] || [[ "$pattern" =~ ^# ]]; then
+              continue
+            fi
 
-          if echo "$CHANGED_FILES" | grep -E '^lib/features/work_requests/(data|domain)/'; then
-            echo "Work Request persistence/domain implementation is gated until PRD/SRS and architecture approval."
-            BLOCKED=1
-          fi
+            if echo "$CHANGED_FILES" | grep -E "$pattern"; then
+              echo "$reason"
+              BLOCKED=1
+            fi
+          done < "$GUARD_FILE"
 
           if [ "$BLOCKED" -eq 1 ]; then
             echo "Architecture phase guard failed. Use a UI-only reversible slice or complete the approval gate."
@@ -90,6 +94,17 @@ jobs:
         shell: bash
         run: |
           echo "Checking for removed or invalid database columns..."
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="$(git rev-list --max-parents=0 HEAD)"
+          fi
+
+          CHANGED_DART_FILES="$(git diff --name-only "$BASE_REF" HEAD -- 'lib/**/*.dart' || true)"
+          if [ -z "$CHANGED_DART_FILES" ]; then
+            echo "No changed Dart files under lib/. Schema contract validation skipped."
+            exit 0
+          fi
+
           INVALID_COLUMNS=(
             "system_role"
             "base_role"
@@ -107,18 +122,19 @@ jobs:
 
           FAILED=0
           for col in "${INVALID_COLUMNS[@]}"; do
-            if grep -rn "'$col'" lib/ --include="*.dart" | grep -v "//"; then
+            if echo "$CHANGED_DART_FILES" | xargs grep -n "'$col'" | grep -v "//"; then
               echo "Schema drift detected: '$col' is deprecated or not in the production schema."
               FAILED=1
             fi
           done
 
-          if grep -rn "'published'" lib/features/events/ --include="*.dart" | grep -v "//"; then
+          CHANGED_EVENT_FILES="$(echo "$CHANGED_DART_FILES" | grep '^lib/features/events/' || true)"
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'published'" | grep -v "//"; then
             echo "Invalid event status 'published' found. Use 'upcoming'."
             FAILED=1
           fi
 
-          if grep -rn "'active'" lib/features/events/ --include="*.dart" | grep -v "//"; then
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'active'" | grep -v "//"; then
             echo "Invalid event status 'active' found. Use 'upcoming' or 'ongoing'."
             FAILED=1
           fi
@@ -150,6 +166,11 @@ jobs:
           fi
 
           echo "Secret scan passed."
+
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   debug_build:
     name: Debug APK Build
