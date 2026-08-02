@@ -1,0 +1,36 @@
+name: Dependabot Review Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  label_dependabot:
+    name: Label Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Label dependency update for human review
+        run: |
+          gh label create dependencies \
+            --color "0366d6" \
+            --description "Dependency update requiring CI and human review" || true
+          gh pr edit "$PR_URL" --add-label "dependencies"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Explain review policy
+        run: |
+          echo "Dependabot auto-merge is intentionally disabled."
+          echo "Flutter, Android, Firebase, Supabase, and GitHub Actions updates require CI plus human review."

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_roles.dart';
+import 'package:grow/core/constants/feature_flags.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
@@ -258,10 +259,14 @@ class CompactActionsBox extends StatelessWidget {
             onTap: () => context.push('/lab'),
           ),
           _CompactActionItem(
-            icon: Icons.construction_rounded,
-            label: 'Book Tools',
+            icon: FeatureFlags.enableWorkRequests
+                ? Icons.assignment_add
+                : Icons.construction_rounded,
+            label: FeatureFlags.enableWorkRequests ? 'Request' : 'Book Tools',
             color: const Color(0xFF38BDF8), // Cyan
-            onTap: () => context.push('/tools'),
+            onTap: () => context.push(
+              FeatureFlags.enableWorkRequests ? '/work-requests' : '/tools',
+            ),
           ),
           _CompactActionItem(
             icon: Icons.folder_copy_rounded,
@@ -658,6 +663,22 @@ class ThreeNavigationButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _RowButton(
+          title: 'Work Requests',
+          subtitle: 'Request fabrication, design support, or machine work',
+          icon: Icons.assignment_add,
+          circleColor: const Color(0xFF38BDF8),
+          onTap: () => context.push('/work-requests'),
+        ),
+        const SizedBox(height: 16),
+        _RowButton(
+          title: 'Tools & Machines',
+          subtitle: 'Reserve available lab tools and equipment',
+          icon: Icons.construction_rounded,
+          circleColor: const Color(0xFFFFEA00),
+          onTap: () => context.push('/tools'),
+        ),
+        const SizedBox(height: 16),
         _RowButton(
           title: 'Mentorship & Support',
           subtitle: 'Request help with blockers, designs, or guidance',

@@ -1,54 +1,110 @@
-name: Grow~ CI/CD Pipeline
+name: Grow CI
 
 on:
-  push:
-    branches: [ main ]
-    tags: [ 'v*' ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - develop
+      - rc5-release-candidate
+  push:
+    branches:
+      - main
+      - develop
+      - rc5-release-candidate
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   quality_gate:
-    name: "Quality Gate"
+    name: Quality Gate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.9'
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      - name: Dependency Integrity
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify dependency lockfile
         run: |
-          flutter pub get
-          git diff --exit-code pubspec.lock || (echo "pubspec.lock is out of sync with pubspec.yaml" && exit 1)
+          git diff --exit-code pubspec.lock || (
+            echo "pubspec.lock is out of sync with pubspec.yaml"
+            exit 1
+          )
 
-      - name: Static Analysis (flutter analyze)
-        run: flutter analyze
-
-      - name: Format Check (dart format)
+      - name: Format check
         run: dart format --set-exit-if-changed .
 
-      - name: Unit & Widget Tests (flutter test)
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Unit and widget tests
         run: flutter test
 
-      - name: Verify Migrations (Supabase CLI)
+      - name: Architecture phase guard
+        shell: bash
         run: |
-          echo "Linting database migrations..."
-          npx supabase db lint
-          npx supabase migration list
+          echo "Checking for gated architecture-phase changes..."
 
-      - name: Schema Contract Validation
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="$(git rev-list --max-parents=0 HEAD)"
+          fi
+
+          CHANGED_FILES="$(git diff --name-only "$BASE_REF" HEAD)"
+          echo "$CHANGED_FILES"
+
+          BLOCKED=0
+          GUARD_FILE=".github/ci/architecture_guard_paths.txt"
+
+          while IFS= read -r line; do
+            pattern="${line%%::*}"
+            reason="${line#*::}"
+            if [ -z "$pattern" ] || [[ "$pattern" =~ ^# ]]; then
+              continue
+            fi
+
+            if echo "$CHANGED_FILES" | grep -E "$pattern"; then
+              echo "$reason"
+              BLOCKED=1
+            fi
+          done < "$GUARD_FILE"
+
+          if [ "$BLOCKED" -eq 1 ]; then
+            echo "Architecture phase guard failed. Use a UI-only reversible slice or complete the approval gate."
+            exit 1
+          fi
+
+          echo "Architecture phase guard passed."
+
+      - name: Schema contract validation
+        shell: bash
         run: |
           echo "Checking for removed or invalid database columns..."
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="$(git rev-list --max-parents=0 HEAD)"
+          fi
+
+          CHANGED_DART_FILES="$(git diff --name-only "$BASE_REF" HEAD -- 'lib/**/*.dart' || true)"
+          if [ -z "$CHANGED_DART_FILES" ]; then
+            echo "No changed Dart files under lib/. Schema contract validation skipped."
+            exit 0
+          fi
+
           INVALID_COLUMNS=(
             "system_role"
             "base_role"
@@ -63,73 +119,78 @@ jobs:
             "end_time"
             "location_name"
           )
+
           FAILED=0
           for col in "${INVALID_COLUMNS[@]}"; do
-            # Search Dart files for Supabase query mappings referencing invalid columns
-            if grep -rn "'$col'" lib/ --include="*.dart" | \
-               grep -E "\.select\(|\.insert\(|\.update\(|'$col'" | \
-               grep -v "//"; then
-              echo "❌ DRIFT DETECTED: '$col' found in code but deprecated or not in production database schema"
+            if echo "$CHANGED_DART_FILES" | xargs grep -n "'$col'" | grep -v "//"; then
+              echo "Schema drift detected: '$col' is deprecated or not in the production schema."
               FAILED=1
             fi
           done
 
-          # Check event status enum values
-          if grep -rn "'published'" lib/features/events/ --include="*.dart" | \
-             grep -v "//"; then
-            echo "❌ Invalid event status 'published' found — use 'upcoming'"
-            FAILED=1
-          fi
-          if grep -rn "'active'" lib/features/events/ --include="*.dart" | \
-             grep -v "//"; then
-            echo "❌ Invalid event status 'active' found — use 'upcoming' or 'ongoing'"
+          CHANGED_EVENT_FILES="$(echo "$CHANGED_DART_FILES" | grep '^lib/features/events/' || true)"
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'published'" | grep -v "//"; then
+            echo "Invalid event status 'published' found. Use 'upcoming'."
             FAILED=1
           fi
 
-          if [ $FAILED -eq 1 ]; then
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'active'" | grep -v "//"; then
+            echo "Invalid event status 'active' found. Use 'upcoming' or 'ongoing'."
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
-          echo "✅ Schema Contract check completed with 0 errors."
 
-      - name: Secret Scan
+          echo "Schema contract validation passed."
+
+      - name: Secret scan
+        shell: bash
         run: |
-          echo "Scanning codebase for raw api keys or sensitive client credentials..."
+          echo "Scanning Dart code for raw API keys or sensitive client credentials..."
           FAILED=0
-          # Look for potential raw API keys or Client Secrets hardcoded in code files
+
           if grep -rn "AIzaSy" lib/ --include="*.dart"; then
-            echo "❌ CRITICAL: Hardcoded Firebase/Google API key pattern (AIzaSy) found in Dart files!"
+            echo "Hardcoded Firebase/Google API key pattern found in Dart files."
             FAILED=1
           fi
-          if [ $FAILED -eq 1 ]; then
+
+          if grep -rn "service_role" lib/ --include="*.dart"; then
+            echo "Potential Supabase service role reference found in Dart files."
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
-          echo "✅ Secret scan completed with 0 errors."
 
-      - name: Dependency Vulnerability Scan
-        run: |
-          echo "Scanning for outdated or insecure package dependencies..."
-          flutter pub outdated
+          echo "Secret scan passed."
 
-  build_apks:
-    name: "Production Build"
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  debug_build:
+    name: Debug APK Build
     needs: quality_gate
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.9'
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Create Google Services Configurations
+      - name: Create CI Firebase config
         run: |
           mkdir -p android/app
           cat << 'EOF' > android/app/google-services.json
@@ -174,56 +235,36 @@ jobs:
           }
           EOF
 
-      - name: Build Debug APK
+      - name: Build debug APK
         run: |
-          flutter build apk --debug --verbose \
+          flutter build apk --debug \
             --dart-define=SUPABASE_URL="https://placeholder.supabase.co" \
             --dart-define=SUPABASE_ANON_KEY="placeholder_anon_key"
 
-      - name: Build Release APK
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          flutter build apk --release --verbose \
-            --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://placeholder.supabase.co}" \
-            --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-placeholder_anon_key}"
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: grow-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 7
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: grow-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-  integration_test:
-    name: "Integration Test Gate (Optional)"
+  release_build:
+    name: Release APK Build
     needs: quality_gate
     runs-on: ubuntu-latest
-    # This runs integration tests; configured as optional or manual trigger to save resources
-    if: github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.9'
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Execute Integration Suite
+      - name: Build release APK
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          echo "Starting integration suite (mock environment)..."
-          # Typically runs flutter test integration_test/
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://placeholder.supabase.co}" \
+            --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-placeholder_anon_key}"

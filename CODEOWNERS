@@ -1,0 +1,12 @@
+# Grow~ ownership rules
+#
+# Current state: solo-maintainer ownership is intentional for the private
+# student-led repository. Split ownership by module when more maintainers join.
+
+* @NAVANEETHVVINOD
+
+/.github/ @NAVANEETHVVINOD
+/android/ @NAVANEETHVVINOD
+/lib/ @NAVANEETHVVINOD
+/supabase/ @NAVANEETHVVINOD
+/test/ @NAVANEETHVVINOD
