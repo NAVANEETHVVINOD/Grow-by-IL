@@ -18,7 +18,7 @@ class WorkRequestsScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
                 child: _WorkRequestHeader(
                   onBack: () => context.pop(),
-                  onCreate: () => _showPreviewNotice(context),
+                  onCreate: () => context.push('/work-requests/create'),
                 ),
               ),
             ),
@@ -58,17 +58,7 @@ class WorkRequestsScreen extends StatelessWidget {
           label: 'Start a Work Request',
           icon: Icons.add_rounded,
           fullWidth: true,
-          onPressed: () => _showPreviewNotice(context),
-        ),
-      ),
-    );
-  }
-
-  void _showPreviewNotice(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Request builder arrives after PRD/SRS and schema approval.',
+          onPressed: () => context.push('/work-requests/create'),
         ),
       ),
     );
