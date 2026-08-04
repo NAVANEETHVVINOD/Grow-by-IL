@@ -35,9 +35,7 @@ class CategoryStepView extends ConsumerWidget {
           _CategoryOptionTile(
             category: category,
             isSelected: category.label == selectedCategory,
-            onSelect: category.enabled
-                ? () => controller.nextStep()
-                : null,
+            onSelect: category.enabled ? () => controller.nextStep() : null,
           ),
           const SizedBox(height: 10),
         ],

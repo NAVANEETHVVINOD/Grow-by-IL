@@ -25,8 +25,7 @@ class _DesignMaterialStepViewState
     // externalLinks is a list; show the first link (design file) in this field.
     _linkController =
         TextEditingController(text: draft.externalLinks.firstOrNull ?? '');
-    _materialNotesController =
-        TextEditingController(text: draft.materialNotes);
+    _materialNotesController = TextEditingController(text: draft.materialNotes);
   }
 
   @override
