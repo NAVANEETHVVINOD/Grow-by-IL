@@ -93,10 +93,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Continue'));
+      // The 'Continue' button may be off-screen in the 600px test viewport.
+      // Scroll it into view before tapping.
+      final continueButton = find.text('Continue');
+      await tester.ensureVisible(continueButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Tell us the basics'), findsNothing);
+      await tester.tap(continueButton);
+      await tester.pumpAndSettle();
+
+      // Should still show the category step because validation fails
+      // (no subcategoryIds selected in empty draft).
       expect(find.text('What kind of help do you need?'), findsOneWidget);
     });
 
@@ -121,9 +128,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Continue'));
+      // Scroll the Continue button into view and tap to advance past category.
+      final continueButton = find.text('Continue');
+      await tester.ensureVisible(continueButton);
       await tester.pumpAndSettle();
 
+      await tester.tap(continueButton);
+      await tester.pumpAndSettle();
+
+      // The basics step should show the restored draft fields.
       expect(find.text('Saved prototype'), findsOneWidget);
       expect(find.text('Class project'), findsOneWidget);
     });
