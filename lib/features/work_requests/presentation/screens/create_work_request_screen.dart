@@ -921,6 +921,7 @@ class _QuantitySelector extends StatelessWidget {
           IconButton(
             onPressed: value > 1 ? () => onChanged(value - 1) : null,
             icon: const Icon(Icons.remove_circle_outline_rounded),
+            tooltip: 'Decrease quantity',
           ),
           Text(
             '$value',
@@ -929,6 +930,7 @@ class _QuantitySelector extends StatelessWidget {
           IconButton(
             onPressed: () => onChanged(value + 1),
             icon: const Icon(Icons.add_circle_outline_rounded),
+            tooltip: 'Increase quantity',
           ),
         ],
       ),
@@ -972,6 +974,7 @@ class _DateTile extends StatelessWidget {
               IconButton(
                 onPressed: onClear,
                 icon: const Icon(Icons.close_rounded),
+                tooltip: 'Clear selected date',
               ),
           ],
         ),

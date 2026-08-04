@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/work_request_draft.dart';
@@ -96,6 +98,17 @@ class WorkRequestCreateController
         super(const WorkRequestCreateState());
 
   final WorkRequestDraftStorage _storage;
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer?.cancel();
+      // Trigger a final save on dispose to avoid losing in-progress input.
+      _storage.saveDraft(state.draft);
+    }
+    super.dispose();
+  }
 
   Future<void> restoreDraft() async {
     final restored = await _storage.loadDraft();
@@ -113,10 +126,15 @@ class WorkRequestCreateController
       validationErrors: const <String>[],
       clearLastError: true,
     );
-    await _saveDraft(draft);
+
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      _saveDraft(state.draft);
+    });
   }
 
   Future<void> clearDraft() async {
+    _debounceTimer?.cancel();
     await _storage.clearDraft();
     if (!mounted) return;
     state = state.copyWith(
@@ -133,6 +151,11 @@ class WorkRequestCreateController
     if (errors.isNotEmpty) {
       state = state.copyWith(validationErrors: errors);
       return false;
+    }
+
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer?.cancel();
+      await _saveDraft(state.draft);
     }
 
     final nextIndex = state.currentStepIndex + 1;
@@ -175,6 +198,7 @@ class WorkRequestCreateController
       return false;
     }
 
+    _debounceTimer?.cancel();
     state = state.copyWith(isSaving: true);
     await _storage.clearDraft();
     if (!mounted) return false;

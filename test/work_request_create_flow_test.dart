@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grow/features/work_requests/application/providers/work_request_create_controller.dart';
 import 'package:grow/features/work_requests/models/work_request_draft.dart';
 import 'package:grow/features/work_requests/presentation/screens/create_work_request_screen.dart';
 import 'package:grow/features/work_requests/services/draft_storage/work_request_draft_storage.dart';
@@ -125,6 +126,77 @@ void main() {
 
       expect(find.text('Saved prototype'), findsOneWidget);
       expect(find.text('Class project'), findsOneWidget);
+    });
+  });
+
+  group('WorkRequestCreateController Debounce', () {
+    test('debounces draft saves and flushes pending write', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final subscription = container.listen(
+        workRequestCreateControllerProvider,
+        (previous, next) {},
+      );
+      addTearDown(subscription.close);
+
+      final controller =
+          container.read(workRequestCreateControllerProvider.notifier);
+
+      // Wait for restoreDraft to complete
+      await Future.delayed(Duration.zero);
+
+      final draft1 = const WorkRequestDraft(title: 'T');
+      final draft2 = const WorkRequestDraft(title: 'Te');
+      final draft3 = const WorkRequestDraft(title: 'Test');
+
+      await controller.updateDraft(draft1);
+      await controller.updateDraft(draft2);
+      await controller.updateDraft(draft3);
+
+      // Verify that nothing is written to SharedPreferences yet
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('work_request_create_draft_v1'), isNull);
+
+      // Wait 500ms (debounce is 400ms)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Now verify it has been written
+      final raw = prefs.getString('work_request_create_draft_v1');
+      expect(raw, isNotNull);
+      final decoded = jsonDecode(raw!) as Map<String, dynamic>;
+      expect(decoded['title'], 'Test');
+    });
+
+    test('flushes pending write on dispose', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      final container = ProviderContainer();
+      final subscription = container.listen(
+        workRequestCreateControllerProvider,
+        (previous, next) {},
+      );
+
+      final controller =
+          container.read(workRequestCreateControllerProvider.notifier);
+
+      await Future.delayed(Duration.zero);
+
+      final draft = const WorkRequestDraft(title: 'Typing done');
+      await controller.updateDraft(draft);
+
+      // Immediately dispose before 400ms
+      subscription.close();
+      container.dispose();
+
+      // Verify that the final state was still flushed to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('work_request_create_draft_v1');
+      expect(raw, isNotNull);
+      final decoded = jsonDecode(raw!) as Map<String, dynamic>;
+      expect(decoded['title'], 'Typing done');
     });
   });
 }
