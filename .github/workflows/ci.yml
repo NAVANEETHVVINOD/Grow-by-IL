@@ -59,12 +59,22 @@ jobs:
         run: |
           echo "Checking for gated architecture-phase changes..."
 
-          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
-            BASE_REF="$(git rev-list --max-parents=0 HEAD)"
+          # For PRs: diff only the files changed by this PR (merge-base strategy)
+          # For pushes: diff only the files in the pushed commits
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            # PR event — use merge-base so we only see files THIS PR changed,
+            # not every file that differs between the target branch and main.
+            MERGE_BASE="$(git merge-base ${{ github.event.pull_request.base.sha }} HEAD)"
+            CHANGED_FILES="$(git diff --name-only "$MERGE_BASE" HEAD)"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            # Push event — compare against the previous HEAD of this branch
+            CHANGED_FILES="$(git diff --name-only ${{ github.event.before }} HEAD)"
+          else
+            # Fallback (new branch, workflow_dispatch) — compare against parent
+            CHANGED_FILES="$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD)"
           fi
 
-          CHANGED_FILES="$(git diff --name-only "$BASE_REF" HEAD)"
+          echo "Files changed in this changeset:"
           echo "$CHANGED_FILES"
 
           BLOCKED=0
@@ -78,7 +88,7 @@ jobs:
             fi
 
             if echo "$CHANGED_FILES" | grep -E "$pattern"; then
-              echo "$reason"
+              echo "::error::$reason"
               BLOCKED=1
             fi
           done < "$GUARD_FILE"
@@ -94,12 +104,16 @@ jobs:
         shell: bash
         run: |
           echo "Checking for removed or invalid database columns..."
-          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
-            BASE_REF="$(git rev-list --max-parents=0 HEAD)"
-          fi
 
-          CHANGED_DART_FILES="$(git diff --name-only "$BASE_REF" HEAD -- 'lib/**/*.dart' || true)"
+          # Use the same merge-base strategy as the Architecture Guard
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            MERGE_BASE="$(git merge-base ${{ github.event.pull_request.base.sha }} HEAD)"
+            CHANGED_DART_FILES="$(git diff --name-only "$MERGE_BASE" HEAD -- 'lib/**/*.dart' || true)"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            CHANGED_DART_FILES="$(git diff --name-only ${{ github.event.before }} HEAD -- 'lib/**/*.dart' || true)"
+          else
+            CHANGED_DART_FILES="$(git diff --name-only HEAD~1 HEAD -- 'lib/**/*.dart' 2>/dev/null || true)"
+          fi
           if [ -z "$CHANGED_DART_FILES" ]; then
             echo "No changed Dart files under lib/. Schema contract validation skipped."
             exit 0
