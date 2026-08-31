@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grow/core/theme/rc5_design_tokens.dart';
-import 'package:grow/shared/widgets/rc5/rc5_button.dart';
-import 'package:grow/shared/widgets/rc5/rc5_card.dart';
+import '../../../core/theme/rc5_design_tokens.dart';
+import 'rc5_card.dart';
+import 'rc5_button.dart';
 
 class RC5EmptyState extends StatelessWidget {
   const RC5EmptyState({
@@ -29,59 +29,74 @@ class RC5EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveAccentColor = accentColor ?? RC5DesignTokens.accent;
 
-    return RC5Card(
-      backgroundColor: Colors.white,
-      shadowOpacity: 0.7,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: effectiveAccentColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(RC5DesignTokens.radiusLg),
-              border: Border.all(
-                color: RC5DesignTokens.border,
-                width: RC5DesignTokens.borderWidth,
+    return Semantics(
+      container: true,
+      label: 'Empty state: $title. $message',
+      child: RC5Card(
+        backgroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+        radius: 20,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: effectiveAccentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: RC5DesignTokens.border,
+                    width: RC5DesignTokens.borderWidth,
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: effectiveAccentColor,
+                  size: 28,
+                ),
               ),
-            ),
-            child: Icon(icon, color: effectiveAccentColor, size: 28),
-          ),
-          const SizedBox(height: RC5DesignTokens.space4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              const SizedBox(height: 18),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: RC5DesignTokens.cardTitle.copyWith(
+                  fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
-          ),
-          const SizedBox(height: RC5DesignTokens.space2),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: RC5DesignTokens.body.copyWith(
                   color: RC5DesignTokens.textSecondary,
+                  fontSize: 13,
                 ),
+              ),
+              if (primaryActionLabel != null && onPrimaryAction != null) ...[
+                const SizedBox(height: 20),
+                RC5Button(
+                  label: primaryActionLabel!,
+                  onPressed: onPrimaryAction,
+                  variant: RC5ButtonVariant.primary,
+                  fullWidth: true,
+                ),
+              ],
+              if (secondaryActionLabel != null &&
+                  onSecondaryAction != null) ...[
+                const SizedBox(height: 10),
+                RC5Button(
+                  label: secondaryActionLabel!,
+                  onPressed: onSecondaryAction,
+                  variant: RC5ButtonVariant.ghost,
+                  fullWidth: true,
+                ),
+              ],
+            ],
           ),
-          if (primaryActionLabel != null && onPrimaryAction != null) ...[
-            const SizedBox(height: RC5DesignTokens.space5),
-            RC5Button(
-              label: primaryActionLabel!,
-              onPressed: onPrimaryAction,
-              fullWidth: true,
-            ),
-          ],
-          if (secondaryActionLabel != null && onSecondaryAction != null) ...[
-            const SizedBox(height: RC5DesignTokens.space3),
-            RC5Button(
-              label: secondaryActionLabel!,
-              onPressed: onSecondaryAction,
-              variant: RC5ButtonVariant.ghost,
-              fullWidth: true,
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }

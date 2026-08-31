@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/work_request_draft.dart';
 import '../../services/draft_storage/work_request_draft_storage.dart';
+import '../../services/work_request_data_source.dart';
 import '../../utils/work_request_validators.dart';
 
 enum WorkRequestCreateStep {
@@ -85,6 +86,7 @@ final workRequestCreateControllerProvider = StateNotifierProvider.autoDispose<
     WorkRequestCreateController, WorkRequestCreateState>((ref) {
   final controller = WorkRequestCreateController(
     storage: ref.watch(workRequestDraftStorageProvider),
+    dataSource: ref.watch(workRequestDataSourceProvider),
   );
   controller.restoreDraft();
   return controller;
@@ -94,10 +96,13 @@ class WorkRequestCreateController
     extends StateNotifier<WorkRequestCreateState> {
   WorkRequestCreateController({
     required WorkRequestDraftStorage storage,
+    required WorkRequestDataSource dataSource,
   })  : _storage = storage,
+        _dataSource = dataSource,
         super(const WorkRequestCreateState());
 
   final WorkRequestDraftStorage _storage;
+  final WorkRequestDataSource _dataSource;
   Timer? _debounceTimer;
 
   @override
@@ -200,6 +205,7 @@ class WorkRequestCreateController
 
     _debounceTimer?.cancel();
     state = state.copyWith(isSaving: true);
+    await _dataSource.submit(state.draft);
     await _storage.clearDraft();
     if (!mounted) return false;
     state = state.copyWith(
