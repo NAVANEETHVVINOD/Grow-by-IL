@@ -17,9 +17,10 @@ class GoogleAuthService {
     scopes: ['email', 'profile'],
     // On Android, clientId MUST be null (it uses SHA-1/Package binding).
     // On Web, it MUST be the Web Client ID.
-    clientId: kIsWeb ? _webClientId : null,
+    clientId: kIsWeb ? (_webClientId.isEmpty ? null : _webClientId) : null,
     // serverClientId is used on Android to get an idToken for backend verification (Supabase).
-    serverClientId: kIsWeb ? null : _webClientId,
+    serverClientId:
+        kIsWeb ? null : (_webClientId.isEmpty ? null : _webClientId),
   );
 
   Future<AuthResponse?> signInWithGoogle() async {
@@ -34,6 +35,13 @@ class GoogleAuthService {
         'clientIdSetting=${kIsWeb ? 'explicit' : 'auto'} '
         'serverClientIdSetting=${!kIsWeb ? 'explicit' : 'none'}',
       );
+
+      if (_webClientId.isEmpty) {
+        AppLogger.warn(
+          LogCategory.auth,
+          'GOOGLE_SIGN_IN_WARNING | GOOGLE_WEB_CLIENT_ID is empty! Google Sign-In will likely fail backend verification (ApiException 7).',
+        );
+      }
 
       AppLogger.info(
         LogCategory.auth,

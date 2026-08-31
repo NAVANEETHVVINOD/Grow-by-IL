@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 
@@ -7,10 +6,11 @@ import '../constants/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get light {
-    final headlineFont = GoogleFonts.spaceGroteskTextTheme();
-    final bodyFont = GoogleFonts.dmSansTextTheme();
+  static const _headlineFamily = 'SpaceGrotesk';
+  static const _bodyFamily = 'DMSans';
+  static const _fallback = ['Roboto', 'sans-serif'];
 
+  static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.background,
@@ -28,13 +28,15 @@ class AppTheme {
       ),
 
       // ── AppBar ─────────────────────────────────────────────
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         foregroundColor: AppColors.navy,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.spaceGrotesk(
+        titleTextStyle: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.navy,
@@ -42,63 +44,99 @@ class AppTheme {
       ),
 
       // ── Text theme ─────────────────────────────────────────
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         // Display
-        displayLarge: headlineFont.displayLarge?.copyWith(
+        displayLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        displayMedium: headlineFont.displayMedium?.copyWith(
+        displayMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        displaySmall: headlineFont.displaySmall?.copyWith(
+        displaySmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
 
         // Headline
-        headlineLarge: headlineFont.headlineLarge?.copyWith(
+        headlineLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        headlineMedium: headlineFont.headlineMedium?.copyWith(
+        headlineMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        headlineSmall: headlineFont.headlineSmall?.copyWith(
+        headlineSmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
 
         // Title
-        titleLarge: headlineFont.titleLarge?.copyWith(
+        titleLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        titleMedium: headlineFont.titleMedium?.copyWith(
+        titleMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        titleSmall: headlineFont.titleSmall?.copyWith(
+        titleSmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
 
         // Body
-        bodyLarge: bodyFont.bodyLarge?.copyWith(color: AppColors.textPrimary),
-        bodyMedium: bodyFont.bodyMedium?.copyWith(color: AppColors.textPrimary),
-        bodySmall: bodyFont.bodySmall?.copyWith(color: AppColors.textSecondary),
+        bodyLarge: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
+          color: AppColors.textPrimary,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
+          color: AppColors.textSecondary,
+        ),
 
         // Label
-        labelLarge: bodyFont.labelLarge?.copyWith(
+        labelLarge: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        labelMedium: bodyFont.labelMedium?.copyWith(
+        labelMedium: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: AppColors.textSecondary,
         ),
-        labelSmall: bodyFont.labelSmall?.copyWith(
+        labelSmall: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: AppColors.textSecondary,
         ),
       ),
@@ -129,7 +167,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.red, width: 2),
         ),
-        labelStyle: GoogleFonts.dmSans(color: AppColors.textSecondary),
+        labelStyle: const TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
+          color: AppColors.textSecondary,
+        ),
       ),
 
       // ── Divider ────────────────────────────────────────────

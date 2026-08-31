@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -37,6 +37,9 @@ import '../../features/profile/presentation/screens/edit_subpages/rc5_edit_visib
 import '../../features/projects/presentation/screens/create_project_screen.dart';
 import '../../features/projects/presentation/screens/project_details_screen.dart';
 import '../../features/projects/presentation/screens/project_list_screen.dart';
+import '../../features/work_requests/presentation/screens/create_work_request_screen.dart';
+import '../../features/profile/presentation/screens/debug_schema_screen.dart';
+import '../../features/work_requests/presentation/screens/work_requests_screen.dart';
 import '../../shared/repositories/supabase_client.dart';
 import '../../shared/widgets/main_shell.dart';
 import '../constants/feature_flags.dart';
@@ -245,6 +248,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const UnauthorizedScreen(),
       ),
       GoRoute(
+        path: '/debug/schema-status',
+        builder: (context, state) => const DebugSchemaScreen(),
+        redirect: (context, state) => kDebugMode ? null : '/home',
+      ),
+      GoRoute(
         path: '/lab/scan',
         builder: (context, state) => const QrScanScreen(),
       ),
@@ -288,6 +296,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/projects',
         builder: (context, state) => const ProjectListScreen(),
+      ),
+      GoRoute(
+        path: '/work-requests',
+        builder: (context, state) => FeatureFlags.enableWorkRequests
+            ? const WorkRequestsScreen()
+            : const ProjectListScreen(),
+      ),
+      GoRoute(
+        path: '/work-requests/create',
+        builder: (context, state) => FeatureFlags.enableWorkRequests
+            ? const CreateWorkRequestScreen()
+            : const ProjectListScreen(),
       ),
       GoRoute(
         path: '/projects/:id',

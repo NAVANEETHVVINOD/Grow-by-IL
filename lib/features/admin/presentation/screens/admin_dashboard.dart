@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_roles.dart';
@@ -62,7 +61,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
             ),
             title: Text(
               'Admin Dashboard',
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navy,
@@ -74,7 +75,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard>
               unselectedLabelColor: AppColors.textSecondary,
               indicatorColor: AppColors.yellow,
               indicatorWeight: 4,
-              labelStyle: GoogleFonts.spaceGrotesk(
+              labelStyle: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -123,7 +126,9 @@ class _OverviewTab extends ConsumerWidget {
           children: [
             Text(
               'Pending Approvals',
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navy,
@@ -137,7 +142,9 @@ class _OverviewTab extends ConsumerWidget {
                       backgroundColor: AppColors.red,
                       child: Text(
                         b.length.toString(),
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -163,8 +170,10 @@ class _OverviewTab extends ConsumerWidget {
                       const SizedBox(height: AppSizes.md),
                       Text(
                         'No pending approvals',
-                        style:
-                            GoogleFonts.dmSans(color: AppColors.textSecondary),
+                        style: TextStyle(
+                            fontFamily: 'DMSans',
+                            fontFamilyFallback: const ['Roboto', 'sans-serif'],
+                            color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -244,7 +253,9 @@ class _QuickStatCard extends StatelessWidget {
           children: [
             Text(
               value,
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: textColor ?? AppColors.navy,
@@ -252,7 +263,9 @@ class _QuickStatCard extends StatelessWidget {
             ),
             Text(
               label,
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
+                fontFamily: 'DMSans',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: (textColor ?? AppColors.navy).withValues(alpha: 0.7),
@@ -340,14 +353,18 @@ class _PendingBookingCard extends ConsumerWidget {
                     children: [
                       Text(
                         booking.toolName ?? 'Unknown Tool',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       Text(
                         'By: ${booking.userName ?? 'Unknown User'}',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -357,7 +374,9 @@ class _PendingBookingCard extends ConsumerWidget {
                 ),
                 Text(
                   booking.slotStart.toLocal().toString().substring(5, 16),
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
+                    fontFamily: 'DMSans',
+                    fontFamilyFallback: const ['Roboto', 'sans-serif'],
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -478,7 +497,9 @@ class _EquipmentTab extends ConsumerWidget {
               const SizedBox(width: AppSizes.md),
               Text(
                 '${needingRepair.length} items need attention',
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
+                  fontFamily: 'DMSans',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontWeight: FontWeight.bold,
                   color: AppColors.red,
                 ),
@@ -609,7 +630,9 @@ class _ToolAdminCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           tool.name,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
+                            fontFamilyFallback: const ['Roboto', 'sans-serif'],
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -626,7 +649,9 @@ class _ToolAdminCard extends ConsumerWidget {
                     children: [
                       Text(
                         '${tool.availableQty} / ${tool.totalQty} available',
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
@@ -791,7 +816,9 @@ class _AddToolSheetState extends ConsumerState<_AddToolSheet> {
             children: [
               Text(
                 'Add Tool',
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.navy,
@@ -964,7 +991,9 @@ class _EditToolSheetState extends ConsumerState<_EditToolSheet> {
             children: [
               Text(
                 'Edit Details',
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.navy,

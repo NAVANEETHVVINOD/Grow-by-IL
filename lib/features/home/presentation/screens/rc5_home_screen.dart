@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_roles.dart';
+import 'package:grow/core/constants/feature_flags.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
@@ -144,7 +144,9 @@ class HomeHeader extends ConsumerWidget {
         const SizedBox(width: 10),
         Text(
           'Grow~',
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: const Color(0xFF111111),
@@ -257,10 +259,14 @@ class CompactActionsBox extends StatelessWidget {
             onTap: () => context.push('/lab'),
           ),
           _CompactActionItem(
-            icon: Icons.construction_rounded,
-            label: 'Book Tools',
+            icon: FeatureFlags.enableWorkRequests
+                ? Icons.assignment_add
+                : Icons.construction_rounded,
+            label: FeatureFlags.enableWorkRequests ? 'Request' : 'Book Tools',
             color: const Color(0xFF38BDF8), // Cyan
-            onTap: () => context.push('/tools'),
+            onTap: () => context.push(
+              FeatureFlags.enableWorkRequests ? '/work-requests' : '/tools',
+            ),
           ),
           _CompactActionItem(
             icon: Icons.folder_copy_rounded,
@@ -581,7 +587,9 @@ class OpportunitiesSection extends StatelessWidget {
                     children: [
                       Text(
                         opp.creator,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF71717A),
@@ -590,7 +598,9 @@ class OpportunitiesSection extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         opp.title,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF111111),
@@ -599,7 +609,9 @@ class OpportunitiesSection extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         opp.tags,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF71717A),
@@ -622,7 +634,9 @@ class OpportunitiesSection extends StatelessWidget {
                     child: Text(
                       opp.logoText,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         color: opp.logoColor == Colors.black
                             ? Colors.white
                             : const Color(0xFF111111),
@@ -649,6 +663,22 @@ class ThreeNavigationButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _RowButton(
+          title: 'Work Requests',
+          subtitle: 'Request fabrication, design support, or machine work',
+          icon: Icons.assignment_add,
+          circleColor: const Color(0xFF38BDF8),
+          onTap: () => context.push('/work-requests'),
+        ),
+        const SizedBox(height: 16),
+        _RowButton(
+          title: 'Tools & Machines',
+          subtitle: 'Reserve available lab tools and equipment',
+          icon: Icons.construction_rounded,
+          circleColor: const Color(0xFFFFEA00),
+          onTap: () => context.push('/tools'),
+        ),
+        const SizedBox(height: 16),
         _RowButton(
           title: 'Mentorship & Support',
           subtitle: 'Request help with blockers, designs, or guidance',
@@ -841,7 +871,9 @@ class _ScrollingTickerState extends State<ScrollingTicker> {
           children: [
             Text(
               '${widget.text}   •   ${widget.text}   •   ${widget.text}   •   ${widget.text}   ',
-              style: GoogleFonts.pressStart2p(
+              style: TextStyle(
+                fontFamily: 'PressStart2P',
+                fontFamilyFallback: const ['monospace'],
                 fontSize: 12,
                 color: widget.textColor,
                 letterSpacing: 1.5,

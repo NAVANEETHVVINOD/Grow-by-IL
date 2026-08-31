@@ -1,60 +1,210 @@
-name: Grow~ CI/CD
+name: Grow CI
 
 on:
-  push:
-    branches: [ main ]
-    tags: [ 'v*' ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - develop
+      - rc5-release-candidate
+  push:
+    branches:
+      - main
+      - develop
+      - rc5-release-candidate
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   quality_gate:
-    name: "Quality Gate (CI)"
+    name: Quality Gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.9'
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      - name: Dependency Integrity
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify dependency lockfile
         run: |
-          flutter pub get
-          git diff --exit-code pubspec.lock || (echo "pubspec.lock is out of sync with pubspec.yaml" && exit 1)
+          git diff --exit-code pubspec.lock || (
+            echo "pubspec.lock is out of sync with pubspec.yaml"
+            exit 1
+          )
 
-      - name: Static Analysis
-        run: flutter analyze
-
-      - name: Format Check
+      - name: Format check
         run: dart format --set-exit-if-changed .
 
-      - name: Unit Tests
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Unit and widget tests
         run: flutter test
 
-  build_android:
-    name: "Android Production Build"
+      - name: Architecture phase guard
+        shell: bash
+        run: |
+          echo "Checking for gated architecture-phase changes..."
+
+          # For PRs: diff only the files changed by this PR (merge-base strategy)
+          # For pushes: diff only the files in the pushed commits
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            # PR event — use merge-base so we only see files THIS PR changed,
+            # not every file that differs between the target branch and main.
+            MERGE_BASE="$(git merge-base ${{ github.event.pull_request.base.sha }} HEAD)"
+            CHANGED_FILES="$(git diff --name-only "$MERGE_BASE" HEAD)"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            # Push event — compare against the previous HEAD of this branch
+            CHANGED_FILES="$(git diff --name-only ${{ github.event.before }} HEAD)"
+          else
+            # Fallback (new branch, workflow_dispatch) — compare against parent
+            CHANGED_FILES="$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD)"
+          fi
+
+          echo "Files changed in this changeset:"
+          echo "$CHANGED_FILES"
+
+          BLOCKED=0
+          GUARD_FILE=".github/ci/architecture_guard_paths.txt"
+
+          while IFS= read -r line; do
+            pattern="${line%%::*}"
+            reason="${line#*::}"
+            if [ -z "$pattern" ] || [[ "$pattern" =~ ^# ]]; then
+              continue
+            fi
+
+            if echo "$CHANGED_FILES" | grep -E "$pattern"; then
+              echo "::error::$reason"
+              BLOCKED=1
+            fi
+          done < "$GUARD_FILE"
+
+          if [ "$BLOCKED" -eq 1 ]; then
+            echo "Architecture phase guard failed. Use a UI-only reversible slice or complete the approval gate."
+            exit 1
+          fi
+
+          echo "Architecture phase guard passed."
+
+      - name: Schema contract validation
+        shell: bash
+        run: |
+          echo "Checking for removed or invalid database columns..."
+
+          # Use the same merge-base strategy as the Architecture Guard
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            MERGE_BASE="$(git merge-base ${{ github.event.pull_request.base.sha }} HEAD)"
+            CHANGED_DART_FILES="$(git diff --name-only "$MERGE_BASE" HEAD -- 'lib/**/*.dart' || true)"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            CHANGED_DART_FILES="$(git diff --name-only ${{ github.event.before }} HEAD -- 'lib/**/*.dart' || true)"
+          else
+            CHANGED_DART_FILES="$(git diff --name-only HEAD~1 HEAD -- 'lib/**/*.dart' 2>/dev/null || true)"
+          fi
+          if [ -z "$CHANGED_DART_FILES" ]; then
+            echo "No changed Dart files under lib/. Schema contract validation skipped."
+            exit 0
+          fi
+
+          INVALID_COLUMNS=(
+            "system_role"
+            "base_role"
+            "duration_minutes"
+            "cover_image_url"
+            "interests"
+            "show_github_graph"
+            "is_blocked"
+            "action_url"
+            "full_name"
+            "start_time"
+            "end_time"
+            "location_name"
+          )
+
+          FAILED=0
+          for col in "${INVALID_COLUMNS[@]}"; do
+            if echo "$CHANGED_DART_FILES" | xargs grep -n "'$col'" | grep -v "//"; then
+              echo "Schema drift detected: '$col' is deprecated or not in the production schema."
+              FAILED=1
+            fi
+          done
+
+          CHANGED_EVENT_FILES="$(echo "$CHANGED_DART_FILES" | grep '^lib/features/events/' || true)"
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'published'" | grep -v "//"; then
+            echo "Invalid event status 'published' found. Use 'upcoming'."
+            FAILED=1
+          fi
+
+          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'active'" | grep -v "//"; then
+            echo "Invalid event status 'active' found. Use 'upcoming' or 'ongoing'."
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "Schema contract validation passed."
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          echo "Scanning Dart code for raw API keys or sensitive client credentials..."
+          FAILED=0
+
+          if grep -rn "AIzaSy" lib/ --include="*.dart"; then
+            echo "Hardcoded Firebase/Google API key pattern found in Dart files."
+            FAILED=1
+          fi
+
+          if grep -rn "service_role" lib/ --include="*.dart"; then
+            echo "Potential Supabase service role reference found in Dart files."
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "Secret scan passed."
+
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  debug_build:
+    name: Debug APK Build
     needs: quality_gate
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
-      - uses: subosito/flutter-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.9'
-          channel: 'stable'
+          channel: stable
           cache: true
-      
-      - run: flutter pub get
 
-      - name: Create Dummy google-services.json for CI Build
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Create CI Firebase config
         run: |
           mkdir -p android/app
           cat << 'EOF' > android/app/google-services.json
@@ -98,43 +248,37 @@ jobs:
             "configuration_version": "1"
           }
           EOF
-          ls -la android/app/google-services.json
 
-      - name: Build APK (Release)
+      - name: Build debug APK
+        run: |
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL="https://placeholder.supabase.co" \
+            --dart-define=SUPABASE_ANON_KEY="placeholder_anon_key"
+
+  release_build:
+    name: Release APK Build
+    needs: quality_gate
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.9'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release APK
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          flutter build apk --release --verbose \
+          flutter build apk --release \
             --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://placeholder.supabase.co}" \
             --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-placeholder_anon_key}"
-          
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: grow-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-  release:
-    name: "GitHub Release"
-    needs: build_android
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Download APK
-        uses: actions/download-artifact@v8
-        with:
-          name: grow-release-apk
-          path: build/
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          files: build/app-release.apk
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

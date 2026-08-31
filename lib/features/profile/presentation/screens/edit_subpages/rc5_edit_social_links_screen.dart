@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
 import 'package:grow/features/profile/domain/rc5_profile_providers.dart';
+import 'package:grow/shared/models/profile_ecosystem_models.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class RC5EditSocialLinksScreen extends ConsumerStatefulWidget {
   const RC5EditSocialLinksScreen({super.key});
@@ -29,15 +32,60 @@ class _RC5EditSocialLinksScreenState
     _loadData();
   }
 
+  String _cleanGithubUsername(String url) {
+    if (url.isEmpty) return '';
+    var cleaned = url;
+    cleaned = cleaned.replaceFirst('https://github.com/', '');
+    cleaned = cleaned.replaceFirst('http://github.com/', '');
+    cleaned = cleaned.replaceFirst('github.com/', '');
+    return cleaned;
+  }
+
   Future<void> _loadData() async {
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final key = 'rc5_onboarding.${user.id}';
+      final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      _githubController.text = prefs.getString('$key.social_github') ?? '';
-      _linkedinController.text = prefs.getString('$key.social_linkedin') ?? '';
-      _websiteController.text = prefs.getString('$key.social_website') ?? '';
+      try {
+        final serverLinks = await repo.getSocialLinks(user.id);
+
+        final github = serverLinks
+            .firstWhere((l) => l.platform == 'github',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'github', url: ''))
+            .url;
+        final linkedin = serverLinks
+            .firstWhere((l) => l.platform == 'linkedin',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'linkedin', url: ''))
+            .url;
+        final website = serverLinks
+            .firstWhere((l) => l.platform == 'website',
+                orElse: () => const UserSocialLinkModel(
+                    id: '', userId: '', platform: 'website', url: ''))
+            .url;
+
+        _githubController.text = _cleanGithubUsername(github);
+        _linkedinController.text = linkedin;
+        _websiteController.text = website;
+
+        if (github.isEmpty && linkedin.isEmpty && website.isEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          final key = 'rc5_onboarding.${user.id}';
+          _githubController.text = prefs.getString('$key.social_github') ?? '';
+          _linkedinController.text =
+              prefs.getString('$key.social_linkedin') ?? '';
+          _websiteController.text =
+              prefs.getString('$key.social_website') ?? '';
+        }
+      } catch (e) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        _githubController.text = prefs.getString('$key.social_github') ?? '';
+        _linkedinController.text =
+            prefs.getString('$key.social_linkedin') ?? '';
+        _websiteController.text = prefs.getString('$key.social_website') ?? '';
+      }
     }
     setState(() => _isLoading = false);
   }
@@ -46,20 +94,116 @@ class _RC5EditSocialLinksScreenState
     setState(() => _isSaving = true);
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final key = 'rc5_onboarding.${user.id}';
+      final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      await prefs.setString(
-          '$key.social_github', _githubController.text.trim());
-      await prefs.setString(
-          '$key.social_linkedin', _linkedinController.text.trim());
-      await prefs.setString(
-          '$key.social_website', _websiteController.text.trim());
+      final ghVal = _githubController.text.trim();
+      final githubUrl = ghVal.isNotEmpty
+          ? (ghVal.startsWith('http') ? ghVal : 'https://github.com/$ghVal')
+          : '';
 
-      ref.invalidate(rc5ProfileHeaderProvider);
+      final liVal = _linkedinController.text.trim();
+      final linkedinUrl = liVal.isNotEmpty
+          ? (liVal.startsWith('http')
+              ? liVal
+              : (liVal.startsWith('in/')
+                  ? 'https://linkedin.com/$liVal'
+                  : 'https://linkedin.com/in/$liVal'))
+          : '';
+
+      final wsVal = _websiteController.text.trim();
+      final websiteUrl = wsVal.isNotEmpty
+          ? (wsVal.startsWith('http') ? wsVal : 'https://$wsVal')
+          : '';
+
+      try {
+        final existingLinks = await repo.getSocialLinks(user.id);
+        final linkIds = {for (final l in existingLinks) l.platform: l.id};
+
+        // Write to Supabase (upsert if present, delete if cleared)
+        if (githubUrl.isNotEmpty) {
+          await repo.upsertSocialLink(UserSocialLinkModel(
+            id: linkIds['github'] ?? const Uuid().v4(),
+            userId: user.id,
+            platform: 'github',
+            url: githubUrl,
+          ));
+        } else {
+          await repo.deleteSocialLinkByPlatform(user.id, 'github');
+        }
+
+        if (linkedinUrl.isNotEmpty) {
+          await repo.upsertSocialLink(UserSocialLinkModel(
+            id: linkIds['linkedin'] ?? const Uuid().v4(),
+            userId: user.id,
+            platform: 'linkedin',
+            url: linkedinUrl,
+          ));
+        } else {
+          await repo.deleteSocialLinkByPlatform(user.id, 'linkedin');
+        }
+
+        if (websiteUrl.isNotEmpty) {
+          await repo.upsertSocialLink(UserSocialLinkModel(
+            id: linkIds['website'] ?? const Uuid().v4(),
+            userId: user.id,
+            platform: 'website',
+            url: websiteUrl,
+          ));
+        } else {
+          await repo.deleteSocialLinkByPlatform(user.id, 'website');
+        }
+
+        // Cache locally in SharedPreferences onboarding draft
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        await prefs.setString('$key.social_github', ghVal);
+        await prefs.setString('$key.social_linkedin', liVal);
+        await prefs.setString('$key.social_website', wsVal);
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Social links updated successfully!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } on OfflineQueueException catch (e) {
+        // Cache locally on offline queue exception
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        await prefs.setString('$key.social_github', ghVal);
+        await prefs.setString('$key.social_linkedin', liVal);
+        await prefs.setString('$key.social_website', wsVal);
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.ink,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save social links: $e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.error,
+            ),
+          );
+        }
+      }
     }
     setState(() => _isSaving = false);
-    if (mounted) Navigator.of(context).pop();
   }
 
   @override

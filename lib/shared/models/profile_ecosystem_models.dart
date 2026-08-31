@@ -57,6 +57,7 @@ class UserProfileModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'username': username,
         'bio': bio,
@@ -140,6 +141,7 @@ class UserExperienceModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'title': title,
         'organization': organization,
@@ -149,6 +151,28 @@ class UserExperienceModel {
         'is_current': isCurrent,
         'sort_order': sortOrder,
       };
+
+  UserExperienceModel copyWith({
+    String? title,
+    String? organization,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCurrent,
+    int? sortOrder,
+  }) {
+    return UserExperienceModel(
+      id: id,
+      userId: userId,
+      title: title ?? this.title,
+      organization: organization ?? this.organization,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isCurrent: isCurrent ?? this.isCurrent,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }
 
 class UserEducationModel {
@@ -189,6 +213,7 @@ class UserEducationModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'institution': institution,
         'degree': degree,
@@ -198,6 +223,28 @@ class UserEducationModel {
         'is_current': isCurrent,
         'sort_order': sortOrder,
       };
+
+  UserEducationModel copyWith({
+    String? institution,
+    String? degree,
+    String? fieldOfStudy,
+    int? startYear,
+    int? endYear,
+    bool? isCurrent,
+    int? sortOrder,
+  }) {
+    return UserEducationModel(
+      id: id,
+      userId: userId,
+      institution: institution ?? this.institution,
+      degree: degree ?? this.degree,
+      fieldOfStudy: fieldOfStudy ?? this.fieldOfStudy,
+      startYear: startYear ?? this.startYear,
+      endYear: endYear ?? this.endYear,
+      isCurrent: isCurrent ?? this.isCurrent,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }
 
 class UserPortfolioProjectModel {
@@ -242,6 +289,7 @@ class UserPortfolioProjectModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'title': title,
         'description': description,
@@ -252,6 +300,30 @@ class UserPortfolioProjectModel {
         'is_featured': isFeatured,
         'sort_order': sortOrder,
       };
+
+  UserPortfolioProjectModel copyWith({
+    String? title,
+    String? description,
+    String? projectUrl,
+    String? sourceUrl,
+    String? bannerUrl,
+    List<String>? technologies,
+    bool? isFeatured,
+    int? sortOrder,
+  }) {
+    return UserPortfolioProjectModel(
+      id: id,
+      userId: userId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      projectUrl: projectUrl ?? this.projectUrl,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
+      bannerUrl: bannerUrl ?? this.bannerUrl,
+      technologies: technologies ?? this.technologies,
+      isFeatured: isFeatured ?? this.isFeatured,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }
 
 class UserVolunteeringModel {
@@ -296,6 +368,7 @@ class UserVolunteeringModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'role': role,
         'organization': organization,
@@ -305,6 +378,28 @@ class UserVolunteeringModel {
         'is_current': isCurrent,
         'sort_order': sortOrder,
       };
+
+  UserVolunteeringModel copyWith({
+    String? role,
+    String? organization,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCurrent,
+    int? sortOrder,
+  }) {
+    return UserVolunteeringModel(
+      id: id,
+      userId: userId,
+      role: role ?? this.role,
+      organization: organization ?? this.organization,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isCurrent: isCurrent ?? this.isCurrent,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }
 
 class UserSocialLinkModel {
@@ -336,12 +431,29 @@ class UserSocialLinkModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'platform': platform,
         'url': url,
         'label': label,
         'sort_order': sortOrder,
       };
+
+  UserSocialLinkModel copyWith({
+    String? platform,
+    String? url,
+    String? label,
+    int? sortOrder,
+  }) {
+    return UserSocialLinkModel(
+      id: id,
+      userId: userId,
+      platform: platform ?? this.platform,
+      url: url ?? this.url,
+      label: label ?? this.label,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }
 
 class UserSkillModel {
@@ -370,9 +482,24 @@ class UserSkillModel {
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'user_id': userId,
         'name': name,
         'level': level,
         'sort_order': sortOrder,
       };
+
+  UserSkillModel copyWith({
+    String? name,
+    int? level,
+    int? sortOrder,
+  }) {
+    return UserSkillModel(
+      id: id,
+      userId: userId,
+      name: name ?? this.name,
+      level: level ?? this.level,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
 }

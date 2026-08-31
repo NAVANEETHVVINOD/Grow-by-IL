@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
 import 'package:grow/features/profile/domain/rc5_profile_providers.dart';
+import 'package:grow/shared/models/profile_ecosystem_models.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 const _skillOptions = [
   'Python',
@@ -34,6 +37,7 @@ class RC5EditSkillsScreen extends ConsumerStatefulWidget {
 
 class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
   final Map<String, int> _skills = {};
+  final Map<String, int> _baseSkills = {};
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -45,7 +49,9 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
 
   Future<void> _loadData() async {
     final header = await ref.read(rc5ProfileHeaderProvider.future);
-    _skills.addAll(header?.skills ?? {});
+    final initial = header?.skills ?? {};
+    _skills.addAll(initial);
+    _baseSkills.addAll(initial);
     setState(() => _isLoading = false);
   }
 
@@ -64,17 +70,84 @@ class _RC5EditSkillsScreenState extends ConsumerState<RC5EditSkillsScreen> {
     setState(() => _isSaving = true);
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final key = 'rc5_onboarding.${user.id}';
+      final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      final serialized =
-          _skills.entries.map((e) => '${e.key}:${e.value}').toList();
-      await prefs.setStringList('$key.skills', serialized);
+      try {
+        // Retrieve existing skills list to map and preserve IDs
+        final existingSkills = await repo.getSkills(user.id);
+        final skillIds = {for (final s in existingSkills) s.name: s.id};
 
-      ref.invalidate(rc5ProfileHeaderProvider);
+        // 1. Process server deletes (skills in base but not in current selection)
+        for (final baseSkill in _baseSkills.keys) {
+          if (!_skills.containsKey(baseSkill)) {
+            await repo.deleteSkillByName(user.id, baseSkill);
+          }
+        }
+
+        // 2. Process server upserts (skills in current selection that are new or level modified)
+        for (final entry in _skills.entries) {
+          if (_baseSkills[entry.key] != entry.value) {
+            final skillItem = UserSkillModel(
+              id: skillIds[entry.key] ?? const Uuid().v4(),
+              userId: user.id,
+              name: entry.key,
+              level: entry.value,
+            );
+            await repo.upsertSkill(skillItem);
+          }
+        }
+
+        // 3. Save locally to SharedPreferences onboarding draft
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        final serialized =
+            _skills.entries.map((e) => '${e.key}:${e.value}').toList();
+        await prefs.setStringList('$key.skills', serialized);
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Skills updated successfully!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } on OfflineQueueException catch (e) {
+        // Cache locally in SharedPreferences onboarding draft
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        final serialized =
+            _skills.entries.map((e) => '${e.key}:${e.value}').toList();
+        await prefs.setStringList('$key.skills', serialized);
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.ink,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save skills: $e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.error,
+            ),
+          );
+        }
+      }
     }
     setState(() => _isSaving = false);
-    if (mounted) Navigator.of(context).pop();
   }
 
   @override

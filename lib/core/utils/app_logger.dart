@@ -13,6 +13,7 @@ enum LogCategory {
   notifications,
   router,
   system,
+  profile,
 }
 
 class AppLogger {
