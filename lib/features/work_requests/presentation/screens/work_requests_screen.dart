@@ -285,9 +285,7 @@ class _DraftSection extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    draft.title.isEmpty
-                        ? 'Untitled Work Request'
-                        : draft.title,
+                    draft.title.isEmpty ? 'Untitled Work Request' : draft.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: RC5DesignTokens.cardTitle.copyWith(fontSize: 15),

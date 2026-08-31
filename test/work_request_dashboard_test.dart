@@ -27,9 +27,11 @@ class _NoNetworkHttpClient implements HttpClient {
   Future<HttpClientRequest> getUrl(Uri url) =>
       Future.error(const SocketException('Network disabled in tests'));
 
+  // Property setters (e.g. `autoUncompress =`) and other unused members
+  // fall through here. Returning null keeps them inert instead of creating
+  // dangling Futures that the test zone reports as unhandled errors.
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      Future.error(const SocketException('Network disabled in tests'));
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 void main() {
@@ -230,8 +232,7 @@ void main() {
           container.read(workRequestDashboardControllerProvider).requests;
       expect(requests[0].title,
           'Robotics chassis prototype'); // high, created 3 days ago
-      expect(
-          requests[1].title, 'Workshop badge laser cut'); // high, 5 days ago
+      expect(requests[1].title, 'Workshop badge laser cut'); // high, 5 days ago
       expect(requests.last.priority, WorkRequestPriority.low); // Acrylic
     });
   });
