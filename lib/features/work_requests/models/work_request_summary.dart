@@ -1,15 +1,18 @@
 import '../constants/work_request_options.dart';
 
+// Canonical lifecycle per docs/01_Product/06_WORK_REQUEST_IMPLEMENTATION_CONTRACT.md
+// (approved). `queued` is intentionally not a Work Request status — queueing
+// belongs to the future Manufacturing Task / Machine Queue domain.
 enum WorkRequestStatus {
   draft,
   submitted,
-  underReview,
+  reviewed,
+  changesRequested,
   approved,
-  queued,
   inProgress,
+  readyForPickup,
   completed,
   rejected,
-  needsChanges,
   cancelled,
 }
 
@@ -18,13 +21,13 @@ extension WorkRequestStatusLabel on WorkRequestStatus {
     return switch (this) {
       WorkRequestStatus.draft => 'Draft',
       WorkRequestStatus.submitted => 'Submitted',
-      WorkRequestStatus.underReview => 'Under Review',
+      WorkRequestStatus.reviewed => 'Under Review',
+      WorkRequestStatus.changesRequested => 'Changes Requested',
       WorkRequestStatus.approved => 'Approved',
-      WorkRequestStatus.queued => 'In Queue',
       WorkRequestStatus.inProgress => 'In Progress',
+      WorkRequestStatus.readyForPickup => 'Ready for Pickup',
       WorkRequestStatus.completed => 'Completed',
       WorkRequestStatus.rejected => 'Rejected',
-      WorkRequestStatus.needsChanges => 'Needs Changes',
       WorkRequestStatus.cancelled => 'Cancelled',
     };
   }

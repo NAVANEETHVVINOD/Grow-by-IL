@@ -47,7 +47,7 @@ void main() {
     test('initializes with seed mock data', () async {
       final dataSource = MockWorkRequestDataSource();
       final list = await dataSource.watchAll().first;
-      expect(list.length, 4);
+      expect(list.length, 5);
       expect(list.any((r) => r.title == 'Robotics chassis prototype'), isTrue);
       expect(list.any((r) => r.status == WorkRequestStatus.completed), isTrue);
     });
@@ -64,7 +64,7 @@ void main() {
 
       await dataSource.submit(draft);
       var list = await dataSource.watchAll().first;
-      expect(list.length, 5);
+      expect(list.length, 6);
       expect(list.any((r) => r.title == 'New custom draft'), isTrue);
       expect(list.firstWhere((r) => r.title == 'New custom draft').status,
           WorkRequestStatus.submitted);
@@ -75,7 +75,7 @@ void main() {
 
       dataSource.reset();
       list = await dataSource.watchAll().first;
-      expect(list.length, 4);
+      expect(list.length, 5);
     });
 
     test('emits an initial snapshot from watchAll', () async {
@@ -83,7 +83,7 @@ void main() {
 
       final initialSnapshot = await dataSource.watchAll().first;
 
-      expect(initialSnapshot.length, 4);
+      expect(initialSnapshot.length, 5);
       expect(
           initialSnapshot.any((r) => r.title == 'Robotics chassis prototype'),
           isTrue);
@@ -115,11 +115,11 @@ void main() {
       await Future.delayed(Duration.zero);
       final state = container.read(workRequestDashboardControllerProvider);
 
-      expect(state.requests.length, 4);
+      expect(state.requests.length, 5);
       expect(state.draftCount, 0); // Seed data does not have draft status
       expect(state.submittedCount,
-          0); // No seed data has submitted or underReview status
-      // Seed: needsChanges(1), queued(1), completed(1), approved(1)
+          0); // No seed data has submitted or reviewed status
+      // Seed: changesRequested(1), approved(2), completed(1), readyForPickup(1)
       expect(state.approvedCount, 2);
       expect(state.completedCount, 1);
     });
@@ -188,14 +188,14 @@ void main() {
       await Future.delayed(Duration.zero);
       await Future.delayed(Duration.zero);
 
-      // Filter by status approved
+      // Filter by status approved (PCB enclosure mockup + Acrylic test stand)
       controller.setStatusFilter(WorkRequestStatus.approved);
       expect(
           container
               .read(workRequestDashboardControllerProvider)
               .requests
               .length,
-          1);
+          2);
 
       // Filter by priority low (acrylic test stand is approved + low)
       controller.setPriorityFilter(WorkRequestPriority.low);
@@ -234,6 +234,82 @@ void main() {
           'Robotics chassis prototype'); // high, created 3 days ago
       expect(requests[1].title, 'Workshop badge laser cut'); // high, 5 days ago
       expect(requests.last.priority, WorkRequestPriority.low); // Acrylic
+    });
+  });
+
+  group('WorkRequestStatus lifecycle alignment', () {
+    test('matches exactly the approved implementation contract states', () {
+      final names = WorkRequestStatus.values.map((s) => s.name).toSet();
+      expect(
+        names,
+        {
+          'draft',
+          'submitted',
+          'reviewed',
+          'changesRequested',
+          'approved',
+          'inProgress',
+          'readyForPickup',
+          'completed',
+          'rejected',
+          'cancelled',
+        },
+      );
+    });
+
+    test('queued is not a Work Request status', () {
+      expect(
+        WorkRequestStatus.values.map((s) => s.name),
+        isNot(contains('queued')),
+      );
+    });
+
+    test('renamed and new states have human-friendly labels', () {
+      expect(WorkRequestStatus.reviewed.label, 'Under Review');
+      expect(WorkRequestStatus.changesRequested.label, 'Changes Requested');
+      expect(WorkRequestStatus.readyForPickup.label, 'Ready for Pickup');
+    });
+
+    Future<void> pumpCardWithStatus(
+      WidgetTester tester,
+      WorkRequestStatus status,
+    ) async {
+      final now = DateTime.now();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WorkRequestCard(
+              request: WorkRequestSummary(
+                id: 'lifecycle-test',
+                title: 'Lifecycle test request',
+                purpose: 'Testing status rendering',
+                status: status,
+                priority: WorkRequestPriority.normal,
+                subcategoryLabels: const ['Laser Cutting'],
+                createdAt: now,
+                updatedAt: now,
+              ),
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('renders readyForPickup without error', (tester) async {
+      await pumpCardWithStatus(tester, WorkRequestStatus.readyForPickup);
+      expect(find.text('Ready for Pickup'), findsOneWidget);
+    });
+
+    testWidgets('renders rejected without error', (tester) async {
+      await pumpCardWithStatus(tester, WorkRequestStatus.rejected);
+      expect(find.text('Rejected'), findsOneWidget);
+    });
+
+    testWidgets('renders cancelled without error', (tester) async {
+      await pumpCardWithStatus(tester, WorkRequestStatus.cancelled);
+      expect(find.text('Cancelled'), findsOneWidget);
     });
   });
 

@@ -355,7 +355,7 @@ class _FiltersSection extends ConsumerWidget {
             WorkRequestStatus.submitted,
             WorkRequestStatus.approved,
             WorkRequestStatus.completed,
-            WorkRequestStatus.needsChanges,
+            WorkRequestStatus.changesRequested,
           ],
           selectedOption: state.statusFilter,
           labelMapper: (status) => status == null ? 'All' : status.label,

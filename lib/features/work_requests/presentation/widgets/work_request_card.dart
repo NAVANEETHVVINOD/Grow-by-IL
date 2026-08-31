@@ -231,11 +231,11 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (background, foreground) = switch (status) {
       WorkRequestStatus.draft => (const Color(0xFFFFF7A1), RC5DesignTokens.ink),
-      WorkRequestStatus.submitted || WorkRequestStatus.underReview => (
+      WorkRequestStatus.submitted || WorkRequestStatus.reviewed => (
           const Color(0xFFDFF4FF),
           RC5DesignTokens.ink
         ),
-      WorkRequestStatus.approved || WorkRequestStatus.queued => (
+      WorkRequestStatus.approved => (
           const Color(0xFFF5D6F7),
           RC5DesignTokens.ink
         ),
@@ -243,11 +243,15 @@ class _StatusBadge extends StatelessWidget {
           const Color(0xFFE0E7FF),
           RC5DesignTokens.ink
         ),
+      WorkRequestStatus.readyForPickup => (
+          const Color(0xFFFFE0B2),
+          RC5DesignTokens.ink
+        ),
       WorkRequestStatus.completed => (
           const Color(0xFFDDF5D7),
           RC5DesignTokens.ink
         ),
-      WorkRequestStatus.needsChanges => (
+      WorkRequestStatus.changesRequested => (
           const Color(0xFFFFD6D6),
           RC5DesignTokens.ink
         ),

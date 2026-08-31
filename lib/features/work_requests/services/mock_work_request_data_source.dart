@@ -78,7 +78,7 @@ class MockWorkRequestDataSource implements WorkRequestDataSource {
         id: 'mock-1',
         title: 'Robotics chassis prototype',
         purpose: 'Robocon contest build',
-        status: WorkRequestStatus.needsChanges,
+        status: WorkRequestStatus.changesRequested,
         priority: WorkRequestPriority.high,
         subcategoryLabels: const ['Laser Cutting', 'Mechanical Assembly'],
         createdAt: now.subtract(const Duration(days: 3)),
@@ -92,7 +92,7 @@ class MockWorkRequestDataSource implements WorkRequestDataSource {
         id: 'mock-2',
         title: 'PCB enclosure mockup',
         purpose: 'Mini project casing',
-        status: WorkRequestStatus.queued,
+        status: WorkRequestStatus.approved,
         priority: WorkRequestPriority.normal,
         subcategoryLabels: const ['3D Printing'],
         createdAt: now.subtract(const Duration(days: 2)),
@@ -129,6 +129,19 @@ class MockWorkRequestDataSource implements WorkRequestDataSource {
         leaderAvatarUrl:
             'https://api.dicebear.com/7.x/avataaars/svg?seed=Elizabeth',
         estimatedCompletionDate: now.add(const Duration(days: 4)),
+      ),
+      WorkRequestSummary(
+        id: 'mock-5',
+        title: 'Enclosure lid prototype',
+        purpose: 'Final electronics housing',
+        status: WorkRequestStatus.readyForPickup,
+        priority: WorkRequestPriority.normal,
+        subcategoryLabels: const ['3D Printing'],
+        createdAt: now.subtract(const Duration(days: 4)),
+        updatedAt: now.subtract(const Duration(hours: 2)),
+        leaderName: 'Sara Thomas',
+        leaderAvatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sara',
+        estimatedCompletionDate: now.subtract(const Duration(hours: 1)),
       ),
     ]);
 

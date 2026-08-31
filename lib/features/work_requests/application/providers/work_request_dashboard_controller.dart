@@ -46,13 +46,10 @@ class WorkRequestDashboardState {
   int get submittedCount => allRequests
       .where((r) =>
           r.status == WorkRequestStatus.submitted ||
-          r.status == WorkRequestStatus.underReview)
+          r.status == WorkRequestStatus.reviewed)
       .length;
-  int get approvedCount => allRequests
-      .where((r) =>
-          r.status == WorkRequestStatus.approved ||
-          r.status == WorkRequestStatus.queued)
-      .length;
+  int get approvedCount =>
+      allRequests.where((r) => r.status == WorkRequestStatus.approved).length;
   int get completedCount =>
       allRequests.where((r) => r.status == WorkRequestStatus.completed).length;
 
