@@ -71,3 +71,23 @@ schema-first guessing will cause rework.
 
 Consequence: No Supabase schema, migration, repository, or persistence logic for
 new operational modules before PRD/SRS and architecture approval.
+
+## ADR-008: Repository & Documentation Audit (2026-09-01)
+
+Status: Accepted
+
+Reason: A repo-wide file/doc structure audit found no orphaned or duplicate
+application code, but found several documentation issues worth recording as
+durable decisions rather than one-off edits: (1) `docs/` remains intentionally
+git-ignored and local per `docs/DOCUMENTATION_GOVERNANCE.md` — this audit does
+not change that, so none of its `docs/` changes appear in this PR's diff; (2)
+two parallel ADR systems exist (this file, ADR-001..007, and
+`docs/00_Project_Management/ARCHITECTURAL_DECISION_RECORDS/`, ADR-0001..0004)
+and were not reconciled — flagged, not merged; (3) `docs/01_Product/04_BUSINESS_RULE_MATRIX.md`
+BRULE-020/021 were rewritten to match the approved Work Request lifecycle
+enum (PR #63) instead of the older, contradictory wording.
+
+Consequence: Future sessions should not assume `docs/` changes are visible in
+`git diff`/PR review — check the local `docs/` tree directly. The two ADR
+systems should be reconciled into one before either grows further; tracked as
+an open item, not resolved here.
