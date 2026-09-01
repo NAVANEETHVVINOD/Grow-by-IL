@@ -1,8 +1,16 @@
 # Grow~ Architecture Decisions
 
-This file is the tracked repo-level index of important architecture decisions.
-Detailed local ADRs may exist under ignored architecture docs, but accepted
-decisions that affect contributors must be visible here.
+This file is the **canonical, authoritative** record of accepted architecture
+decisions. It is git-tracked and visible to every contributor, unlike the
+`docs/` tree which is local-only.
+
+Detailed local ADRs exist under
+`docs/00_Project_Management/ARCHITECTURAL_DECISION_RECORDS/` with richer
+Context/Alternatives/Consequences writeups for ADR-002 (`ADR-0002-work-requests.md`),
+ADR-003 (`ADR-0003-manufacturing-tasks.md`), and ADR-004
+(`ADR-0004-assets-inventory-separation.md`). That folder is retained for that
+extended rationale but is **not authoritative** — if it and this file ever
+disagree, this file wins. New decisions get recorded here first.
 
 ## ADR-001: Use Work Request Instead Of Order
 
