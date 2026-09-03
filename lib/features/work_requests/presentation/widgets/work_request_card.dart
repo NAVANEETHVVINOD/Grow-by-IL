@@ -62,8 +62,8 @@ class WorkRequestCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 4,
                     children: [
-                      _StatusBadge(status: request.status),
-                      _PriorityBadge(priority: request.priority),
+                      WorkRequestStatusBadge(status: request.status),
+                      WorkRequestPriorityBadge(priority: request.priority),
                     ],
                   ),
                 ),
@@ -223,8 +223,8 @@ class WorkRequestCard extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
+class WorkRequestStatusBadge extends StatelessWidget {
+  const WorkRequestStatusBadge({super.key, required this.status});
   final WorkRequestStatus status;
 
   @override
@@ -280,8 +280,8 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _PriorityBadge extends StatelessWidget {
-  const _PriorityBadge({required this.priority});
+class WorkRequestPriorityBadge extends StatelessWidget {
+  const WorkRequestPriorityBadge({super.key, required this.priority});
   final WorkRequestPriority priority;
 
   @override

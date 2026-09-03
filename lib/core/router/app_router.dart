@@ -38,6 +38,7 @@ import '../../features/projects/presentation/screens/create_project_screen.dart'
 import '../../features/projects/presentation/screens/project_details_screen.dart';
 import '../../features/projects/presentation/screens/project_list_screen.dart';
 import '../../features/work_requests/presentation/screens/create_work_request_screen.dart';
+import '../../features/work_requests/presentation/screens/work_request_detail_screen.dart';
 import '../../features/profile/presentation/screens/debug_schema_screen.dart';
 import '../../features/work_requests/presentation/screens/work_requests_screen.dart';
 import '../../shared/repositories/supabase_client.dart';
@@ -308,6 +309,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => FeatureFlags.enableWorkRequests
             ? const CreateWorkRequestScreen()
             : const ProjectListScreen(),
+      ),
+      GoRoute(
+        path: '/work-requests/:id',
+        builder: (context, state) {
+          if (!FeatureFlags.enableWorkRequests) {
+            return const ProjectListScreen();
+          }
+          final id = state.pathParameters['id']!;
+          return WorkRequestDetailScreen(requestId: id);
+        },
       ),
       GoRoute(
         path: '/projects/:id',

@@ -497,17 +497,13 @@ class _RequestListSection extends ConsumerWidget {
               ),
               child: WorkRequestCard(
                 request: state.requests[index],
-                onTap: () {
-                  final request = state.requests[index];
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          'Request details for "${request.title}" coming in the next update.'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
+                onTap: () =>
+                    context.push('/work-requests/${state.requests[index].id}'),
                 onActionSelected: (action) {
+                  if (action == 'open') {
+                    context.push('/work-requests/${state.requests[index].id}');
+                    return;
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content:
