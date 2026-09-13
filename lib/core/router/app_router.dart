@@ -47,6 +47,20 @@ import '../constants/feature_flags.dart';
 import '../constants/app_roles.dart';
 import '../utils/app_logger.dart';
 
+/// Sends successful authentication flows through Splash so it can resolve the
+/// public.users synchronization and profile-completion gate.
+String? redirectAuthenticatedEntryRoute({
+  required bool hasSession,
+  required String path,
+}) {
+  if (!hasSession) return null;
+
+  return switch (path) {
+    '/onboarding' || '/login' || '/register' => '/splash',
+    _ => null,
+  };
+}
+
 /// Adapter class to refresh GoRouter when a Stream triggers a new event.
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -103,13 +117,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      if (session != null &&
-          (path == '/onboarding' || path == '/login' || path == '/register')) {
+      final authenticatedEntryRedirect = redirectAuthenticatedEntryRoute(
+        hasSession: session != null,
+        path: path,
+      );
+      if (authenticatedEntryRedirect != null) {
+        // Splash owns the public.users completion check. Sending a newly
+        // authenticated user straight to Home can bypass profile setup.
         AppLogger.info(
           LogCategory.router,
-          'AUTH_USER_REDIRECTED_HOME | from=$path',
+          'AUTH_USER_REDIRECTED_TO_PROFILE_GATE | from=$path',
         );
-        return '/home';
+        return authenticatedEntryRedirect;
       }
 
       // ---------------------------------------------------------

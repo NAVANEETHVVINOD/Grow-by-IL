@@ -50,7 +50,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      if (mounted) context.go('/home');
+      // Registration creates an authenticated session, but profile completion
+      // is resolved by Splash before the user reaches the application shell.
+      if (mounted) context.go('/splash');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

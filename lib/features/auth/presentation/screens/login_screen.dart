@@ -43,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      if (mounted) context.go('/home');
+      if (mounted) context.go('/splash');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,16 +66,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (response == null) return; // user cancelled
       if (!mounted) return;
 
-      // Check profile completion
-      final user = await ref.read(authRepositoryProvider).getCurrentUser();
-      if (!mounted) return;
-
-      if (user?.profileCompleted == true) {
-        context.go('/home');
-      } else {
-        // New user or incomplete profile -> show onboarding slides first
-        context.go('/onboarding');
-      }
+      // Keep email and Google sign-in on the same authenticated entry path.
+      // Splash synchronizes public.users and resolves profile completion.
+      context.go('/splash');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
