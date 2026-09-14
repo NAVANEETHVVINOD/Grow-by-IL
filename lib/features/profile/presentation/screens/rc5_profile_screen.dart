@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/constants/app_roles.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
@@ -65,10 +64,16 @@ class _RC5ProfileScreenState extends ConsumerState<RC5ProfileScreen> {
             indicatorColor: RC5DesignTokens.ink,
             labelColor: RC5DesignTokens.ink,
             unselectedLabelColor: RC5DesignTokens.textSecondary,
-            labelStyle: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.bold, fontSize: 13),
-            unselectedLabelStyle: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.w600, fontSize: 13),
+            labelStyle: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
+                fontWeight: FontWeight.bold,
+                fontSize: 13),
+            unselectedLabelStyle: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
+                fontWeight: FontWeight.w600,
+                fontSize: 13),
             tabs: tabs.map((t) => Tab(text: t)).toList(),
           ),
         ),
@@ -320,7 +325,9 @@ class _ProfileHeaderCard extends ConsumerWidget {
                 children: [
                   Text(
                     'ABOUT ME',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      fontFamilyFallback: const ['Roboto', 'sans-serif'],
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       color: RC5DesignTokens.textSecondary,
@@ -881,7 +888,9 @@ class _ProjectCard extends StatelessWidget {
                       project.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: RC5DesignTokens.ink,
@@ -894,7 +903,9 @@ class _ProjectCard extends StatelessWidget {
                         project.description!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.dmSans(
+                        style: TextStyle(
+                          fontFamily: 'DMSans',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 12,
                           color: RC5DesignTokens.textSecondary,
                           height: 1.4,
@@ -922,7 +933,12 @@ class _ProjectCard extends StatelessWidget {
                           size: 12, color: RC5DesignTokens.ink),
                       const SizedBox(width: 3),
                       Text('PINNED',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: TextStyle(
+                              fontFamily: 'SpaceGrotesk',
+                              fontFamilyFallback: const [
+                                'Roboto',
+                                'sans-serif'
+                              ],
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
                               color: RC5DesignTokens.ink,
@@ -933,7 +949,9 @@ class _ProjectCard extends StatelessWidget {
                         size: 12, color: RC5DesignTokens.muted),
                     const SizedBox(width: 3),
                     Text(isPublic ? 'PUBLIC' : 'PRIVATE',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
+                            fontFamilyFallback: const ['Roboto', 'sans-serif'],
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
                             color: RC5DesignTokens.muted,
@@ -1095,7 +1113,9 @@ class _StickerBadge extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.spaceGrotesk(
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontFamilyFallback: const ['Roboto', 'sans-serif'],
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF111111),
@@ -1219,7 +1239,9 @@ class _StatCard extends StatelessWidget {
               ),
               Text(
                 value,
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF111111),
@@ -1230,7 +1252,9 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             label,
-            style: GoogleFonts.dmSans(
+            style: TextStyle(
+              fontFamily: 'DMSans',
+              fontFamilyFallback: const ['Roboto', 'sans-serif'],
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF71717A),

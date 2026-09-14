@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 import 'package:grow/core/constants/app_sizes.dart';
@@ -22,7 +21,9 @@ class ExploreScreen extends ConsumerWidget {
             children: [
               Text(
                 AppStrings.explore,
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: AppColors.navy,
@@ -84,14 +85,24 @@ class ExploreScreen extends ConsumerWidget {
                           children: [
                             Text(
                               AppStrings.makerWiki,
-                              style: GoogleFonts.spaceGrotesk(
+                              style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
+                                fontFamilyFallback: const [
+                                  'Roboto',
+                                  'sans-serif'
+                                ],
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                               ),
                             ),
                             Text(
                               AppStrings.makerWikiSubtitle,
-                              style: GoogleFonts.dmSans(
+                              style: TextStyle(
+                                fontFamily: 'DMSans',
+                                fontFamilyFallback: const [
+                                  'Roboto',
+                                  'sans-serif'
+                                ],
                                 fontSize: 14,
                                 color: AppColors.textSecondary,
                               ),
@@ -108,7 +119,9 @@ class ExploreScreen extends ConsumerWidget {
               const SizedBox(height: AppSizes.md),
               Text(
                 AppStrings.ideaLabAbout,
-                style: GoogleFonts.dmSans(
+                style: TextStyle(
+                  fontFamily: 'DMSans',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontSize: 15,
                   color: AppColors.textSecondary,
                   height: 1.5,
@@ -117,7 +130,9 @@ class ExploreScreen extends ConsumerWidget {
               const SizedBox(height: AppSizes.md),
               Text(
                 AppStrings.appTagline,
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: AppColors.navy,
@@ -145,7 +160,9 @@ class ExploreScreen extends ConsumerWidget {
         const SizedBox(width: AppSizes.sm),
         Text(
           title,
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.navy,
@@ -180,7 +197,9 @@ class ExploreScreen extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.spaceGrotesk(
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                         color: iconColor ?? AppColors.navy,
@@ -188,7 +207,9 @@ class ExploreScreen extends ConsumerWidget {
                     ),
                     Text(
                       desc,
-                      style: GoogleFonts.dmSans(
+                      style: TextStyle(
+                        fontFamily: 'DMSans',
+                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
                         fontSize: 13,
                         color: (iconColor ?? AppColors.navy).withValues(
                           alpha: 0.7,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/explore/domain/event_providers.dart';
 import 'package:grow/features/lab/domain/lab_providers.dart';
@@ -111,7 +110,9 @@ class _StatusChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.spaceGrotesk(
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontFamilyFallback: const ['Roboto', 'sans-serif'],
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF111111),
@@ -340,7 +341,9 @@ class _CheckInCard extends StatelessWidget {
         children: [
           Text(
             isCheckedIn ? 'ACTIVE SESSION' : 'CHECK-IN REQUIRED',
-            style: GoogleFonts.spaceGrotesk(
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontFamilyFallback: const ['Roboto', 'sans-serif'],
               fontSize: 11,
               fontWeight: FontWeight.w800,
               color: isCheckedIn
@@ -404,7 +407,9 @@ class _UpcomingEvents extends StatelessWidget {
               onPressed: () => context.push('/events'),
               child: Text(
                 'View all',
-                style: GoogleFonts.spaceGrotesk(
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontFamilyFallback: const ['Roboto', 'sans-serif'],
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF111111),
                   decoration: TextDecoration.underline,

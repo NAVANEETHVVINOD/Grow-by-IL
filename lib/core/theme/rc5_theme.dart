@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 
 /// Opt-in RC5 theme for the Grow redesign.
@@ -8,10 +7,11 @@ import 'package:grow/core/theme/rc5_design_tokens.dart';
 class RC5Theme {
   RC5Theme._();
 
-  static ThemeData get light {
-    final headlineFont = GoogleFonts.spaceGroteskTextTheme();
-    final bodyFont = GoogleFonts.dmSansTextTheme();
+  static const _headlineFamily = 'SpaceGrotesk';
+  static const _bodyFamily = 'DMSans';
+  static const _fallback = ['Roboto', 'sans-serif'];
 
+  static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: RC5DesignTokens.background,
@@ -42,76 +42,108 @@ class RC5Theme {
           return RC5DesignTokens.neutralSurface;
         }),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: RC5DesignTokens.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         foregroundColor: RC5DesignTokens.ink,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.spaceGrotesk(
+        titleTextStyle: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
       ),
-      textTheme: TextTheme(
-        displayLarge: headlineFont.displayLarge?.copyWith(
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w800,
           color: RC5DesignTokens.ink,
         ),
-        displayMedium: headlineFont.displayMedium?.copyWith(
+        displayMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w800,
           color: RC5DesignTokens.ink,
         ),
-        displaySmall: headlineFont.displaySmall?.copyWith(
+        displaySmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w800,
           color: RC5DesignTokens.ink,
         ),
-        headlineLarge: headlineFont.headlineLarge?.copyWith(
+        headlineLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w800,
           color: RC5DesignTokens.ink,
         ),
-        headlineMedium: headlineFont.headlineMedium?.copyWith(
+        headlineMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
-        headlineSmall: headlineFont.headlineSmall?.copyWith(
+        headlineSmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
-        titleLarge: headlineFont.titleLarge?.copyWith(
+        titleLarge: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
-        titleMedium: headlineFont.titleMedium?.copyWith(
+        titleMedium: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
-        titleSmall: headlineFont.titleSmall?.copyWith(
+        titleSmall: TextStyle(
+          fontFamily: _headlineFamily,
+          fontFamilyFallback: _fallback,
           fontWeight: FontWeight.w700,
           color: RC5DesignTokens.ink,
         ),
-        bodyLarge: bodyFont.bodyLarge?.copyWith(
+        bodyLarge: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.ink,
           height: 1.35,
         ),
-        bodyMedium: bodyFont.bodyMedium?.copyWith(
+        bodyMedium: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.ink,
           height: 1.35,
         ),
-        bodySmall: bodyFont.bodySmall?.copyWith(
+        bodySmall: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.textSecondary,
           height: 1.35,
         ),
-        labelLarge: bodyFont.labelLarge?.copyWith(
+        labelLarge: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.ink,
           fontWeight: FontWeight.w700,
         ),
-        labelMedium: bodyFont.labelMedium?.copyWith(
+        labelMedium: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.textSecondary,
           fontWeight: FontWeight.w700,
         ),
-        labelSmall: bodyFont.labelSmall?.copyWith(
+        labelSmall: TextStyle(
+          fontFamily: _bodyFamily,
+          fontFamilyFallback: _fallback,
           color: RC5DesignTokens.textSecondary,
           fontWeight: FontWeight.w700,
         ),

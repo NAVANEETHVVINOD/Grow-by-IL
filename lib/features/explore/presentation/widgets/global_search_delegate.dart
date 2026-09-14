@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/constants/app_colors.dart';
 
@@ -117,7 +116,9 @@ class GlobalSearchDelegate extends SearchDelegate {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.spaceGrotesk(
+        style: TextStyle(
+          fontFamily: 'SpaceGrotesk',
+          fontFamilyFallback: const ['Roboto', 'sans-serif'],
           fontWeight: FontWeight.bold,
           fontSize: 12,
           color: AppColors.textSecondary,

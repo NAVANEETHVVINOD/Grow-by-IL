@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/rc5_design_tokens.dart';
@@ -120,7 +119,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: 16),
                 Text(
                   'Grow~',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    fontFamilyFallback: const ['Roboto', 'sans-serif'],
                     fontSize: 48,
                     fontWeight: FontWeight.w800,
                     color: RC5DesignTokens.ink,
@@ -140,7 +141,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: 12),
                 Text(
                   'IDEA Lab Platform',
-                  style: GoogleFonts.dmSans(
+                  style: TextStyle(
+                    fontFamily: 'DMSans',
+                    fontFamilyFallback: const ['Roboto', 'sans-serif'],
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: RC5DesignTokens.textSecondary,

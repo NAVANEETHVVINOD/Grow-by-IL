@@ -16,6 +16,8 @@ import 'core/utils/provider_observer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final sw = Stopwatch()..start();
+
   // ── Firebase initialization ──────────────────────────────
   try {
     if (DefaultFirebaseOptions.isConfigured) {
@@ -69,6 +71,24 @@ void main() async {
     url: SupabaseKeys.url,
     anonKey: SupabaseKeys.anonKey,
   );
+
+  // ── Database Schema Health Check ───────────────────────
+  try {
+    await Supabase.instance.client.from('user_profiles').select('id').limit(1);
+    AppLogger.success(
+        LogCategory.system, 'DATABASE_SCHEMA_VERIFIED | user_profiles exists');
+  } catch (e, st) {
+    AppLogger.error(
+      LogCategory.system,
+      '[SCHEMA_MISMATCH] Critical tables missing in Supabase. Check migrations.',
+      error: e,
+      stack: st,
+    );
+  }
+
+  if (!kReleaseMode) {
+    debugPrint('[Grow~][PERF] Startup: ${sw.elapsedMilliseconds}ms');
+  }
 
   runApp(
     ProviderScope(

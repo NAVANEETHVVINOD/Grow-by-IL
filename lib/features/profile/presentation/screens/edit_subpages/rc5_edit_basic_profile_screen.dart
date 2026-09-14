@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
 import 'package:grow/features/profile/domain/rc5_profile_providers.dart';
+import 'package:grow/shared/models/profile_ecosystem_models.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class RC5EditBasicProfileScreen extends ConsumerStatefulWidget {
   const RC5EditBasicProfileScreen({super.key});
@@ -43,18 +46,71 @@ class _RC5EditBasicProfileScreenState
     setState(() => _isSaving = true);
     final user = ref.read(currentUserProvider).valueOrNull;
     if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      final key = 'rc5_onboarding.${user.id}';
+      final repo = ref.read(profileEcosystemRepositoryProvider);
 
-      await prefs.setString('$key.username', _usernameController.text.trim());
-      await prefs.setString('$key.bio', _bioController.text.trim());
-      await prefs.setString(
-          '$key.department', _departmentController.text.trim());
+      try {
+        final existingProfile = await repo.getProfile(user.id);
+        final profileId = existingProfile?.id ?? const Uuid().v4();
 
-      ref.invalidate(rc5ProfileHeaderProvider);
+        final profileModel = UserProfileModel(
+          id: profileId,
+          userId: user.id,
+          username: _usernameController.text.trim(),
+          bio: _bioController.text.trim(),
+          department: _departmentController.text.trim(),
+        );
+
+        await repo.upsertProfile(profileModel);
+
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        await prefs.setString('$key.username', _usernameController.text.trim());
+        await prefs.setString('$key.bio', _bioController.text.trim());
+        await prefs.setString(
+            '$key.department', _departmentController.text.trim());
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile updated successfully!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } on OfflineQueueException catch (e) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'rc5_onboarding.${user.id}';
+        await prefs.setString('$key.username', _usernameController.text.trim());
+        await prefs.setString('$key.bio', _bioController.text.trim());
+        await prefs.setString(
+            '$key.department', _departmentController.text.trim());
+
+        ref.invalidate(rc5ProfileHeaderProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.ink,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save changes: $e'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: RC5DesignTokens.error,
+            ),
+          );
+        }
+      }
     }
     setState(() => _isSaving = false);
-    if (mounted) Navigator.of(context).pop();
   }
 
   @override

@@ -7,6 +7,8 @@ import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/providers/toast_provider.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 
+import '../providers/background_startup_provider.dart';
+
 import '../../features/notifications/domain/notification_providers.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -64,6 +66,10 @@ class _MainShellState extends ConsumerState<MainShell>
         'Heartbeat tick — checking session freshness',
       );
       ref.read(labRepositoryProvider).refreshSession();
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(backgroundStartupProvider.future);
     });
   }
 

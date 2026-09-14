@@ -75,10 +75,15 @@ supabase/.temp/
 **/ios/Runner/GoogleService-Info.plist
 
 # Custom excludes
+*.apk
 analyze_output.txt
 analyzer_output.txt
 mcp_output.txt
 build_error.log
+login_output.txt
+pr_body.txt
+protection.json
+task.md
 qa_artifacts/
 scratch/
 web/

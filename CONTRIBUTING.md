@@ -1,34 +1,74 @@
 # Contributing to Grow~
 
-Welcome! We follow a professional **Senior Developer Workflow** to maintain production stability.
+Grow~ is now managed as a production-oriented Innovation Hub platform. The
+project uses phase gates, pull requests, CI, and documented architecture
+decisions to avoid drift.
 
-## 1. Branching Strategy
-- **`main`**: The stable production-ready branch. **Never push directly to main.**
-- **`feature/*`**: For new features (e.g., `feature/admin-panel`).
-- **`fix/*`**: For bug fixes (e.g., `fix/auth-leak`).
+## Required Reading
 
-## 2. Development Process
-1. **Sync**: Ensure your local `main` is up to date: `git pull origin main`.
-2. **Branch**: Create your feature branch: `git checkout -b feature/xyz`.
-3. **Commit**: Use descriptive, conventional commits: `feat: add inventory stock tracking`.
-4. **Push**: Push your branch to GitHub: `git push -u origin feature/xyz`.
+Before contributing, read:
 
-## 3. Pull Requests (PRs)
-- All changes must go through a PR.
-- **CI/CD Checks**: Every PR must pass the automated CI pipeline:
-  - `Static Analysis` (Linting)
-  - `Unit Tests` (Smoke tests)
-  - `Build Check` (APK build verification)
-- **Green Tick**: Do not merge until you see the green checkmark from GitHub Actions.
+- `DEV_WORKFLOW.md`
+- `CODING_STANDARD.md`
+- `DEFINITION_OF_DONE.md`
+- `SYSTEM_BOUNDARIES.md`
+- `ARCHITECTURE_DECISIONS.md`
+- `SECURITY.md`
 
-## 4. Merging
-- Use **Squash and Merge** on GitHub to keep the commit history clean.
-- Delete your feature branch after a successful merge.
+## Branching Strategy
 
-## 5. Coding Standards
-- Follow the official [Flutter Style Guide](https://docs.flutter.dev/cookbook/style).
-- Ensure all new features are documented in the `README.md` if necessary.
-- Add unit tests for critical business logic.
+- `main`: production-ready trunk. Never push directly.
+- `develop`: optional integration branch when active release coordination needs
+  it.
+- `release/*`: release stabilization branches.
+- `feature/*`: new feature slices.
+- `fix/*`: bug fixes.
+- `chore/*`: tooling, docs, CI, cleanup.
 
----
-*Thank you for helping us Grow~ the IdeaLab ecosystem!*
+Use one branch for one coherent change. Do not mix product features, schema
+changes, formatting, and unrelated cleanup in one PR.
+
+## Development Process
+
+1. Start from an approved issue/task or documented architecture decision.
+2. Create a focused branch.
+3. Implement the smallest reversible slice.
+4. Run local checks before pushing:
+   - `dart format .`
+   - `flutter analyze`
+   - `flutter test`
+5. Open a pull request using `.github/PULL_REQUEST_TEMPLATE.md`.
+6. Wait for CI to pass.
+7. Get at least one review.
+8. Squash merge only after approval.
+
+## Pull Request Rules
+
+Every PR must state:
+
+- purpose
+- scope
+- architecture impact
+- database impact
+- security/RLS impact
+- UI/UX impact
+- tests run
+- rollback plan
+
+No PR should merge if CI is red.
+
+## Architecture Gate
+
+During the architecture phase, do not add Supabase migrations, schema changes,
+new repositories, or persistence logic unless the relevant PRD/SRS, architecture,
+role matrix, and database design are approved.
+
+UI-only exploratory slices must be feature-flagged and reversible.
+
+## Coding Standards
+
+See `CODING_STANDARD.md`.
+
+## Definition Of Done
+
+See `DEFINITION_OF_DONE.md`.

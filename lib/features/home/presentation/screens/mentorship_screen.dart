@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/shared/widgets/neo_card.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
@@ -43,7 +42,9 @@ class MentorshipScreen extends StatelessWidget {
         ),
         title: Text(
           'Mentorship',
-          style: GoogleFonts.spaceGrotesk(
+          style: TextStyle(
+            fontFamily: 'SpaceGrotesk',
+            fontFamilyFallback: const ['Roboto', 'sans-serif'],
             color: RC5DesignTokens.ink,
             fontWeight: FontWeight.w700,
             fontSize: 20,
@@ -107,7 +108,9 @@ class MentorshipScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         'EXPERTISE',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           color: RC5DesignTokens.textSecondary,
