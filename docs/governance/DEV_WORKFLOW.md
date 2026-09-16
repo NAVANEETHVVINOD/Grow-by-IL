@@ -104,7 +104,7 @@ A PR must include:
 
 ## Dependency Update Rule
 
-Dependabot auto-merge is disabled at least through V1. Dependency updates
-require CI plus human review because Flutter, Firebase, Supabase, Android, and
-GitHub Actions updates can cause runtime or build regressions even when they are
-minor version updates.
+Scheduled Dependabot version-update PRs are disabled at the maintainer's request.
+Security alerts and manual dependency upgrades remain in scope. Any upgrade
+requires CI plus human review because Flutter, Firebase, Supabase, Android, and
+GitHub Actions updates can cause runtime or build regressions.

@@ -1,8 +1,11 @@
-## Grow~ by IdeaLab
-Operational management platform for AICTE IdeaLab at MEC (Model Engineering College), Kerala.
+# Grow by Idea Lab and Fab Lab
+Flutter product for MEC Idea Lab and Fab Lab, operated as one organisation
+across two rooms. It is being built for a supervised initial rollout and
+eventual use by more than 4,000 students and external participants. The public
+name is still to be confirmed.
 
 ## What it does
-- Lab check-in/out with QR
+- Lab check-in/out (manual first; QR optional)
 - Tool booking and inventory
 - Project and team management
 - Event RSVP
@@ -41,7 +44,9 @@ flutter pub get
 
 ## Development
 
-All sensitive credentials are injected via `--dart-define` at build time. **No API keys are hardcoded in source.**
+`--dart-define` passes public mobile configuration to the build. Its contents
+can be extracted from a shipped app, so it must never hold a Supabase service
+role key, signing secret, or payment credential.
 
 ```sh
 flutter run -d <device> \
@@ -58,15 +63,19 @@ flutter run -d <device> \
 See `.env.example` for a complete list of required values and where to find them.
 
 ## Security
-- All secrets injected via `--dart-define` (compile-time only)
+- Mobile builds receive only public configuration through `--dart-define`.
 - `google-services.json` is gitignored
 - No `service_role` keys in frontend
-- RLS enforced on all protected tables
+- RLS and role boundaries must be verified against the live project before launch.
 
 ## Current status
-**RC4 — Production Readiness Phase**
-- **Auth & Route Hardening**: Implemented role-aware dynamic navigation gating `/admin` direct routing via a Riverpod-backed `routerProvider` and `/unauthorized` fallback UI.
-- **Resilience & Observability**: Integrated Firebase Crashlytics for production exception tracking, and added a centralized 10-second timeout guard on all Supabase queries.
-- **Global Error Handling**: Standardized screen error states using tactile custom retry widgets.
-- **Robust Testing**: Expanded integration flow testing using Mocktail (57 tests passing with 100% clean static analysis).
-- Zero known critical vulnerabilities.
+This repository contains features at different stages of completion. Some
+screens still use seeded local data, simulated actions, or fixed lab status.
+These must not be presented as live operations. The current automated suite
+does not establish real device and backend end-to-end readiness. See the
+[launch audit](docs/audits/LAUNCH_READINESS.md) before enabling a workflow for
+members.
+
+Project governance and current approved product decisions are indexed in
+[docs](docs/README.md). Changes to protected branches require a pull request,
+current CI checks, and independent review.

@@ -17,9 +17,17 @@ migrate_working_dir/
 hs_err_pid*
 replay_pid*
 
-# Project Specific Documentation (Sensitive)
-docs/
-/docs/
+# Keep historical local notes private; publish reviewed documentation only.
+/docs/*
+!/docs/README.md
+!/docs/governance/
+!/docs/product/
+!/docs/audits/
+!/docs/tooling/
+
+# Local worktrees and pinned third-party source snapshots are not app source.
+/.worktrees/
+/.tooling-sources/
 
 # IntelliJ related
 *.iml

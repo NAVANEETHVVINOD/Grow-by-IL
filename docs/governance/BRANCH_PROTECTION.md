@@ -19,15 +19,12 @@ release-candidate integration branch.
 - Block deletions.
 - Restrict direct pushes.
 
-## Solo-Maintainer Review Rule
+## Review Rule
 
-During solo development, repository administrators may merge their own PRs after
-all required CI checks pass and the PR has been reviewed against the checklist in
-`.github/PULL_REQUEST_TEMPLATE.md`.
-
-This is not a permanent substitute for independent review. Once a second
-maintainer joins the project, at least one independent approval becomes
-mandatory for `main` and active release-candidate branches.
+The live `main` and `rc5-release-candidate` rules require one approval, dismiss
+stale reviews, require up-to-date checks, and enforce rules for administrators.
+Do not bypass review or merge a PR whose required checks do not match the
+configured check names. Recheck GitHub rules before each merge.
 
 ## RC Branch
 
@@ -35,7 +32,7 @@ If `rc5-release-candidate` is used as the active integration/release-candidate
 branch, apply the same protections as `main`:
 
 - Require pull request before merging.
-- Follow the solo-maintainer review rule above until a second maintainer exists.
+- Require an independent approval under the live branch rule.
 - Require status checks to pass before merging.
 - Block force pushes.
 - Block deletions.
@@ -54,8 +51,8 @@ Release builds should run from version tags (`v*`) or release branches only.
 
 ## Dependabot Rule
 
-Do not let Dependabot self-approve and auto-merge Flutter, Android, Firebase,
-Supabase, or GitHub Actions updates. Dependency PRs require CI plus human review.
+Scheduled Dependabot version updates are disabled. Manually proposed dependency
+updates require CI plus human review. Keep security alerting enabled.
 
 ## Current Exceptions
 

@@ -8,11 +8,11 @@ decisions to avoid drift.
 
 Before contributing, read:
 
-- `DEV_WORKFLOW.md`
-- `CODING_STANDARD.md`
-- `DEFINITION_OF_DONE.md`
-- `SYSTEM_BOUNDARIES.md`
-- `ARCHITECTURE_DECISIONS.md`
+- `docs/governance/DEV_WORKFLOW.md`
+- `docs/governance/CODING_STANDARD.md`
+- `docs/governance/DEFINITION_OF_DONE.md`
+- `docs/governance/SYSTEM_BOUNDARIES.md`
+- `docs/governance/ARCHITECTURE_DECISIONS.md`
 - `SECURITY.md`
 
 ## Branching Strategy
@@ -67,8 +67,8 @@ UI-only exploratory slices must be feature-flagged and reversible.
 
 ## Coding Standards
 
-See `CODING_STANDARD.md`.
+See `docs/governance/CODING_STANDARD.md`.
 
 ## Definition Of Done
 
-See `DEFINITION_OF_DONE.md`.
+See `docs/governance/DEFINITION_OF_DONE.md`.

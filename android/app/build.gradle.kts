@@ -1,9 +1,40 @@
+import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
+}
+
+val releasePropertiesFile = rootProject.file("key.properties")
+val releaseProperties = Properties()
+if (releasePropertiesFile.isFile) {
+    FileInputStream(releasePropertiesFile).use(releaseProperties::load)
+}
+
+fun releaseValue(environmentName: String, propertyName: String): String? =
+    System.getenv(environmentName)?.takeIf(String::isNotBlank)
+        ?: releaseProperties.getProperty(propertyName)?.takeIf(String::isNotBlank)
+
+val releaseStorePath = releaseValue("ANDROID_KEYSTORE_FILE", "storeFile")
+val releaseStorePassword = releaseValue("ANDROID_STORE_PASSWORD", "storePassword")
+val releaseKeyAlias = releaseValue("ANDROID_KEY_ALIAS", "keyAlias")
+val releaseKeyPassword = releaseValue("ANDROID_KEY_PASSWORD", "keyPassword")
+val releaseSigningReady = listOf(
+    releaseStorePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
+if (gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) } &&
+    !releaseSigningReady
+) {
+    throw GradleException("Release signing configuration is incomplete")
 }
 
 android {
@@ -24,7 +55,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.idealab.mec.grow"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -34,11 +64,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningReady) {
+                val configuredStore = File(requireNotNull(releaseStorePath))
+                storeFile = if (configuredStore.isAbsolute) {
+                    configuredStore
+                } else {
+                    rootProject.file(configuredStore.path)
+                }
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             
             isMinifyEnabled = true
             isShrinkResources = true
