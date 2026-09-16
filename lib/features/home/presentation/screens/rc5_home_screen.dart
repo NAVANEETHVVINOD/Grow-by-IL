@@ -44,7 +44,7 @@ class RC5HomeScreen extends StatelessWidget {
                 angle: 0.035,
                 child: const ScrollingTicker(
                   text:
-                      '/// LATEST NEWS: New CNC Mill is now operational! Check out the updated safety guide in the Knowledge Base...',
+                      '/// MAKE. TEST. LEARN. /// BUILD TOGETHER. ///',
                   backgroundColor: RC5DesignTokens.surfaceAlt,
                   textColor: RC5DesignTokens.ink,
                   speedMultiplier: 1.0,
@@ -64,12 +64,6 @@ class RC5HomeScreen extends StatelessWidget {
               const SlashDivider(),
               const SizedBox(height: 20),
               const FeaturedActivitiesSection(),
-              const SizedBox(height: 24),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: OpportunitiesSection(),
-              ),
-              const SizedBox(height: 24),
               const SlashDivider(),
               const SizedBox(height: 20),
               const Padding(
@@ -537,125 +531,6 @@ class _SmallTag extends StatelessWidget {
   }
 }
 
-class OpportunitiesSection extends StatelessWidget {
-  const OpportunitiesSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final opportunities = [
-      _OppItem(
-        creator: 'FOSS United',
-        title: 'Call for volunteers-IndiaFOSS 2026',
-        tags: 'Part Time · Remote · Volunteering',
-        logoColor: const Color(0xFFDFF4FF),
-        logoText: 'FOSS',
-      ),
-      _OppItem(
-        creator: 'TinkerHub Foundation',
-        title: 'Operations Lead',
-        tags: 'Full Time · Onsite · Job',
-        logoColor: const Color(0xFFE5E7EB),
-        logoText: 'TH',
-      ),
-      _OppItem(
-        creator: 'MakerGram',
-        title: 'Embedded Systems Engineer',
-        tags: 'Full Time · Hybrid · Role',
-        logoColor: const Color(0xFFF7EEB4),
-        logoText: 'MG',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Opportunities',
-          style: RC5DesignTokens.sectionTitle,
-        ),
-        const SizedBox(height: 16),
-        // Minimal list items
-        ...opportunities.map((opp) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        opp.creator,
-                        style: TextStyle(
-                          fontFamily: 'DMSans',
-                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF71717A),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        opp.title,
-                        style: TextStyle(
-                          fontFamily: 'SpaceGrotesk',
-                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111111),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        opp.tags,
-                        style: TextStyle(
-                          fontFamily: 'DMSans',
-                          fontFamilyFallback: const ['Roboto', 'sans-serif'],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF71717A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: opp.logoColor,
-                    border:
-                        Border.all(color: const Color(0xFF111111), width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      opp.logoText,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'SpaceGrotesk',
-                        fontFamilyFallback: const ['Roboto', 'sans-serif'],
-                        color: opp.logoColor == Colors.black
-                            ? Colors.white
-                            : const Color(0xFF111111),
-                        fontWeight: FontWeight.bold,
-                        fontSize: opp.logoText.contains('\n') ? 9 : 12,
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-}
-
 class ThreeNavigationButtons extends StatelessWidget {
   const ThreeNavigationButtons({super.key});
 
@@ -947,24 +822,6 @@ class _IconBadgeButton extends StatelessWidget {
     );
   }
 }
-
-class _OppItem {
-  const _OppItem({
-    required this.creator,
-    required this.title,
-    required this.tags,
-    required this.logoColor,
-    required this.logoText,
-  });
-
-  final String creator;
-  final String title;
-  final String tags;
-  final Color logoColor;
-  final String logoText;
-}
-
-// Mocks removed
 
 String _profileHandle(UserModel user) {
   final localPart = user.email.split('@').first;
