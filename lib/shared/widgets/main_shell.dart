@@ -150,9 +150,9 @@ class _MainShellState extends ConsumerState<MainShell>
                   label: 'Home',
                 ),
                 RC5BottomNavItem(
-                  icon: Icons.explore_outlined,
-                  activeIcon: Icons.explore_rounded,
-                  label: 'Akathalam',
+                  icon: Icons.handyman_outlined,
+                  activeIcon: Icons.handyman_rounded,
+                  label: 'Lab',
                 ),
                 RC5BottomNavItem(
                   icon: Icons.person_outline_rounded,
