@@ -13,6 +13,9 @@ import 'package:grow/shared/models/project_model.dart';
 import 'package:grow/shared/models/user_model.dart';
 import 'package:grow/shared/repositories/supabase_client.dart';
 
+const _legacyDefaultBio =
+    'Builder at IDEA Lab, exploring projects and collaboration.';
+
 class Rc5ProfileHeaderData {
   const Rc5ProfileHeaderData({
     required this.user,
@@ -121,7 +124,9 @@ final rc5ProfileHeaderProvider =
         user: user,
         username: cachedData['username'] as String,
         departmentOrRole: cachedData['departmentOrRole'] as String,
-        bio: cachedData['bio'] as String,
+        bio: cachedData['bio'] == _legacyDefaultBio
+            ? ''
+            : cachedData['bio'] as String,
         interests: (cachedData['interests'] as List).cast<String>(),
         skills: cachedSkillsMap,
       );
@@ -131,12 +136,10 @@ final rc5ProfileHeaderProvider =
   // 3. Construct header data and cache it locally
   final username =
       serverProfile?.username ?? _deriveUsernameFromEmail(user.email);
-  final bio = serverProfile?.bio ??
-      'Builder at IDEA Lab, exploring projects and collaboration.';
-  final department = serverProfile?.department ??
-      (serverProfile?.userType == 'professional'
-          ? 'Professional'
-          : 'Student, IDEA Lab');
+  final serverBio = serverProfile?.bio.trim() ?? '';
+  final bio = serverBio == _legacyDefaultBio ? '' : serverBio;
+  final department =
+      serverProfile?.department ?? serverProfile?.userType ?? user.role;
 
   final headerData = Rc5ProfileHeaderData(
     user: user,

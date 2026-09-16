@@ -338,7 +338,7 @@ class _ProfileHeaderCard extends ConsumerWidget {
                   Text(
                     header.bio.isNotEmpty
                         ? header.bio
-                        : 'Builder at IDEA Lab, exploring projects and collaboration.',
+                        : 'Add a short bio to tell other makers what you build.',
                     style: RC5DesignTokens.body,
                   ),
                   const SizedBox(height: 20),
@@ -1043,87 +1043,12 @@ class _CollectibleBadgesSection extends StatelessWidget {
             style: RC5DesignTokens.sectionTitle,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Wrap(
-            spacing: 14,
-            runSpacing: 16,
-            children: const [
-              _StickerBadge(
-                icon: Icons.build_rounded,
-                label: 'Builder',
-                color: Color(0xFFDFF4FF),
-                angle: -0.04,
-              ),
-              _StickerBadge(
-                icon: Icons.precision_manufacturing_rounded,
-                label: 'Robotics',
-                color: Color(0xFFF7EEB4),
-                angle: 0.02,
-              ),
-              _StickerBadge(
-                icon: Icons.lightbulb_outline_rounded,
-                label: 'Innovator',
-                color: Color(0xFFE5E7EB),
-                angle: -0.01,
-              ),
-            ],
-          ),
+        const RC5EmptyState(
+          icon: Icons.military_tech_outlined,
+          title: 'No badges yet',
+          message: 'Verified core badges will appear here when awarded.',
         ),
       ],
-    );
-  }
-}
-
-class _StickerBadge extends StatelessWidget {
-  const _StickerBadge({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.angle,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final double angle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: angle,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF111111), width: 2),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0xFF111111),
-              offset: Offset(2, 2),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: const Color(0xFF111111)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'SpaceGrotesk',
-                fontFamilyFallback: const ['Roboto', 'sans-serif'],
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111111),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
