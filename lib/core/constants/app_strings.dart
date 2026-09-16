@@ -11,7 +11,6 @@ class AppStrings {
   static const tabExplore = 'Explore';
   static const tabEvents = 'Events';
   static const tabLab = 'Lab';
-  static const tabAkathalam = 'അകത്തളം';
   static const tabProfile = 'Profile';
 
   // Actions / Tiles

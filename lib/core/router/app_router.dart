@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
-import '../../features/akathalam/presentation/screens/akathalam_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
@@ -195,8 +194,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/akathalam',
-                builder: (context, state) => const AkathalamScreen(),
+                path: '/lab',
+                builder: (context, state) => const LabScreen(),
               ),
             ],
           ),
@@ -269,7 +268,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/donate',
         builder: (context, state) => const DonationScreen(),
       ),
-      GoRoute(path: '/lab', builder: (context, state) => const LabScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
       GoRoute(
         path: '/events',

@@ -35,8 +35,9 @@ class LabScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
-          onPressed: () => context.pop(),
+          tooltip: 'Home',
+          icon: const Icon(Icons.home_outlined, color: AppColors.navy),
+          onPressed: () => context.go('/home'),
         ),
         title: Text(
           'Lab Session',
