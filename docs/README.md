@@ -5,6 +5,7 @@ local notes remain ignored until checked for accuracy and sensitive data.
 Do not treat old proposals or screenshots as approval or launch evidence.
 
 - [Approved product decisions](product/APPROVED_DECISIONS.md)
+- [Launch implementation plan](product/LAUNCH_IMPLEMENTATION_PLAN.md)
 - [Launch readiness audit](audits/LAUNCH_READINESS.md)
 - [Repository workflow](governance/DEV_WORKFLOW.md)
 - [Architecture decisions](governance/ARCHITECTURE_DECISIONS.md)
