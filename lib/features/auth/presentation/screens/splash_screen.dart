@@ -8,6 +8,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../shared/repositories/supabase_client.dart';
 import '../../../../shared/widgets/rc5/rc5_grow_logo.dart';
 import '../../data/auth_repository.dart';
+import '../../data/password_recovery_session.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -48,20 +49,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final session = supabase.auth.currentSession;
     AppLogger.info(
       LogCategory.auth,
-      'SPLASH_SESSION_CHECK | sessionExists=${session != null} | userId=${session?.user.id} | email=${session?.user.email}',
+      'SPLASH_SESSION_CHECK | sessionExists=${session != null}',
     );
 
     if (session != null) {
       try {
+        // A valid recovery callback may survive an app restart. Keep it in the
+        // reset-password flow rather than letting the temporary session enter
+        // Profile Setup or Home.
+        if (await PasswordRecoverySession.isPendingFor(session.user.id)) {
+          if (mounted) context.go('/reset-password');
+          return;
+        }
+
         // Calling getCurrentUser() triggers the ensureUserProfileExists() sync
         final user = await ref.read(authRepositoryProvider).getCurrentUser();
 
         // Banned user guard — check is_active before allowing entry
         if (user != null && user.isActive == false) {
-          AppLogger.warn(
-            LogCategory.auth,
-            'SUSPENDED_USER_DETECTED | userId=${user.id}',
-          );
+          AppLogger.warn(LogCategory.auth, 'SUSPENDED_USER_DETECTED');
           await supabase.auth.signOut();
           if (mounted) {
             context.go('/login');
@@ -80,7 +86,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         if (user != null) {
           AppLogger.info(
             LogCategory.auth,
-            'PROFILE_CHECK | completed=${user.profileCompleted} | role=${user.role}',
+            'PROFILE_CHECK | completed=${user.profileCompleted}',
           );
         }
 

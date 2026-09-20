@@ -8,6 +8,21 @@ import 'app_logger.dart';
 String handleSupabaseError(Object error) {
   if (error is AuthException) {
     AppLogger.warn(LogCategory.auth, 'AuthException: ${error.message}');
+    final message = error.message.toLowerCase();
+    if (message.contains('provider') && message.contains('not enabled')) {
+      return 'Google sign-in is not configured yet. Use email and password for now.';
+    }
+    if (message.contains('rate limit') ||
+        message.contains('over_email_send_rate_limit')) {
+      return 'Please wait a few minutes before requesting another confirmation email.';
+    }
+    if (error is AuthSessionMissingException) {
+      return 'This recovery link is expired or unavailable. Request a new one.';
+    }
+    if (error is AuthWeakPasswordException ||
+        message.contains('weak password')) {
+      return 'Choose a stronger password and try again.';
+    }
     switch (error.message) {
       case 'Invalid login credentials':
         return 'Wrong email or password.';
