@@ -21,8 +21,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _rollController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -33,8 +31,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _rollController.dispose();
-    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -49,8 +45,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final emailAlreadyVerified =
           await ref.read(authRepositoryProvider).signUp(
                 name: _nameController.text.trim(),
-                collegeRoll: _optionalValue(_rollController.text),
-                phone: _optionalValue(_phoneController.text),
                 email: _emailController.text.trim(),
                 password: _passwordController.text,
               );
@@ -76,11 +70,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  String? _optionalValue(String value) {
-    final trimmed = value.trim();
-    return trimmed.isEmpty ? null : trimmed;
   }
 
   Future<void> _resendConfirmation() async {
@@ -124,99 +113,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const _RegisterIntro(),
-                const SizedBox(height: AppSizes.xl),
-                if (_awaitingConfirmation)
-                  _ConfirmationSentCard(
-                    onSignIn: () => context.go('/login'),
-                    onResend: _resendConfirmation,
-                    isResending: _isResendingConfirmation,
-                  )
-                else
-                  NeoCard(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          NeoTextField(
-                            label: 'Full Name',
-                            controller: _nameController,
-                            prefixIcon: Icons.person_outline,
-                            validator: (v) => AppValidators.required(v, 'Name'),
-                          ),
-                          const SizedBox(height: AppSizes.lg),
-                          NeoTextField(
-                            label: 'College Roll Number (optional)',
-                            controller: _rollController,
-                            prefixIcon: Icons.badge_outlined,
-                          ),
-                          const SizedBox(height: AppSizes.lg),
-                          NeoTextField(
-                            label: 'Phone Number (optional)',
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            prefixIcon: Icons.phone_outlined,
-                          ),
-                          const SizedBox(height: AppSizes.lg),
-                          NeoTextField(
-                            label: 'Email Address',
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            prefixIcon: Icons.email_outlined,
-                            validator: AppValidators.email,
-                          ),
-                          const SizedBox(height: AppSizes.lg),
-                          NeoTextField(
-                            label: 'Password',
-                            controller: _passwordController,
-                            obscureText: true,
-                            prefixIcon: Icons.lock_outline,
-                            validator: AppValidators.password,
-                          ),
-                          const SizedBox(height: AppSizes.xl),
-                          NeoButton(
-                            label: 'Create account',
-                            icon: Icons.arrow_forward_rounded,
-                            isLoading: _isLoading,
-                            onPressed: _register,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: AppSizes.xl),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      'Already have an account?',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        'Sign In',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.navy,
-                              fontWeight: FontWeight.w700,
-                              decoration: TextDecoration.underline,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final keyboardIsVisible =
+                  MediaQuery.viewInsetsOf(context).bottom > 0;
+              final compact = constraints.maxHeight < 740 || keyboardIsVisible;
+              final needsScroll = _awaitingConfirmation ||
+                  keyboardIsVisible ||
+                  constraints.maxHeight < 620;
+              final content = _RegisterContent(
+                compact: compact,
+                awaitingConfirmation: _awaitingConfirmation,
+                formKey: _formKey,
+                nameController: _nameController,
+                emailController: _emailController,
+                passwordController: _passwordController,
+                isLoading: _isLoading,
+                isResending: _isResendingConfirmation,
+                onRegister: _register,
+                onResend: _resendConfirmation,
+                onSignIn: () => context.go('/login'),
+              );
+
+              if (needsScroll) {
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  child: content,
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.all(AppSizes.md),
+                child: content,
+              );
+            },
           ),
         ),
       ),
@@ -224,15 +156,130 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
+class _RegisterContent extends StatelessWidget {
+  const _RegisterContent({
+    required this.compact,
+    required this.awaitingConfirmation,
+    required this.formKey,
+    required this.nameController,
+    required this.emailController,
+    required this.passwordController,
+    required this.isLoading,
+    required this.isResending,
+    required this.onRegister,
+    required this.onResend,
+    required this.onSignIn,
+  });
+
+  final bool compact;
+  final bool awaitingConfirmation;
+  final GlobalKey<FormState> formKey;
+  final TextEditingController nameController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool isLoading;
+  final bool isResending;
+  final VoidCallback onRegister;
+  final VoidCallback onResend;
+  final VoidCallback onSignIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final gap = compact ? AppSizes.md : AppSizes.xl;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _RegisterIntro(compact: compact),
+        SizedBox(height: gap),
+        if (awaitingConfirmation)
+          _ConfirmationSentCard(
+            onSignIn: onSignIn,
+            onResend: onResend,
+            isResending: isResending,
+          )
+        else
+          NeoCard(
+            padding: EdgeInsets.all(compact ? AppSizes.md : AppSizes.lg),
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  NeoTextField(
+                    label: 'Full name',
+                    controller: nameController,
+                    prefixIcon: Icons.person_outline,
+                    validator: (value) => AppValidators.required(value, 'Name'),
+                  ),
+                  SizedBox(height: compact ? AppSizes.md : AppSizes.lg),
+                  NeoTextField(
+                    label: 'Email address',
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.email_outlined,
+                    validator: AppValidators.email,
+                  ),
+                  SizedBox(height: compact ? AppSizes.md : AppSizes.lg),
+                  NeoTextField(
+                    label: 'Password',
+                    controller: passwordController,
+                    obscureText: true,
+                    prefixIcon: Icons.lock_outline,
+                    validator: AppValidators.password,
+                  ),
+                  SizedBox(height: compact ? AppSizes.lg : AppSizes.xl),
+                  NeoButton(
+                    label: 'Create account',
+                    icon: Icons.arrow_forward_rounded,
+                    isLoading: isLoading,
+                    onPressed: onRegister,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        SizedBox(height: compact ? AppSizes.md : AppSizes.xl),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 4,
+          children: [
+            Text(
+              'Already have an account?',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            TextButton(
+              onPressed: onSignIn,
+              child: Text(
+                'Sign in',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.navy,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class _RegisterIntro extends StatelessWidget {
-  const _RegisterIntro();
+  const _RegisterIntro({required this.compact});
+
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return NeoCard(
       color: AppColors.green,
       borderRadius: 18,
-      padding: const EdgeInsets.all(AppSizes.lg),
+      padding: EdgeInsets.all(compact ? AppSizes.md : AppSizes.lg),
       child: Stack(
         children: [
           Positioned(
@@ -247,20 +294,22 @@ class _RegisterIntro extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.person_add_alt_1_outlined, size: 28),
-              const SizedBox(height: AppSizes.md),
+              Icon(Icons.person_add_alt_1_outlined, size: compact ? 22 : 28),
+              SizedBox(height: compact ? AppSizes.xs : AppSizes.md),
               Text('Start making.',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       )),
-              const SizedBox(height: AppSizes.xs),
-              Text(
-                'Create your verified Grow~ account. It works across IDEA Lab and Fab Lab.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      height: 1.4,
-                      color: AppColors.textSecondary,
-                    ),
-              ),
+              if (!compact) ...[
+                const SizedBox(height: AppSizes.xs),
+                Text(
+                  'Create your verified Grow~ account. It works across IDEA Lab and Fab Lab.',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        height: 1.4,
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
             ],
           ),
         ],
