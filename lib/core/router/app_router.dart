@@ -76,10 +76,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         event.event == AuthChangeEvent.initialSession;
   });
 
-  return GoRouter(
+  final authRefresh = GoRouterRefreshStream(filteredAuthStream);
+  final router = GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: false,
-    refreshListenable: GoRouterRefreshStream(filteredAuthStream),
+    refreshListenable: authRefresh,
     redirect: (context, state) {
       final session = supabase.auth.currentSession;
       final path = state.uri.path;
@@ -119,6 +120,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         // Grow's mandatory profile setup. This guard also prevents a verified
         // user from reaching Home by reopening the public introduction route.
         final user = ref.read(currentUserProvider).valueOrNull;
+        // An unavailable profile must never be treated as completed.
         final destination =
             user?.profileCompleted == true ? '/home' : '/profile-setup';
         AppLogger.info(
@@ -138,10 +140,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         final userProfileAsync = ref.read(currentUserProvider);
         final user = userProfileAsync.valueOrNull;
 
-        if (user != null && !user.profileCompleted) {
+        if (user == null || !user.profileCompleted) {
           AppLogger.warn(
             LogCategory.router,
-            'INCOMPLETE_PROFILE_REDIRECT | path=$path',
+            'UNVERIFIED_PROFILE_GATE | path=$path',
           );
           return '/profile-setup';
         }
@@ -354,4 +356,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  // A sign-in event can arrive before the profile query completes. Re-check
+  // the gate when that query resolves so an existing member reaches Home.
+  ref.listen(currentUserProvider, (_, __) => router.refresh());
+  ref.onDispose(() {
+    router.dispose();
+    authRefresh.dispose();
+  });
+  return router;
 });
