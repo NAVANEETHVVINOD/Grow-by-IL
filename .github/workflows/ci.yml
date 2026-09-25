@@ -105,17 +105,27 @@ jobs:
         run: |
           echo "Checking for removed or invalid database columns..."
 
-          # Use the same merge-base strategy as the Architecture Guard
+          # Use the same merge-base strategy as the Architecture Guard, but
+          # inspect only added lines. A changed file can contain unrelated,
+          # pre-existing local keys with the same name as a removed DB column.
           if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
             MERGE_BASE="$(git merge-base ${{ github.event.pull_request.base.sha }} HEAD)"
-            CHANGED_DART_FILES="$(git diff --name-only "$MERGE_BASE" HEAD -- 'lib/**/*.dart' || true)"
           elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            CHANGED_DART_FILES="$(git diff --name-only ${{ github.event.before }} HEAD -- 'lib/**/*.dart' || true)"
+            MERGE_BASE="${{ github.event.before }}"
           else
-            CHANGED_DART_FILES="$(git diff --name-only HEAD~1 HEAD -- 'lib/**/*.dart' 2>/dev/null || true)"
+            MERGE_BASE="HEAD~1"
           fi
-          if [ -z "$CHANGED_DART_FILES" ]; then
-            echo "No changed Dart files under lib/. Schema contract validation skipped."
+
+          ADDED_DART_LINES="$(git diff --unified=0 --no-ext-diff "$MERGE_BASE" HEAD -- 'lib/**/*.dart' | awk '
+            /^\+\+\+ b\/lib\/.*\.dart$/ { file = substr($0, 7); next }
+            /^\+\+\+/ { file = ""; next }
+            /^\+/ && file != "" {
+              line = substr($0, 2)
+              if (line !~ /^[[:space:]]*\/\//) print file ":" line
+            }
+          ')"
+          if [ -z "$ADDED_DART_LINES" ]; then
+            echo "No added Dart lines under lib/. Schema contract validation skipped."
             exit 0
           fi
 
@@ -136,19 +146,19 @@ jobs:
 
           FAILED=0
           for col in "${INVALID_COLUMNS[@]}"; do
-            if echo "$CHANGED_DART_FILES" | xargs grep -n "'$col'" | grep -v "//"; then
+            if echo "$ADDED_DART_LINES" | grep -F "'$col'" | grep -v "//"; then
               echo "Schema drift detected: '$col' is deprecated or not in the production schema."
               FAILED=1
             fi
           done
 
-          CHANGED_EVENT_FILES="$(echo "$CHANGED_DART_FILES" | grep '^lib/features/events/' || true)"
-          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'published'" | grep -v "//"; then
+          ADDED_EVENT_LINES="$(echo "$ADDED_DART_LINES" | grep '^lib/features/events/' || true)"
+          if [ -n "$ADDED_EVENT_LINES" ] && echo "$ADDED_EVENT_LINES" | grep -F "'published'" | grep -v "//"; then
             echo "Invalid event status 'published' found. Use 'upcoming'."
             FAILED=1
           fi
 
-          if [ -n "$CHANGED_EVENT_FILES" ] && echo "$CHANGED_EVENT_FILES" | xargs grep -n "'active'" | grep -v "//"; then
+          if [ -n "$ADDED_EVENT_LINES" ] && echo "$ADDED_EVENT_LINES" | grep -F "'active'" | grep -v "//"; then
             echo "Invalid event status 'active' found. Use 'upcoming' or 'ongoing'."
             FAILED=1
           fi
