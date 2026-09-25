@@ -53,6 +53,18 @@ class ProfileMigrationService {
 
   final ProfileEcosystemRepository _repository;
 
+  /// Persists the saved onboarding draft before marking the account complete.
+  ///
+  /// Keeping the completion write behind migration makes a failed profile
+  /// save retryable without allowing the router to treat the profile as done.
+  Future<void> completeOnboarding(
+    String userId, {
+    required Future<void> Function() markProfileCompleted,
+  }) async {
+    await migrate(userId);
+    await markProfileCompleted();
+  }
+
   /// Loads the legacy onboarding draft from SharedPreferences.
   Future<_LegacyDraftData> _loadLegacyDraft(String userId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -95,18 +107,24 @@ class ProfileMigrationService {
   Future<void> migrate(String userId) async {
     final state = await ProfileMigrationStorage.getMigrationState(userId);
     if (state == ProfileMigrationState.migrated) {
-      AppLogger.info(LogCategory.profile,
-          '[PROFILE_MIGRATION] Profile already migrated for $userId');
+      AppLogger.info(
+        LogCategory.profile,
+        '[PROFILE_MIGRATION] Profile already migrated for $userId',
+      );
       return;
     }
 
-    AppLogger.info(LogCategory.profile,
-        '[PROFILE_MIGRATION] Starting profile migration for $userId (State: $state)');
+    AppLogger.info(
+      LogCategory.profile,
+      '[PROFILE_MIGRATION] Starting profile migration for $userId (State: $state)',
+    );
 
     // Set state to migrating if we are starting fresh
     if (state == ProfileMigrationState.localOnly) {
       await ProfileMigrationStorage.setMigrationState(
-          userId, ProfileMigrationState.migrating);
+        userId,
+        ProfileMigrationState.migrating,
+      );
       await ProfileMigrationStorage.setCheckpoints(userId, {
         'profile': false,
         'education': false,
@@ -122,8 +140,10 @@ class ProfileMigrationService {
     try {
       // ─── STEP 1: BASIC PROFILE ──────────────────────────────────────────
       if (checkpoints['profile'] != true) {
-        AppLogger.info(LogCategory.profile,
-            '[PROFILE_MIGRATION] Migrating profile metadata...');
+        AppLogger.info(
+          LogCategory.profile,
+          '[PROFILE_MIGRATION] Migrating profile metadata...',
+        );
         final serverProfile = await _repository.getProfile(userId);
 
         // Scalar Merge Rule: server ?? local
@@ -150,13 +170,16 @@ class ProfileMigrationService {
 
       // ─── STEP 2: EDUCATION ──────────────────────────────────────────────
       if (checkpoints['education'] != true) {
-        AppLogger.info(LogCategory.profile,
-            '[PROFILE_MIGRATION] Migrating education history...');
+        AppLogger.info(
+          LogCategory.profile,
+          '[PROFILE_MIGRATION] Migrating education history...',
+        );
 
         if (draft.eduCollege.isNotEmpty) {
           final serverEduList = await _repository.getEducation(userId);
-          final exists =
-              serverEduList.any((e) => e.institution == draft.eduCollege);
+          final exists = serverEduList.any(
+            (e) => e.institution == draft.eduCollege,
+          );
 
           if (!exists) {
             final eduItem = UserEducationModel(
@@ -172,9 +195,9 @@ class ProfileMigrationService {
 
           // KTU ID Sync to users.college_roll if provided
           if (draft.eduKtuid.isNotEmpty) {
-            await supabase.from('users').update({
-              'college_roll': draft.eduKtuid,
-            }).eq('id', userId);
+            await supabase
+                .from('users')
+                .update({'college_roll': draft.eduKtuid}).eq('id', userId);
           }
         }
 
@@ -185,7 +208,9 @@ class ProfileMigrationService {
       // ─── STEP 3: SKILLS ─────────────────────────────────────────────────
       if (checkpoints['skills'] != true) {
         AppLogger.info(
-            LogCategory.profile, '[PROFILE_MIGRATION] Migrating skills...');
+          LogCategory.profile,
+          '[PROFILE_MIGRATION] Migrating skills...',
+        );
 
         if (draft.skills.isNotEmpty) {
           final serverSkills = await _repository.getSkills(userId);
@@ -220,14 +245,18 @@ class ProfileMigrationService {
       // ─── STEP 4: INTERESTS ──────────────────────────────────────────────
       if (checkpoints['interests'] != true) {
         AppLogger.info(
-            LogCategory.profile, '[PROFILE_MIGRATION] Migrating interests...');
+          LogCategory.profile,
+          '[PROFILE_MIGRATION] Migrating interests...',
+        );
 
         if (draft.interests.isNotEmpty) {
           final serverInterests = await _repository.getInterests(userId);
 
           // Array/List Merge Rule: union(server, local)
-          final mergedInterests =
-              {...serverInterests, ...draft.interests}.toList();
+          final mergedInterests = {
+            ...serverInterests,
+            ...draft.interests,
+          }.toList();
           await _repository.setInterests(userId, mergedInterests);
         }
 
@@ -237,8 +266,10 @@ class ProfileMigrationService {
 
       // ─── STEP 5: SOCIAL LINKS ───────────────────────────────────────────
       if (checkpoints['social_links'] != true) {
-        AppLogger.info(LogCategory.profile,
-            '[PROFILE_MIGRATION] Migrating social links...');
+        AppLogger.info(
+          LogCategory.profile,
+          '[PROFILE_MIGRATION] Migrating social links...',
+        );
 
         final socialMap = {
           'github': draft.socialGithub,
@@ -264,12 +295,18 @@ class ProfileMigrationService {
       }
 
       // ─── MIGRATION COMPLETED ────────────────────────────────────────────
-      AppLogger.info(LogCategory.profile,
-          '[PROFILE_MIGRATION] Profile migration completed successfully for $userId');
+      AppLogger.info(
+        LogCategory.profile,
+        '[PROFILE_MIGRATION] Profile migration completed successfully for $userId',
+      );
       await ProfileMigrationStorage.setMigrationState(
-          userId, ProfileMigrationState.migrated);
+        userId,
+        ProfileMigrationState.migrated,
+      );
       await ProfileMigrationStorage.setSchemaVersion(
-          userId, ProfileMigrationStorage.currentProfileSchemaVersion);
+        userId,
+        ProfileMigrationStorage.currentProfileSchemaVersion,
+      );
       await ProfileMigrationStorage.clearCheckpoints(userId);
     } catch (e, st) {
       AppLogger.error(
@@ -282,7 +319,9 @@ class ProfileMigrationService {
       // Do not reset state to localOnly; keep it as migrating so it continues on next start.
       if (e is! SocketException) {
         await ProfileMigrationStorage.setMigrationState(
-            userId, ProfileMigrationState.failed);
+          userId,
+          ProfileMigrationState.failed,
+        );
       }
       rethrow;
     }
