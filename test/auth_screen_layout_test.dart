@@ -78,6 +78,20 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('login fits the I2301 portrait safe area without scrolling',
+      (tester) async {
+    // The physical device is 1080x2400 at 440 dpi (about 393x873 dp).
+    // Allow for system bars: the app receives roughly 824 dp of height.
+    tester.view.physicalSize = const Size(393, 824);
+    await pumpRoute(tester, const LoginScreen());
+
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.text('Create Account'), findsOneWidget);
+    expect(tester.getRect(find.text('Create Account')).bottom,
+        lessThanOrEqualTo(824));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('login action stays visible when the keyboard is open',
       (tester) async {
     await pumpRoute(tester, const LoginScreen());
@@ -127,6 +141,19 @@ void main() {
 
     expect(find.text('Verify your email.'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+      'registration fits the I2301 portrait safe area without scrolling',
+      (tester) async {
+    tester.view.physicalSize = const Size(393, 824);
+    await pumpRoute(tester, const RegisterScreen());
+
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.text('Create account'), findsOneWidget);
+    expect(tester.getRect(find.text('Create account')).bottom,
+        lessThanOrEqualTo(824));
     expect(tester.takeException(), isNull);
   });
 

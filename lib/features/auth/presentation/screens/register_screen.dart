@@ -118,7 +118,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxHeight < 740 || keyboardIsVisible;
+              // Use the compact form on portrait phones after system bars;
+              // the spacious form overflows on the I2301's 824 dp safe area.
+              final compact = constraints.maxHeight < 900 || keyboardIsVisible;
               final needsScroll =
                   keyboardIsVisible || constraints.maxHeight < 560;
               final content = _RegisterContent(

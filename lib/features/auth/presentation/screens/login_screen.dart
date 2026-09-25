@@ -107,7 +107,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               final needsScroll =
                   keyboardIsVisible || constraints.maxHeight < 600;
               final content = _LoginContent(
-                compact: constraints.maxHeight < 760 || keyboardIsVisible,
+                // Most tall Android phones still have under 900 logical pixels
+                // after system bars. The spacious variant overflows there.
+                compact: constraints.maxHeight < 900 || keyboardIsVisible,
                 googleAvailable: googleAvailable,
                 isLoading: _isLoading,
                 isGoogleLoading: _isGoogleLoading,
