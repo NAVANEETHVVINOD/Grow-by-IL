@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/core/theme/rc5_design_tokens.dart';
 import 'package:grow/features/auth/data/auth_repository.dart';
+import 'package:grow/features/profile/data/profile_ecosystem_repository.dart';
+import 'package:grow/features/profile/data/profile_migration_service.dart';
 import 'package:grow/shared/repositories/supabase_client.dart';
 import 'package:grow/shared/widgets/rc5/rc5_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,10 +23,11 @@ final rc5SkillsProvider =
     StateNotifierProvider<_SkillLevelNotifier, Map<String, int>>((ref) {
   return _SkillLevelNotifier();
 });
-final rc5GoalsProvider =
-    StateNotifierProvider<_StringSetNotifier, Set<String>>((ref) {
-  return _StringSetNotifier(maxItems: 3);
-});
+final rc5GoalsProvider = StateNotifierProvider<_StringSetNotifier, Set<String>>(
+  (ref) {
+    return _StringSetNotifier(maxItems: 3);
+  },
+);
 
 class RC5OnboardingScreen extends ConsumerStatefulWidget {
   const RC5OnboardingScreen({super.key});
@@ -44,6 +47,7 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
 
   bool _isLoadingDraft = true;
   bool _isSaving = false;
+  bool _hasCompletedOnboarding = false;
 
   @override
   void initState() {
@@ -53,7 +57,7 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
 
   @override
   void dispose() {
-    _persistDraft();
+    if (!_hasCompletedOnboarding) _persistDraft();
     _pageController.dispose();
     _usernameController.dispose();
     _bioController.dispose();
@@ -81,8 +85,10 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
       skills[parts.first] = int.tryParse(parts.last) ?? 1;
     }
 
-    ref.read(rc5OnboardingStepProvider.notifier).state =
-        step.clamp(0, _stepCount - 1);
+    ref.read(rc5OnboardingStepProvider.notifier).state = step.clamp(
+      0,
+      _stepCount - 1,
+    );
     ref.read(rc5UsernameProvider.notifier).state = username;
     ref.read(rc5BioProvider.notifier).state = bio;
     ref.read(rc5UserTypeProvider.notifier).state = userType;
@@ -106,27 +112,27 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
   }
 
   Future<void> _persistDraft() async {
-    final prefs = await SharedPreferences.getInstance();
     final key = _draftKey;
+    final step = ref.read(rc5OnboardingStepProvider);
+    final username = ref.read(rc5UsernameProvider);
+    final bio = ref.read(rc5BioProvider);
+    final userType = ref.read(rc5UserTypeProvider);
+    final department = ref.read(rc5DepartmentProvider);
+    final interests = ref.read(rc5InterestsProvider).toList();
+    final goals = ref.read(rc5GoalsProvider).toList();
     final skills = ref.read(rc5SkillsProvider);
+    final skillEntries =
+        skills.entries.map((entry) => '${entry.key}:${entry.value}').toList();
+    final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setInt('$key.step', ref.read(rc5OnboardingStepProvider));
-    await prefs.setString('$key.username', ref.read(rc5UsernameProvider));
-    await prefs.setString('$key.bio', ref.read(rc5BioProvider));
-    await prefs.setString('$key.userType', ref.read(rc5UserTypeProvider));
-    await prefs.setString('$key.department', ref.read(rc5DepartmentProvider));
-    await prefs.setStringList(
-      '$key.interests',
-      ref.read(rc5InterestsProvider).toList(),
-    );
-    await prefs.setStringList(
-      '$key.goals',
-      ref.read(rc5GoalsProvider).toList(),
-    );
-    await prefs.setStringList(
-      '$key.skills',
-      skills.entries.map((entry) => '${entry.key}:${entry.value}').toList(),
-    );
+    await prefs.setInt('$key.step', step);
+    await prefs.setString('$key.username', username);
+    await prefs.setString('$key.bio', bio);
+    await prefs.setString('$key.userType', userType);
+    await prefs.setString('$key.department', department);
+    await prefs.setStringList('$key.interests', interests);
+    await prefs.setStringList('$key.goals', goals);
+    await prefs.setStringList('$key.skills', skillEntries);
   }
 
   Future<void> _completeOnboarding() async {
@@ -134,19 +140,35 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
 
     setState(() => _isSaving = true);
     try {
+      await _persistDraft();
       final user = supabase.auth.currentUser;
       if (user == null) {
         if (mounted) context.go('/login');
         return;
       }
 
-      await supabase.from('users').update({
-        'profile_completed': true,
-      }).eq('id', user.id);
+      final migrationService = ProfileMigrationService(
+        ref.read(profileEcosystemRepositoryProvider),
+      );
+      await migrationService.completeOnboarding(
+        user.id,
+        markProfileCompleted: () async {
+          final updatedUser = await supabase
+              .from('users')
+              .update({'profile_completed': true})
+              .eq('id', user.id)
+              .select('id')
+              .maybeSingle();
+          if (updatedUser == null) {
+            throw StateError('Could not save profile completion status.');
+          }
+        },
+      );
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('$_draftKey.step');
       await prefs.setBool('$_draftKey.completedLocally', true);
+      _hasCompletedOnboarding = true;
 
       ref.invalidate(currentUserProvider);
 
@@ -183,9 +205,7 @@ class _RC5OnboardingScreenState extends ConsumerState<RC5OnboardingScreen> {
     if (_isLoadingDraft) {
       return const Scaffold(
         backgroundColor: RC5DesignTokens.background,
-        body: Center(
-          child: RC5Skeleton(width: 260, height: 420),
-        ),
+        body: Center(child: RC5Skeleton(width: 260, height: 420)),
       );
     }
 
@@ -821,10 +841,7 @@ class _PreviewStep extends ConsumerWidget {
             const SizedBox(height: RC5DesignTokens.space4),
             Text(bio),
             const SizedBox(height: RC5DesignTokens.space4),
-            Text(
-              department,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            Text(department, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: RC5DesignTokens.space4),
             Wrap(
               spacing: RC5DesignTokens.space2,
@@ -904,10 +921,9 @@ class _ValuePill extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
                 ),
                 Text(
                   subtitle,
@@ -944,17 +960,16 @@ class _ChoiceContent extends StatelessWidget {
         const SizedBox(height: RC5DesignTokens.space4),
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .titleSmall
-              ?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 3),
         Text(
           subtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: RC5DesignTokens.textSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: RC5DesignTokens.textSecondary),
         ),
       ],
     );
@@ -988,10 +1003,9 @@ class _SkillChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(width: RC5DesignTokens.space2),
             Row(
