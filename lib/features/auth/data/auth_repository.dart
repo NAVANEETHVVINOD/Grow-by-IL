@@ -31,6 +31,9 @@ final currentUserProvider = FutureProvider<UserModel?>((ref) async {
 class AuthRepository {
   AuthRepository(this._client, this._googleAuth);
 
+  // Google exposes this as auth metadata. It is not a public.users column.
+  static const _googleFullNameMetadataKey = "full_name";
+
   final SupabaseClient _client;
   final GoogleAuthService _googleAuth;
 
@@ -353,7 +356,7 @@ class AuthRepository {
 
   String _profileNameFromMetadata(User authUser) {
     return _optionalProfileMetadata(authUser, 'name') ??
-        _optionalProfileMetadata(authUser, 'full_name') ??
+        _optionalProfileMetadata(authUser, _googleFullNameMetadataKey) ??
         authUser.email?.split('@').first ??
         '';
   }
