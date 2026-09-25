@@ -55,6 +55,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (emailAlreadyVerified) {
         context.go('/profile-setup');
       } else {
+        // The password field can still own focus when registration completes.
+        // Close the keyboard before showing the fixed-height confirmation
+        // state so the resend result and both actions remain visible.
+        FocusManager.instance.primaryFocus?.unfocus();
         setState(() {
           _pendingConfirmationEmail = _emailController.text.trim();
           _awaitingConfirmation = true;
