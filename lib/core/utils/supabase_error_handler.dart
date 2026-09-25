@@ -9,7 +9,9 @@ String handleSupabaseError(Object error) {
   if (error is AuthException) {
     AppLogger.warn(LogCategory.auth, 'AuthException: ${error.message}');
     final message = error.message.toLowerCase();
-    if (message.contains('provider') && message.contains('not enabled')) {
+    if (error.code == 'provider_disabled' ||
+        message.contains('provider_disabled') ||
+        (message.contains('provider') && message.contains('not enabled'))) {
       return 'Google sign-in is not configured yet. Use email and password for now.';
     }
     if (message.contains('rate limit') ||

@@ -124,6 +124,8 @@ void main() {
           email: any(named: 'email'),
           password: any(named: 'password'),
         )).thenAnswer((_) async => false);
+    when(() => repository.resendSignupConfirmation(email: any(named: 'email')))
+        .thenAnswer((_) async {});
     await pumpRoute(
       tester,
       const RegisterScreen(),
@@ -141,6 +143,16 @@ void main() {
 
     expect(find.text('Verify your email.'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Resend email'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('fresh email was requested'),
+      findsOneWidget,
+    );
+    expect(find.byType(SnackBar), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

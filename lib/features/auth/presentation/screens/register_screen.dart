@@ -26,6 +26,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _isLoading = false;
   bool _awaitingConfirmation = false;
   bool _isResendingConfirmation = false;
+  bool _resendFeedbackIsError = false;
+  String? _resendFeedback;
   String? _pendingConfirmationEmail;
 
   @override
@@ -76,26 +78,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final email = _pendingConfirmationEmail;
     if (email == null || _isResendingConfirmation) return;
 
-    setState(() => _isResendingConfirmation = true);
+    setState(() {
+      _isResendingConfirmation = true;
+      _resendFeedback = null;
+    });
     try {
       await ref
           .read(authRepositoryProvider)
           .resendSignupConfirmation(email: email);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('A fresh confirmation email has been sent.'),
-          backgroundColor: AppColors.green,
-        ),
-      );
+      setState(() {
+        _resendFeedback =
+            'If this address needs confirmation, a fresh email was requested. Check your spam folder too.';
+        _resendFeedbackIsError = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(handleSupabaseError(e)),
-          backgroundColor: AppColors.red,
-        ),
-      );
+      setState(() {
+        _resendFeedback = handleSupabaseError(e);
+        _resendFeedbackIsError = true;
+      });
     } finally {
       if (mounted) setState(() => _isResendingConfirmation = false);
     }
@@ -133,6 +135,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 passwordController: _passwordController,
                 isLoading: _isLoading,
                 isResending: _isResendingConfirmation,
+                feedbackMessage: _resendFeedback,
+                feedbackIsError: _resendFeedbackIsError,
                 onRegister: _register,
                 onResend: _resendConfirmation,
                 onSignIn: () => context.go('/login'),
@@ -170,6 +174,8 @@ class _RegisterContent extends StatelessWidget {
     required this.passwordController,
     required this.isLoading,
     required this.isResending,
+    required this.feedbackMessage,
+    required this.feedbackIsError,
     required this.onRegister,
     required this.onResend,
     required this.onSignIn,
@@ -184,6 +190,8 @@ class _RegisterContent extends StatelessWidget {
   final TextEditingController passwordController;
   final bool isLoading;
   final bool isResending;
+  final String? feedbackMessage;
+  final bool feedbackIsError;
   final VoidCallback onRegister;
   final VoidCallback onResend;
   final VoidCallback onSignIn;
@@ -204,6 +212,8 @@ class _RegisterContent extends StatelessWidget {
             onSignIn: onSignIn,
             onResend: onResend,
             isResending: isResending,
+            feedbackMessage: feedbackMessage,
+            feedbackIsError: feedbackIsError,
           )
         else
           NeoCard(
@@ -332,11 +342,15 @@ class _ConfirmationSentCard extends StatelessWidget {
     required this.onSignIn,
     required this.onResend,
     required this.isResending,
+    required this.feedbackMessage,
+    required this.feedbackIsError,
   });
 
   final VoidCallback onSignIn;
   final VoidCallback onResend;
   final bool isResending;
+  final String? feedbackMessage;
+  final bool feedbackIsError;
 
   @override
   Widget build(BuildContext context) {
@@ -352,11 +366,19 @@ class _ConfirmationSentCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   )),
           const SizedBox(height: AppSizes.sm),
-          Text(
-            'Open the newest link in your inbox to confirm your address, then return here and sign in. Confirmation does not sign you in automatically.',
-            style:
-                Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
-          ),
+          if (feedbackMessage == null)
+            Text(
+              'Check your inbox and spam for a confirmation link. If you already have a Grow account, sign in or reset your password.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(height: 1.35),
+            )
+          else
+            _ConfirmationFeedback(
+              message: feedbackMessage!,
+              isError: feedbackIsError,
+            ),
           const SizedBox(height: AppSizes.md),
           NeoButton(
             label: 'Resend email',
@@ -375,13 +397,61 @@ class _ConfirmationSentCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.sm),
           Text(
-            'Older or already-used links cannot sign you in.',
+            'No email? Check spam or ask the Grow administrator to check delivery settings. Old or used links cannot sign you in.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.35,
                 ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ConfirmationFeedback extends StatelessWidget {
+  const _ConfirmationFeedback({
+    required this.message,
+    required this.isError,
+  });
+
+  final String message;
+  final bool isError;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isError ? AppColors.red : AppColors.green;
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSizes.sm),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .2),
+          border: Border.all(color: AppColors.navy, width: 1.5),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              size: 20,
+              color: AppColors.navy,
+            ),
+            const SizedBox(width: AppSizes.xs),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.navy,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

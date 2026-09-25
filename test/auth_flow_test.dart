@@ -211,6 +211,42 @@ void main() {
       verifyNever(() => mockQueryBuilder.insert(any()));
     });
 
+    test('obfuscated existing-email signup response creates no profile row',
+        () async {
+      // Supabase may return an obfuscated user with no identities for an
+      // address already registered. Grow must not create another public
+      // profile or treat that response as an authenticated account.
+      final obfuscatedUser = User(
+        id: 'existing-user-123',
+        appMetadata: const {},
+        userMetadata: const {},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'existing@example.com',
+        identities: const <UserIdentity>[],
+      );
+
+      when(() => mockAuth.signUp(
+            email: 'existing@example.com',
+            password: 'securepassword',
+            emailRedirectTo: AppAuthRedirects.emailConfirmationLanding,
+            data: any(named: 'data'),
+          )).thenAnswer((_) async => AuthResponse(user: obfuscatedUser));
+
+      final authRepo = AuthRepository(mockSupabase, mockGoogleAuth);
+
+      await expectLater(
+        authRepo.signUp(
+          name: 'Existing User',
+          email: 'existing@example.com',
+          password: 'securepassword',
+        ),
+        completion(isFalse),
+      );
+
+      verifyNever(() => mockQueryBuilder.insert(any()));
+    });
+
     test('Sign-up does not treat a temporary session as email verification',
         () async {
       final pendingConfirmationUser = User(
