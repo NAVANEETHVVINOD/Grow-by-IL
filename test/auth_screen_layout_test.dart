@@ -156,6 +156,44 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('confirmation resend feedback stays visible on a compact phone',
+      (tester) async {
+    tester.view.physicalSize = const Size(393, 824);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final repository = _MockAuthRepository();
+    when(() => repository.signUp(
+          name: any(named: 'name'),
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        )).thenAnswer((_) async => false);
+    when(() => repository.resendSignupConfirmation(email: any(named: 'email')))
+        .thenAnswer((_) async {});
+    await pumpRoute(
+      tester,
+      const RegisterScreen(),
+      repository: repository,
+    );
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'Ada Maker');
+    await tester.enterText(find.byType(TextFormField).at(1), 'ada@example.org');
+    await tester.enterText(find.byType(TextFormField).at(2), 'StrongPass123');
+    await tester.tap(find.text('Create account'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Resend email'));
+    await tester.pumpAndSettle();
+
+    final feedback = find.textContaining('fresh email was requested');
+    expect(feedback, findsOneWidget);
+    expect(tester.getRect(feedback).top, greaterThanOrEqualTo(0));
+    expect(tester.getRect(feedback).bottom, lessThanOrEqualTo(824));
+    expect(tester.getRect(find.text('Go to sign in')).bottom,
+        lessThanOrEqualTo(824));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
       'registration fits the I2301 portrait safe area without scrolling',
       (tester) async {
