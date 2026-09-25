@@ -171,7 +171,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (!AppRole.isAdminRole(user.role)) {
           AppLogger.warn(
             LogCategory.router,
-            'UNAUTHORIZED_ADMIN_ACCESS | role=${user.role} user=${session.user.email}',
+            // Do not place a member's email address in client logs. The role
+            // supplies enough diagnostic context without retaining PII.
+            'UNAUTHORIZED_ADMIN_ACCESS | role=${user.role}',
           );
           return '/unauthorized';
         }
