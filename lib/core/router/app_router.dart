@@ -6,17 +6,18 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
-import '../../features/akathalam/presentation/screens/akathalam_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/auth_callback_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
-import '../../features/auth/presentation/screens/rc5_onboarding_screen.dart';
+import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/unauthorized_screen.dart';
 import '../../features/events/presentation/screens/events_screen.dart';
 import '../../features/explore/presentation/screens/event_details_screen.dart';
-import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/rc5_home_screen.dart';
 import '../../features/home/presentation/screens/mentorship_screen.dart';
 import '../../features/home/presentation/screens/knowledge_base_screen.dart';
@@ -71,13 +72,15 @@ final routerProvider = Provider<GoRouter>((ref) {
   final filteredAuthStream = supabase.auth.onAuthStateChange.where((event) {
     return event.event == AuthChangeEvent.signedIn ||
         event.event == AuthChangeEvent.signedOut ||
+        event.event == AuthChangeEvent.passwordRecovery ||
         event.event == AuthChangeEvent.initialSession;
   });
 
-  return GoRouter(
+  final authRefresh = GoRouterRefreshStream(filteredAuthStream);
+  final router = GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: false,
-    refreshListenable: GoRouterRefreshStream(filteredAuthStream),
+    refreshListenable: authRefresh,
     redirect: (context, state) {
       final session = supabase.auth.currentSession;
       final path = state.uri.path;
@@ -87,6 +90,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         '/onboarding',
         '/login',
         '/register',
+        '/callback',
+        '/forgot-password',
+        '/reset-password',
       };
       final isPublic = publicRoutes.contains(path);
 
@@ -103,13 +109,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
+      // An email callback may briefly create a Supabase session. It must stay
+      // on its dedicated screen so Grow can clear that session and require an
+      // intentional email-and-password sign-in.
+      if (path == '/callback') return null;
+
       if (session != null &&
           (path == '/onboarding' || path == '/login' || path == '/register')) {
+        // Email confirmation proves account ownership; it does not complete
+        // Grow's mandatory profile setup. This guard also prevents a verified
+        // user from reaching Home by reopening the public introduction route.
+        final user = ref.read(currentUserProvider).valueOrNull;
+        // An unavailable profile must never be treated as completed.
+        final destination =
+            user?.profileCompleted == true ? '/home' : '/profile-setup';
         AppLogger.info(
           LogCategory.router,
-          'AUTH_USER_REDIRECTED_HOME | from=$path',
+          'AUTH_USER_REDIRECTED | from=$path to=$destination',
         );
-        return '/home';
+        return destination;
       }
 
       // ---------------------------------------------------------
@@ -122,10 +140,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         final userProfileAsync = ref.read(currentUserProvider);
         final user = userProfileAsync.valueOrNull;
 
-        if (user != null && !user.profileCompleted) {
+        if (user == null || !user.profileCompleted) {
           AppLogger.warn(
             LogCategory.router,
-            'INCOMPLETE_PROFILE_REDIRECT | path=$path',
+            'UNVERIFIED_PROFILE_GATE | path=$path',
           );
           return '/profile-setup';
         }
@@ -153,7 +171,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (!AppRole.isAdminRole(user.role)) {
           AppLogger.warn(
             LogCategory.router,
-            'UNAUTHORIZED_ADMIN_ACCESS | role=${user.role} user=${session.user.email}',
+            // Do not place a member's email address in client logs. The role
+            // supplies enough diagnostic context without retaining PII.
+            'UNAUTHORIZED_ADMIN_ACCESS | role=${user.role}',
           );
           return '/unauthorized';
         }
@@ -172,12 +192,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
+        path: '/callback',
+        builder: (context, state) => AuthCallbackScreen(callbackUri: state.uri),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/profile-setup',
-        builder: (context, state) => const RC5OnboardingScreen(),
+        builder: (context, state) => const ProfileSetupScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -195,8 +227,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/akathalam',
-                builder: (context, state) => const AkathalamScreen(),
+                path: '/lab',
+                builder: (context, state) => const LabScreen(
+                  showBackButton: false,
+                ),
               ),
             ],
           ),
@@ -269,15 +303,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/donate',
         builder: (context, state) => const DonationScreen(),
       ),
-      GoRoute(path: '/lab', builder: (context, state) => const LabScreen()),
       GoRoute(path: '/tools', builder: (context, state) => const ToolsScreen()),
       GoRoute(
         path: '/events',
         builder: (context, state) => const EventsScreen(),
-      ),
-      GoRoute(
-        path: '/explore',
-        builder: (context, state) => const ExploreScreen(),
       ),
       GoRoute(
         path: '/events/:id',
@@ -329,4 +358,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  // A sign-in event can arrive before the profile query completes. Re-check
+  // the gate when that query resolves so an existing member reaches Home.
+  ref.listen(currentUserProvider, (_, __) => router.refresh());
+  ref.onDispose(() {
+    router.dispose();
+    authRefresh.dispose();
+  });
+  return router;
 });

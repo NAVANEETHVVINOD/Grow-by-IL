@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../../core/constants/app_defaults.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../shared/repositories/supabase_client.dart';
@@ -12,6 +11,11 @@ class GoogleAuthService {
     'GOOGLE_WEB_CLIENT_ID',
     defaultValue: '',
   );
+
+  /// Native Google sign-in needs the Supabase-compatible web OAuth client ID.
+  /// Keep the button unavailable rather than sending users into a known-broken
+  /// flow when it has not been injected by the build environment.
+  static bool get isConfigured => _webClientId.isNotEmpty;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
@@ -36,17 +40,7 @@ class GoogleAuthService {
         'serverClientIdSetting=${!kIsWeb ? 'explicit' : 'none'}',
       );
 
-      if (_webClientId.isEmpty) {
-        AppLogger.warn(
-          LogCategory.auth,
-          'GOOGLE_SIGN_IN_WARNING | GOOGLE_WEB_CLIENT_ID is empty! Google Sign-In will likely fail backend verification (ApiException 7).',
-        );
-      }
-
-      AppLogger.info(
-        LogCategory.auth,
-        'GOOGLE_PICKER_LAUNCHING | serverClientId=${_googleSignIn.serverClientId} | clientId=${_googleSignIn.clientId}',
-      );
+      AppLogger.info(LogCategory.auth, 'GOOGLE_PICKER_LAUNCHING');
 
       final googleUser = await _googleSignIn.signIn();
 
@@ -58,10 +52,7 @@ class GoogleAuthService {
         return null;
       }
 
-      AppLogger.success(
-        LogCategory.auth,
-        'GOOGLE_USER_SELECTED | email=${googleUser.email} | id=${googleUser.id}',
-      );
+      AppLogger.success(LogCategory.auth, 'GOOGLE_USER_SELECTED');
 
       final googleAuth = await googleUser.authentication;
 
@@ -78,36 +69,8 @@ class GoogleAuthService {
         );
       }
 
-      // 2. Firebase Session Verification (with dynamic fallback protection)
-      try {
-        AppLogger.info(
-          LogCategory.auth,
-          'FIREBASE_VERIFICATION_START | idTokenLength=${googleAuth.idToken?.length} | accessTokenLength=${googleAuth.accessToken?.length}',
-        );
-        final fb.AuthCredential credential = fb.GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        AppLogger.info(
-          LogCategory.auth,
-          'FIREBASE_SIGNING_IN_WITH_CREDENTIAL | credentialProviderId=${credential.providerId}',
-        );
-        final fbUserCred =
-            await fb.FirebaseAuth.instance.signInWithCredential(credential);
-        AppLogger.success(
-          LogCategory.auth,
-          'FIREBASE_VERIFICATION_SUCCESS | email=${fbUserCred.user?.email} | uid=${fbUserCred.user?.uid}',
-        );
-      } catch (fbError, fbStack) {
-        AppLogger.error(
-          LogCategory.auth,
-          'FIREBASE_VERIFICATION_FAILED | Proceeding with pure direct Supabase login fallback',
-          error: fbError,
-          stack: fbStack,
-        );
-      }
-
-      // 3. Authenticate with Supabase using the Google ID Token
+      // Authenticate with Supabase using the Google ID token. Firebase is used
+      // elsewhere for platform services; it is not a second account authority.
       AppLogger.info(
         LogCategory.auth,
         'SUPABASE_SIGN_IN_START | provider=google | idTokenLength=${googleAuth.idToken?.length}',
@@ -140,10 +103,7 @@ class GoogleAuthService {
         }
       }
 
-      AppLogger.info(
-        LogCategory.auth,
-        'GOOGLE_SIGN_IN_COMPLETE | userId=${response.user?.id}',
-      );
+      AppLogger.info(LogCategory.auth, 'GOOGLE_SIGN_IN_COMPLETE');
       return response;
     } catch (e, st) {
       AppLogger.error(
@@ -159,7 +119,6 @@ class GoogleAuthService {
   Future<void> signOut() async {
     try {
       await _googleSignIn.signOut();
-      await fb.FirebaseAuth.instance.signOut();
       AppLogger.info(LogCategory.auth, 'GOOGLE_SIGN_OUT_COMPLETE');
     } catch (e, st) {
       AppLogger.error(
