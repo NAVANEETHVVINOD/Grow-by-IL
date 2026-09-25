@@ -277,6 +277,18 @@ void main() {
           )).called(1);
     });
 
+    test('profile repository rejects role updates before a database call',
+        () async {
+      final authRepo = AuthRepository(mockSupabase, mockGoogleAuth);
+
+      await expectLater(
+        authRepo.updateProfile('user-123', {'role': 'super_admin'}),
+        throwsArgumentError,
+      );
+
+      verifyNever(() => mockSupabase.from(any()));
+    });
+
     test('Password recovery request keeps the approved mobile callback',
         () async {
       when(() => mockAuth.resetPasswordForEmail(

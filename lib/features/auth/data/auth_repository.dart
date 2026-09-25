@@ -33,6 +33,12 @@ class AuthRepository {
 
   // Google exposes this as auth metadata. It is not a public.users column.
   static const _googleFullNameMetadataKey = "full_name";
+  static const _clientEditableUserFields = {
+    'name',
+    'phone',
+    'college_roll',
+    'avatar_url',
+  };
 
   final SupabaseClient _client;
   final GoogleAuthService _googleAuth;
@@ -371,6 +377,20 @@ class AuthRepository {
     String userId,
     Map<String, dynamic> updates,
   ) async {
+    final forbiddenFields = updates.keys
+        .where((field) => !_clientEditableUserFields.contains(field))
+        .toList(growable: false);
+    if (forbiddenFields.isNotEmpty) {
+      throw ArgumentError.value(
+        forbiddenFields,
+        'updates',
+        'These users fields are not client-editable.',
+      );
+    }
+    if (updates.isEmpty) {
+      throw ArgumentError.value(updates, 'updates', 'Must not be empty.');
+    }
+
     AppLogger.action(LogCategory.auth, 'UPDATE_PROFILE_STARTED');
     try {
       await guardedSupabaseCall(

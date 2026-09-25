@@ -118,11 +118,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               final keyboardIsVisible =
                   MediaQuery.viewInsetsOf(context).bottom > 0;
               final compact = constraints.maxHeight < 740 || keyboardIsVisible;
-              final needsScroll = _awaitingConfirmation ||
-                  keyboardIsVisible ||
-                  constraints.maxHeight < 620;
+              final needsScroll =
+                  keyboardIsVisible || constraints.maxHeight < 560;
               final content = _RegisterContent(
-                compact: compact,
+                compact: compact || _awaitingConfirmation,
                 awaitingConfirmation: _awaitingConfirmation,
                 formKey: _formKey,
                 nameController: _nameController,
@@ -190,8 +189,10 @@ class _RegisterContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _RegisterIntro(compact: compact),
-        SizedBox(height: gap),
+        if (!awaitingConfirmation) ...[
+          _RegisterIntro(compact: compact),
+          SizedBox(height: gap),
+        ],
         if (awaitingConfirmation)
           _ConfirmationSentCard(
             onSignIn: onSignIn,
@@ -238,32 +239,34 @@ class _RegisterContent extends StatelessWidget {
               ),
             ),
           ),
-        SizedBox(height: compact ? AppSizes.md : AppSizes.xl),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 4,
-          children: [
-            Text(
-              'Already have an account?',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-            TextButton(
-              onPressed: onSignIn,
-              child: Text(
-                'Sign in',
+        if (!awaitingConfirmation) ...[
+          SizedBox(height: compact ? AppSizes.md : AppSizes.xl),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            children: [
+              Text(
+                'Already have an account?',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.navy,
-                      fontWeight: FontWeight.w700,
-                      decoration: TextDecoration.underline,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
                     ),
               ),
-            ),
-          ],
-        ),
+              TextButton(
+                onPressed: onSignIn,
+                child: Text(
+                  'Sign in',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.navy,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -344,13 +347,13 @@ class _ConfirmationSentCard extends StatelessWidget {
                   )),
           const SizedBox(height: AppSizes.sm),
           Text(
-            'We sent a confirmation link to your inbox. Open the newest email, confirm your address, then return to Grow~ and sign in with the same email and password.',
+            'Open the newest link in your inbox to confirm your address, then return here and sign in. Confirmation does not sign you in automatically.',
             style:
-                Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.45),
+                Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35),
           ),
-          const SizedBox(height: AppSizes.lg),
+          const SizedBox(height: AppSizes.md),
           NeoButton(
-            label: 'Resend confirmation email',
+            label: 'Resend email',
             icon: Icons.refresh_rounded,
             color: Colors.white,
             isLoading: isResending,
@@ -364,9 +367,9 @@ class _ConfirmationSentCard extends StatelessWidget {
             textColor: Colors.white,
             onPressed: onSignIn,
           ),
-          const SizedBox(height: AppSizes.md),
+          const SizedBox(height: AppSizes.sm),
           Text(
-            'Use the newest confirmation email. Old or already-used links cannot sign you in.',
+            'Older or already-used links cannot sign you in.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.35,

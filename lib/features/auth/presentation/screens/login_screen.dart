@@ -102,10 +102,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // The complete login form fits a normal portrait phone. Only
-              // small landscapes and the software-keyboard state scroll.
+              // Keep the resting portrait screen fully visible. Scrolling is
+              // reserved for the keyboard and genuinely short viewports.
               final needsScroll =
-                  keyboardIsVisible || constraints.maxHeight < 680;
+                  keyboardIsVisible || constraints.maxHeight < 600;
               final content = _LoginContent(
                 compact: constraints.maxHeight < 760 || keyboardIsVisible,
                 googleAvailable: googleAvailable,
