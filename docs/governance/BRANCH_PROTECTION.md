@@ -40,10 +40,18 @@ branch, apply the same protections as `main`:
 
 ## Required Status Checks
 
-The following checks from `.github/workflows/ci.yml` should be required:
+Required check names must match the workflow running for the PR's base branch.
+The two branches currently use different CI workflows:
 
-- `Quality Gate`
-- `Debug APK Build`
+| PR base | Required checks |
+| --- | --- |
+| `main` | `Quality Gate (CI)`, `Android Production Build` |
+| `rc5-release-candidate` | `Quality Gate`, `Debug APK Build` |
+
+The live `main` rule requires the first pair with strict up-to-date checks.
+`Release APK Build` and `GitHub Release` are release jobs, not PR merge checks.
+Re-read the live rules and the exact-head CI run before each merge; do not
+weaken a rule to make a stale or missing check appear green.
 
 ## Recommended Release Rule
 
