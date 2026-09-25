@@ -55,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 640;
+            final compact = constraints.maxHeight < 760;
             return Column(
               children: [
                 Align(
@@ -179,7 +179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         label: _currentPage == _pages.length - 1
                             ? 'Get Started'
                             : 'Next',
-                        width: 140,
+                        width: 190,
                         onPressed: () {
                           if (_currentPage == _pages.length - 1) {
                             final session = supabase.auth.currentSession;

@@ -78,6 +78,30 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('login action stays visible when the keyboard is open',
+      (tester) async {
+    await pumpRoute(tester, const LoginScreen());
+
+    await tester.tap(find.byType(TextFormField).last);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    await tester.pumpAndSettle();
+
+    final availableHeight =
+        tester.view.physicalSize.height / tester.view.devicePixelRatio - 280;
+    for (var index = 0;
+        index < find.byType(TextFormField).evaluate().length;
+        index++) {
+      final fieldRect = tester.getRect(find.byType(TextFormField).at(index));
+      expect(fieldRect.top, greaterThanOrEqualTo(0));
+      expect(fieldRect.bottom, lessThanOrEqualTo(availableHeight));
+    }
+    expect(tester.getRect(find.text('Sign In')).bottom,
+        lessThanOrEqualTo(availableHeight));
+    expect(tester.takeException(), isNull);
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('registration and confirmation fit without scrolling',
       (tester) async {
     final repository = _MockAuthRepository();
@@ -106,10 +130,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('registration action stays visible when the keyboard is open',
+      (tester) async {
+    await pumpRoute(tester, const RegisterScreen());
+
+    await tester.tap(find.byType(TextFormField).last);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    await tester.pumpAndSettle();
+
+    final availableHeight =
+        tester.view.physicalSize.height / tester.view.devicePixelRatio - 280;
+    for (var index = 0;
+        index < find.byType(TextFormField).evaluate().length;
+        index++) {
+      final fieldRect = tester.getRect(find.byType(TextFormField).at(index));
+      expect(fieldRect.top, greaterThanOrEqualTo(0));
+      expect(fieldRect.bottom, lessThanOrEqualTo(availableHeight));
+    }
+    expect(tester.getRect(find.text('Create account')).bottom,
+        lessThanOrEqualTo(availableHeight));
+    expect(tester.takeException(), isNull);
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('onboarding fits a standard portrait viewport without scrolling',
       (tester) async {
     await pumpRoute(tester, const OnboardingScreen());
 
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.text('Make ideas real.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(find.text('Build your maker story.'), findsOneWidget);
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(find.text('Find your next build.'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsNothing);
     expect(tester.takeException(), isNull);
   });

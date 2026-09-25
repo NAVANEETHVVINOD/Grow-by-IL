@@ -103,25 +103,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardIsVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return PopScope(
       canPop: false, // prevents back to onboarding/splash
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/login'),
-          ),
-        ),
+        appBar: keyboardIsVisible
+            ? null
+            : AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.go('/login'),
+                ),
+              ),
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final keyboardIsVisible =
-                  MediaQuery.viewInsetsOf(context).bottom > 0;
               final compact = constraints.maxHeight < 740 || keyboardIsVisible;
               final needsScroll =
                   keyboardIsVisible || constraints.maxHeight < 560;
               final content = _RegisterContent(
                 compact: compact || _awaitingConfirmation,
+                keyboardVisible: keyboardIsVisible,
                 awaitingConfirmation: _awaitingConfirmation,
                 formKey: _formKey,
                 nameController: _nameController,
@@ -158,6 +160,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 class _RegisterContent extends StatelessWidget {
   const _RegisterContent({
     required this.compact,
+    required this.keyboardVisible,
     required this.awaitingConfirmation,
     required this.formKey,
     required this.nameController,
@@ -171,6 +174,7 @@ class _RegisterContent extends StatelessWidget {
   });
 
   final bool compact;
+  final bool keyboardVisible;
   final bool awaitingConfirmation;
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
@@ -189,7 +193,7 @@ class _RegisterContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!awaitingConfirmation) ...[
+        if (!awaitingConfirmation && !keyboardVisible) ...[
           _RegisterIntro(compact: compact),
           SizedBox(height: gap),
         ],
@@ -239,7 +243,7 @@ class _RegisterContent extends StatelessWidget {
               ),
             ),
           ),
-        if (!awaitingConfirmation) ...[
+        if (!awaitingConfirmation && !keyboardVisible) ...[
           SizedBox(height: compact ? AppSizes.md : AppSizes.xl),
           Wrap(
             alignment: WrapAlignment.center,
