@@ -53,14 +53,25 @@ and compliance complexity.
 Consequence: V1 payment records should support manual verification and audit
 history.
 
-## ADR-006: External Customer Flow Is Outside Mobile App V1
+## ADR-006: Signed-In External Participant Access Is In Mobile V1
 
-Status: Accepted
+Status: Accepted (supersedes the prior website-first decision)
 
-Reason: External ordering has different identity, payment, support, and public
-UX requirements.
+Reason: The current product decision permits verified-email onboarding for
+external students and professionals, external participation in eligible events,
+and externally submitted fabrication/work requests. The earlier website-first
+decision is therefore no longer the V1 scope boundary.
 
-Consequence: External customers may be handled by a future website/portal.
+Decision: Grow supports signed-in external participants through the same
+verified-account and mandatory-onboarding entry path as other members. Event
+access remains subject to each event's audience and capacity rules. A future
+public or anonymous ordering portal remains out of scope and is not implied by
+external participant onboarding.
+
+Consequence: External participant behaviour must be specified in the relevant
+product contracts before implementation, including routing, safety,
+eligibility, payments, support, privacy, and authorization. This ADR does not
+authorize a schema, RLS policy, role, or client-side permission change.
 
 ## ADR-007: Phase-Gated Architecture Before Persistence
 

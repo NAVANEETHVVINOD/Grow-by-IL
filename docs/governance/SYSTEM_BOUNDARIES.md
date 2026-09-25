@@ -28,7 +28,8 @@ outside the platform for V1.
 - Design tool hosting.
 - Large fabrication file storage as the primary source of truth.
 - WhatsApp replacement or direct messaging.
-- External customer ordering inside the mobile app.
+- Public or anonymous external customer ordering. Signed-in external
+  participants follow the approved member onboarding and workflow contracts.
 - Payment gateway processing.
 - AI quotation.
 - AI design validation.
