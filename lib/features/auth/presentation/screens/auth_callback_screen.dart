@@ -26,8 +26,8 @@ class AuthCallbackScreen extends StatefulWidget {
     super.key,
     this.callbackUri,
     this.clearSession,
-    this.isConfirmationSession,
     this.resolveCallback,
+    this.exchangeCallback,
     this.recoveryUserId,
     this.markRecoveryPending,
     this.autoRedirectDelay = const Duration(seconds: 3),
@@ -39,12 +39,12 @@ class AuthCallbackScreen extends StatefulWidget {
   @visibleForTesting
   final Future<void> Function()? clearSession;
 
-  /// Compatibility seam for the existing confirmation test.
-  @visibleForTesting
-  final Future<bool> Function()? isConfirmationSession;
-
   @visibleForTesting
   final Future<AuthCallbackResult> Function()? resolveCallback;
+
+  /// Returns the redirect type only after this exact callback was exchanged.
+  @visibleForTesting
+  final Future<String?> Function(Uri uri)? exchangeCallback;
 
   @visibleForTesting
   final Future<String?> Function()? recoveryUserId;
@@ -131,43 +131,37 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
   }
 
   Future<AuthCallbackResult> _resolveCallback() async {
-    if (widget.isConfirmationSession != null) {
-      return await widget.isConfirmationSession!()
-          ? AuthCallbackResult.confirmation
-          : AuthCallbackResult.expiredOrUsed;
+    final uri = widget.callbackUri;
+    if (uri == null ||
+        uri.path != '/callback' ||
+        (uri.hasScheme &&
+            (uri.scheme != 'com.idealab.mec.grow' || uri.host != 'auth'))) {
+      return AuthCallbackResult.invalid;
     }
-
-    final client = Supabase.instance.client;
-    if (_hasAuthError(widget.callbackUri)) return AuthCallbackResult.invalid;
-
-    // The SDK can process an app link before this widget is mounted. A session
-    // alone proves neither type, so use it only after checking the recovery
-    // type supplied by Supabase or as a confirmation session fallback.
-    if (client.auth.currentSession != null) {
-      return _isRecoveryUri(widget.callbackUri)
-          ? AuthCallbackResult.recovery
-          : AuthCallbackResult.confirmation;
+    if (_hasAuthError(uri)) return AuthCallbackResult.expiredOrUsed;
+    // A previously saved session is never evidence for a new confirmation.
+    // Supabase's default deep-link observer is disabled in main.dart so this
+    // route is the sole owner of exchanging the single-use PKCE code.
+    if (!uri.queryParameters.containsKey('code') ||
+        uri.queryParameters['code']!.isEmpty) {
+      return AuthCallbackResult.invalid;
     }
 
     try {
-      return await client.auth.onAuthStateChange
-          .where(
-            (event) =>
-                event.event == AuthChangeEvent.passwordRecovery ||
-                event.event == AuthChangeEvent.signedIn,
-          )
-          .map(
-            (event) => event.event == AuthChangeEvent.passwordRecovery
-                ? AuthCallbackResult.recovery
-                : event.session == null
-                    ? AuthCallbackResult.invalid
-                    : AuthCallbackResult.confirmation,
-          )
-          .first
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () => AuthCallbackResult.timeout,
-          );
+      final exchange = widget.exchangeCallback ??
+          (Uri link) async =>
+              (await Supabase.instance.client.auth.getSessionFromUrl(link))
+                  .redirectType;
+      final redirectType = await exchange(uri).timeout(
+        const Duration(seconds: 12),
+      );
+      // PKCE recovery type comes from the SDK's stored verifier, not an
+      // untrusted `type` query parameter supplied by the caller.
+      return redirectType == AuthChangeEvent.passwordRecovery.name
+          ? AuthCallbackResult.recovery
+          : AuthCallbackResult.confirmation;
+    } on TimeoutException {
+      return AuthCallbackResult.timeout;
     } on AuthException {
       return AuthCallbackResult.expiredOrUsed;
     } catch (_) {
@@ -177,15 +171,11 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
 
   bool _hasAuthError(Uri? uri) {
     if (uri == null) return false;
+    final fragment = _fragmentParameters(uri);
     return uri.queryParameters.containsKey('error') ||
-        _fragmentParameters(uri).containsKey('error');
-  }
-
-  bool _isRecoveryUri(Uri? uri) {
-    if (uri == null) return false;
-    final type =
-        uri.queryParameters['type'] ?? _fragmentParameters(uri)['type'];
-    return type == 'recovery';
+        uri.queryParameters.containsKey('error_description') ||
+        fragment.containsKey('error') ||
+        fragment.containsKey('error_description');
   }
 
   Map<String, String> _fragmentParameters(Uri uri) {

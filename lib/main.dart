@@ -70,6 +70,9 @@ void main() async {
   await Supabase.initialize(
     url: SupabaseKeys.url,
     anonKey: SupabaseKeys.anonKey,
+    // Grow's callback route exchanges the one-time PKCE code itself so an
+    // existing session can never be mistaken for a successful link.
+    authOptions: const FlutterAuthClientOptions(detectSessionInUri: false),
   );
 
   // ── Database Schema Health Check ───────────────────────
