@@ -204,7 +204,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/callback',
         builder: (context, state) => AuthCallbackScreen(
-          key: ValueKey(state.uri.toString()),
+          // Keep a new email link distinct without putting its one-time code
+          // in Flutter widget diagnostics or crash reports.
+          key: ValueKey(Object.hash(
+            state.uri.path,
+            state.uri.queryParameters['code'],
+            state.uri.queryParameters['error'],
+          )),
           callbackUri: state.uri,
         ),
       ),
