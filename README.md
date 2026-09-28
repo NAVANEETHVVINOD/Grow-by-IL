@@ -1,13 +1,14 @@
 ## Grow~ by IdeaLab
 Operational management platform for AICTE IdeaLab at MEC (Model Engineering College), Kerala.
 
-## What it does
-- Lab check-in/out with QR
-- Tool booking and inventory
-- Project and team management
-- Event RSVP
-- Role-based administration
-- Google Sign-In (via Firebase + Supabase hybrid auth)
+## Product scope
+- Manual-first lab presence and check-in, with supervised after-hours access
+- Work requests, machine work/booking, and tools/components under separate approval flows
+- Projects and creator-approved membership requests
+- Events, including verified paid registration and event-head refund handling
+- Member profiles and scoped administration
+
+Some screens and local flows exist, but this list is **product scope, not a claim that each backend workflow is live**. Do not use seeded operational records or QR/demo paths as release evidence.
 
 ## Tech stack
 - Flutter 3.41.9 (Android)
@@ -20,6 +21,11 @@ Operational management platform for AICTE IdeaLab at MEC (Model Engineering Coll
 - `lib/core/` — app configuration, routing, and theme
 - `lib/features/` — main feature modules (auth, explore, lab, profile, projects, events, admin)
 - `lib/shared/` — reusable widgets, models, and repositories
+- `supabase/` — proposed migrations and database tests; compare with the deployed schema before applying
+- `test/` and `integration_test/` — automated checks; device E2E remains a separate gate
+- `docs/` — only individually reviewed, non-sensitive planning documents are tracked; most local docs remain ignored pending audit
+
+See the [Grow V1 task board](docs/00_Project/GROW_V1_TASK_BOARD.md) and [Penpot acceptance matrix](docs/01_Design/PENPOT_ACCEPTANCE_MATRIX.md) for current gates and unverified work.
 
 ## Getting started
 
@@ -61,12 +67,7 @@ See `.env.example` for a complete list of required values and where to find them
 - All secrets injected via `--dart-define` (compile-time only)
 - `google-services.json` is gitignored
 - No `service_role` keys in frontend
-- RLS enforced on all protected tables
+- Validate RLS, grants, and Storage policies against the deployed project before release; repository SQL alone is not proof of live authorization
 
 ## Current status
-**RC4 — Production Readiness Phase**
-- **Auth & Route Hardening**: Implemented role-aware dynamic navigation gating `/admin` direct routing via a Riverpod-backed `routerProvider` and `/unauthorized` fallback UI.
-- **Resilience & Observability**: Integrated Firebase Crashlytics for production exception tracking, and added a centralized 10-second timeout guard on all Supabase queries.
-- **Global Error Handling**: Standardized screen error states using tactile custom retry widgets.
-- **Robust Testing**: Expanded integration flow testing using Mocktail (57 tests passing with 100% clean static analysis).
-- Zero known critical vulnerabilities.
+**RC5 development — not approved for production release.** Auth delivery and Google-provider configuration, private security review/deployment, real Storage access rules, Penpot parity, and exact-build Android E2E remain gates. Passing local tests or CI does not by itself close them. The current evidence and issue/PR dependencies are recorded in the [V1 task board](docs/00_Project/GROW_V1_TASK_BOARD.md).
