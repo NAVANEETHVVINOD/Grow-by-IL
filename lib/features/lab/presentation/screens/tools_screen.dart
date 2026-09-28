@@ -271,6 +271,8 @@ class _ToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = tool.imageUrl?.trim();
+
     return GestureDetector(
       onTap: onTap,
       child: NeoCard(
@@ -291,16 +293,17 @@ class _ToolCard extends StatelessWidget {
                     color: AppColors.navy.withValues(alpha: 0.1),
                   ),
                 ),
-                child: tool.imageUrl != null
+                child: imageUrl != null && imageUrl.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(tool.imageUrl!, fit: BoxFit.cover),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const _ToolImageFallback(),
+                        ),
                       )
-                    : const Icon(
-                        Icons.build_rounded,
-                        size: 40,
-                        color: AppColors.navy,
-                      ),
+                    : const _ToolImageFallback(),
               ),
             ),
             const SizedBox(height: AppSizes.sm),
@@ -356,6 +359,24 @@ class _ToolCard extends StatelessWidget {
           fontSize: 10,
           fontWeight: FontWeight.bold,
           color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolImageFallback extends StatelessWidget {
+  const _ToolImageFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Semantics(
+        label: 'Tool photo unavailable',
+        child: const Icon(
+          Icons.build_rounded,
+          size: 40,
+          color: AppColors.navy,
         ),
       ),
     );

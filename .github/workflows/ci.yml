@@ -250,10 +250,13 @@ jobs:
           EOF
 
       - name: Build debug APK
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
         run: |
           flutter build apk --debug \
             --dart-define=SUPABASE_URL="https://placeholder.supabase.co" \
-            --dart-define=SUPABASE_ANON_KEY="placeholder_anon_key"
+            --dart-define=SUPABASE_ANON_KEY="placeholder_anon_key" \
+            --dart-define=GOOGLE_WEB_CLIENT_ID="${GOOGLE_WEB_CLIENT_ID:-}"
 
   release_build:
     name: Release APK Build
@@ -278,7 +281,9 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
         run: |
           flutter build apk --release \
             --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://placeholder.supabase.co}" \
-            --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-placeholder_anon_key}"
+            --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-placeholder_anon_key}" \
+            --dart-define=GOOGLE_WEB_CLIENT_ID="${GOOGLE_WEB_CLIENT_ID:-}"

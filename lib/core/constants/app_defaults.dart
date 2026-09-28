@@ -16,8 +16,10 @@ class AppDefaults {
   static const defaultReputationScore = 100;
   static const defaultProfileCompleted = false;
 
-  /// Build a complete row for inserting into `public.users`.
+  /// Build only the client-writable columns for `public.users`.
   ///
+  /// The database owns role, progress, and completion defaults. Clients must
+  /// never send those fields, even when their intended value is non-privileged.
   /// Used by: signUp, Google sign-in, and the self-healing auto-create.
   static Map<String, dynamic> buildNewUserRow({
     required String userId,
@@ -32,11 +34,6 @@ class AppDefaults {
       'email': email,
       if (phone != null) 'phone': phone,
       if (collegeRoll != null) 'college_roll': collegeRoll,
-      'role': defaultRole.value,
-      'profile_completed': defaultProfileCompleted,
-      'xp': defaultXp,
-      'level': defaultLevel,
-      'reputation_score': defaultReputationScore,
       'qr_code_data': AppQr.generateUserQr(userId),
     };
   }

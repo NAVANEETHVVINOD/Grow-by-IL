@@ -95,6 +95,8 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
   }
 
   Widget _buildHeader() {
+    final imageUrl = widget.tool.imageUrl?.trim();
+
     return Row(
       children: [
         Expanded(
@@ -120,7 +122,7 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             ],
           ),
         ),
-        if (widget.tool.imageUrl != null)
+        if (imageUrl != null && imageUrl.isNotEmpty)
           Container(
             width: 60,
             height: 60,
@@ -130,7 +132,19 @@ class _BookingBottomSheetState extends ConsumerState<BookingBottomSheet> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: Image.network(widget.tool.imageUrl!, fit: BoxFit.cover),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Center(
+                  child: Semantics(
+                    label: 'Tool photo unavailable',
+                    child: const Icon(
+                      Icons.build_rounded,
+                      color: AppColors.navy,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
       ],
