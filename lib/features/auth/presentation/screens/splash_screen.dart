@@ -8,6 +8,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../shared/repositories/supabase_client.dart';
 import '../../../../shared/widgets/rc5/rc5_grow_logo.dart';
 import '../../data/auth_repository.dart';
+import '../../data/auth_callback_guard.dart';
 import '../../data/password_recovery_session.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // Show splash for at least 2 seconds for branding
     await Future.delayed(const Duration(seconds: 2));
 
+    if (!mounted) return;
+
+    // A same-process callback is still in flight. Do not inspect its
+    // temporary session or route to profile/Home while it settles.
+    while (mounted && AuthCallbackGuard.isActive) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    }
     if (!mounted) return;
 
     final session = supabase.auth.currentSession;

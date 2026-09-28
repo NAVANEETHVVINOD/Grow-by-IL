@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/admin/presentation/screens/admin_dashboard.dart';
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/data/auth_callback_guard.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/auth_callback_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -84,6 +85,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = supabase.auth.currentSession;
       final path = state.uri.path;
+
+      // A PKCE exchange may have persisted a temporary confirmation session.
+      // Until the callback finishes and clears its guard, no protected route
+      // may treat that session as a completed application sign-in.
+      if (AuthCallbackGuard.isActive &&
+          path != '/callback' &&
+          path != '/splash') {
+        return '/splash';
+      }
 
       final publicRoutes = {
         '/splash',
@@ -193,7 +203,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/callback',
-        builder: (context, state) => AuthCallbackScreen(callbackUri: state.uri),
+        builder: (context, state) => AuthCallbackScreen(
+          key: ValueKey(state.uri.toString()),
+          callbackUri: state.uri,
+        ),
       ),
       GoRoute(
         path: '/forgot-password',

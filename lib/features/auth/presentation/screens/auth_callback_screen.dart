@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/password_recovery_session.dart';
+import '../../data/auth_callback_guard.dart';
 
 /// The terminal outcome of a Supabase mobile callback.
 enum AuthCallbackResult {
@@ -28,6 +29,7 @@ class AuthCallbackScreen extends StatefulWidget {
     this.clearSession,
     this.resolveCallback,
     this.exchangeCallback,
+    this.currentSessionToken,
     this.recoveryUserId,
     this.markRecoveryPending,
     this.autoRedirectDelay = const Duration(seconds: 3),
@@ -47,6 +49,9 @@ class AuthCallbackScreen extends StatefulWidget {
   final Future<String?> Function(Uri uri)? exchangeCallback;
 
   @visibleForTesting
+  final String? Function()? currentSessionToken;
+
+  @visibleForTesting
   final Future<String?> Function()? recoveryUserId;
 
   @visibleForTesting
@@ -64,16 +69,31 @@ class AuthCallbackScreen extends StatefulWidget {
 
 class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
   var _state = _CallbackState.processing;
+  Timer? _slowExchangeTimer;
+  String? _sessionTokenBeforeExchange;
 
   @override
   void initState() {
     super.initState();
-    _handleCallback();
+    unawaited(AuthCallbackGuard.runSerialized(_handleCallback));
+  }
+
+  @override
+  void dispose() {
+    _slowExchangeTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _handleCallback() async {
-    final result = await (widget.resolveCallback?.call() ?? _resolveCallback());
     if (!mounted) return;
+    final result = await (widget.resolveCallback?.call() ?? _resolveCallback());
+    _slowExchangeTimer?.cancel();
+    if (!mounted) {
+      // Exchanging a PKCE code can persist a temporary session even when its
+      // screen has been replaced. Never let that session become Grow login.
+      await _discardTemporarySession();
+      return;
+    }
 
     switch (result) {
       case AuthCallbackResult.confirmation:
@@ -83,16 +103,20 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
         await _beginRecovery();
         return;
       case AuthCallbackResult.expiredOrUsed:
-        setState(() => _state = _CallbackState.expiredOrUsed);
+        await _discardTemporarySession();
+        if (mounted) setState(() => _state = _CallbackState.expiredOrUsed);
         return;
       case AuthCallbackResult.invalid:
-        setState(() => _state = _CallbackState.invalid);
+        await _discardTemporarySession();
+        if (mounted) setState(() => _state = _CallbackState.invalid);
         return;
       case AuthCallbackResult.networkFailure:
-        setState(() => _state = _CallbackState.networkFailure);
+        await _discardTemporarySession();
+        if (mounted) setState(() => _state = _CallbackState.networkFailure);
         return;
       case AuthCallbackResult.timeout:
-        setState(() => _state = _CallbackState.timeout);
+        await _discardTemporarySession();
+        if (mounted) setState(() => _state = _CallbackState.timeout);
         return;
     }
   }
@@ -101,33 +125,64 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
     try {
       await (widget.clearSession?.call() ??
           Supabase.instance.client.auth.signOut());
+      await AuthCallbackGuard.clear();
       if (!mounted) return;
       setState(() => _state = _CallbackState.confirmed);
       await Future<void>.delayed(widget.autoRedirectDelay);
       if (mounted) context.go('/login');
     } catch (_) {
+      await _discardTemporarySession();
       if (mounted) setState(() => _state = _CallbackState.networkFailure);
     }
   }
 
   Future<void> _beginRecovery() async {
-    final userId = await (widget.recoveryUserId?.call() ??
-        Future.value(Supabase.instance.client.auth.currentUser?.id));
-    if (userId == null) {
-      setState(() => _state = _CallbackState.invalid);
-      return;
-    }
-
     try {
+      final userId = await (widget.recoveryUserId?.call() ??
+          Future.value(Supabase.instance.client.auth.currentUser?.id));
+      if (userId == null) {
+        await _discardTemporarySession();
+        if (mounted) setState(() => _state = _CallbackState.invalid);
+        return;
+      }
       await (widget.markRecoveryPending?.call(userId) ??
           PasswordRecoverySession.markPendingFor(userId));
+      await AuthCallbackGuard.clear();
       if (!mounted) return;
       setState(() => _state = _CallbackState.recoveryReady);
       await Future<void>.delayed(widget.recoveryRedirectDelay);
       if (mounted) context.go('/reset-password');
     } catch (_) {
+      await _discardTemporarySession();
       if (mounted) setState(() => _state = _CallbackState.networkFailure);
     }
+  }
+
+  Future<void> _discardTemporarySession() async {
+    if (!AuthCallbackGuard.isActive) return;
+    try {
+      final currentToken = _currentSessionToken();
+      if (currentToken != null && currentToken != _sessionTokenBeforeExchange) {
+        await (widget.clearSession?.call() ??
+            Supabase.instance.client.auth.signOut());
+      }
+      await AuthCallbackGuard.clear();
+    } catch (_) {
+      // Retain the persistent guard if local session clearance is uncertain.
+      // On the next launch main.dart will discard the restored session.
+    }
+  }
+
+  String? _currentSessionToken() {
+    if (widget.currentSessionToken != null) {
+      return widget.currentSessionToken!();
+    }
+    // Injected exchange tests do not initialize Supabase. Production always
+    // reads the currently persisted GoTrue session.
+    if (widget.exchangeCallback != null || widget.resolveCallback != null) {
+      return null;
+    }
+    return Supabase.instance.client.auth.currentSession?.accessToken;
   }
 
   Future<AuthCallbackResult> _resolveCallback() async {
@@ -148,20 +203,25 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
     }
 
     try {
+      _sessionTokenBeforeExchange = _currentSessionToken();
+      await AuthCallbackGuard.begin();
+      _slowExchangeTimer = Timer(const Duration(seconds: 12), () {
+        if (mounted && _state == _CallbackState.processing) {
+          setState(() => _state = _CallbackState.slow);
+        }
+      });
       final exchange = widget.exchangeCallback ??
           (Uri link) async =>
               (await Supabase.instance.client.auth.getSessionFromUrl(link))
                   .redirectType;
-      final redirectType = await exchange(uri).timeout(
-        const Duration(seconds: 12),
-      );
+      // Do not time out the underlying exchange: Future.timeout does not
+      // cancel it, so a late result could silently create a Grow session.
+      final redirectType = await exchange(uri);
       // PKCE recovery type comes from the SDK's stored verifier, not an
       // untrusted `type` query parameter supplied by the caller.
       return redirectType == AuthChangeEvent.passwordRecovery.name
           ? AuthCallbackResult.recovery
           : AuthCallbackResult.confirmation;
-    } on TimeoutException {
-      return AuthCallbackResult.timeout;
     } on AuthException {
       return AuthCallbackResult.expiredOrUsed;
     } catch (_) {
@@ -190,42 +250,45 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
   @override
   Widget build(BuildContext context) {
     final content = _CallbackContent.forState(_state);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 260),
-              child: Column(
-                key: ValueKey(_state),
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _CallbackMark(state: _state),
-                  const SizedBox(height: 24),
-                  Text(
-                    content.title,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
+    return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 260),
+                  child: Column(
+                    key: ValueKey(_state),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _CallbackMark(state: _state),
+                      const SizedBox(height: 24),
+                      Text(
+                        content.title,
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(content.description, textAlign: TextAlign.center),
+                      if (content.actionLabel != null) ...[
+                        const SizedBox(height: 24),
+                        TextButton(
+                          onPressed: () => context.go(content.actionRoute!),
+                          child: Text(content.actionLabel!),
                         ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(content.description, textAlign: TextAlign.center),
-                  if (content.actionLabel != null) ...[
-                    const SizedBox(height: 24),
-                    TextButton(
-                      onPressed: () => context.go(content.actionRoute!),
-                      child: Text(content.actionLabel!),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 
@@ -247,6 +310,11 @@ class _CallbackContent {
       _CallbackState.processing => const _CallbackContent(
           title: 'Checking your secure link…',
           description: 'Please wait while Grow verifies this request.',
+        ),
+      _CallbackState.slow => const _CallbackContent(
+          title: 'Still checking your link…',
+          description:
+              'Verification is taking longer than expected. Keep Grow open, or restart it to safely try again.',
         ),
       _CallbackState.confirmed => const _CallbackContent(
           title: 'Email confirmed',
@@ -297,7 +365,9 @@ class _CallbackMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSuccess = state == _CallbackState.confirmed ||
         state == _CallbackState.recoveryReady;
-    final isProblem = state != _CallbackState.processing && !isSuccess;
+    final isProblem = state != _CallbackState.processing &&
+        state != _CallbackState.slow &&
+        !isSuccess;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: 84,
@@ -328,6 +398,7 @@ class _CallbackMark extends StatelessWidget {
 
 enum _CallbackState {
   processing,
+  slow,
   confirmed,
   recoveryReady,
   expiredOrUsed,

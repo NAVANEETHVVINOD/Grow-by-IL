@@ -1,10 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:grow/features/auth/presentation/screens/auth_callback_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:grow/features/auth/data/auth_callback_guard.dart';
 
 void main() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    AuthCallbackGuard.resetSerializationForTesting();
+    await AuthCallbackGuard.restore();
+  });
+
+  test('interrupted callback guard survives a process-style restore', () async {
+    await AuthCallbackGuard.begin();
+    expect(AuthCallbackGuard.isActive, isTrue);
+    expect(await AuthCallbackGuard.restore(), isTrue);
+
+    await AuthCallbackGuard.clear();
+    expect(await AuthCallbackGuard.restore(), isFalse);
+  });
+
   testWidgets('confirmed email clears its temporary session then signs in',
       (tester) async {
     final router = GoRouter(
@@ -29,11 +48,14 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
 
     expect(find.text('Checking your secure link…'), findsOneWidget);
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
     await tester.pumpAndSettle();
     expect(find.text('Sign in'), findsOneWidget);
   });
 
-  testWidgets('expired confirmation links never get a success state',
+  testWidgets('expired confirmation links do not create a success state',
       (tester) async {
     var cleared = false;
     await tester.pumpWidget(
@@ -48,10 +70,124 @@ void main() {
       ),
     );
 
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Link unavailable'), findsOneWidget);
     expect(find.text('Email confirmed'), findsNothing);
     expect(cleared, isFalse);
+    expect(AuthCallbackGuard.isActive, isFalse);
+  });
+
+  testWidgets('a used link does not sign out an existing account',
+      (tester) async {
+    var cleared = false;
+    await tester.pumpWidget(MaterialApp(
+      home: AuthCallbackScreen(
+        callbackUri: Uri.parse('/callback?code=used-code'),
+        currentSessionToken: () => 'already-signed-in',
+        exchangeCallback: (_) async => throw const AuthException('Used code'),
+        clearSession: () async => cleared = true,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Link unavailable'), findsOneWidget);
+    expect(cleared, isFalse);
+    expect(AuthCallbackGuard.isActive, isFalse);
+  });
+
+  testWidgets('a new link waits until the previous callback is discarded',
+      (tester) async {
+    final first = Completer<String?>();
+    final second = Completer<String?>();
+    var firstCleared = false;
+    var secondStarted = false;
+    var currentToken = <String, String?>{'value': null};
+    final router = GoRouter(
+      initialLocation: '/callback?code=first',
+      routes: [
+        GoRoute(
+          path: '/callback',
+          builder: (context, state) {
+            final code = state.uri.queryParameters['code'];
+            return AuthCallbackScreen(
+              key: ValueKey(state.uri.toString()),
+              callbackUri: state.uri,
+              currentSessionToken: () => currentToken['value'],
+              exchangeCallback: (_) {
+                if (code == 'first') return first.future;
+                secondStarted = true;
+                return second.future;
+              },
+              clearSession: () async {
+                if (code == 'first') firstCleared = true;
+                currentToken['value'] = null;
+              },
+              autoRedirectDelay: Duration.zero,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const Scaffold(body: Text('Sign in')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pump();
+    expect(AuthCallbackGuard.isActive, isTrue);
+    router.go('/callback?code=second');
+    await tester.pump();
+    expect(secondStarted, isFalse);
+
+    currentToken['value'] = 'temporary-first-session';
+    first.complete();
+    await tester.pumpAndSettle();
+    expect(firstCleared, isTrue);
+    expect(secondStarted, isTrue);
+
+    currentToken['value'] = 'temporary-second-session';
+    second.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(AuthCallbackGuard.isActive, isFalse);
+  });
+
+  testWidgets('slow exchange cannot time out into a late login',
+      (tester) async {
+    final pendingExchange = Completer<String?>();
+    var cleared = false;
+    final router = GoRouter(
+      initialLocation: '/callback',
+      routes: [
+        GoRoute(
+          path: '/callback',
+          builder: (context, state) => AuthCallbackScreen(
+            callbackUri: Uri.parse('/callback?code=slow-code'),
+            exchangeCallback: (_) => pendingExchange.future,
+            clearSession: () async => cleared = true,
+            autoRedirectDelay: Duration.zero,
+          ),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const Scaffold(body: Text('Sign in')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pump();
+    expect(AuthCallbackGuard.isActive, isTrue);
+    await tester.pump(const Duration(seconds: 13));
+    expect(find.text('Still checking your link…'), findsOneWidget);
+    expect(find.text('Sign in'), findsNothing);
+    expect(cleared, isFalse);
+
+    pendingExchange.complete();
+    await tester.pumpAndSettle();
+    expect(cleared, isTrue);
+    expect(AuthCallbackGuard.isActive, isFalse);
+    expect(find.text('Sign in'), findsOneWidget);
   });
 
   testWidgets('bare callback cannot confirm or sign out an existing session',
