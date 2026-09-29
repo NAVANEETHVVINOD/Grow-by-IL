@@ -15,6 +15,7 @@ Updated: 2026-09-29. Status is based on the current repository and GitHub audit,
 | GitHub | 8 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
 
 The non-sensitive [backend security baseline](../03_Database/BACKEND_SECURITY_BASELINE.md) is the database-entry gate for every operational module.
+The [auth provider release checklist](../03_Database/AUTH_PROVIDER_RELEASE_CHECKLIST.md) is the configuration and Android-evidence gate for issues #112 and #113.
 
 ## Next five executable tasks
 
