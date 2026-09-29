@@ -14,6 +14,8 @@ Updated: 2026-09-29. Status is based on the current repository and GitHub audit,
 | Operations | Local Work Request UI exists; issue #85 tracks non-production data | Approved contract delta, real data/RLS, tests, then separate Manufacturing Task and Machine Queue |
 | GitHub | 9 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
 
+The non-sensitive [backend security baseline](../03_Database/BACKEND_SECURITY_BASELINE.md) is the database-entry gate for every operational module.
+
 ## Next five executable tasks
 
 These tasks may advance in parallel where their systems are independent. A green CI check is not a substitute for review or an Android E2E run.
