@@ -20,6 +20,7 @@ The [role and position contract](../03_Database/ROLE_AND_POSITION_CONTRACT.md) s
 The [Storage access contract](../03_Database/STORAGE_ACCESS_CONTRACT.md) reconciles proposed buckets with Flutter media calls before any upload UI is enabled.
 The [Work Request contract delta](../02_Product/WORK_REQUEST_CONTRACT_DELTA.md) separates the current simulated UI from the decisions and authorization evidence required for real operations.
 The [Profile ecosystem decision gate](../02_Product/PROFILE_ECOSYSTEM_DECISION_GATE.md) keeps the active minimum-profile auth path separate from unverified rich-profile migrations and privacy decisions.
+The [IDEA Lab catalog intake](../02_Product/IDEA_LAB_CATALOG_INTAKE.md) preserves the owner-supplied public facility list as verification candidates without turning it into live stock, prices, booking or availability data.
 
 ## Next five executable tasks
 
