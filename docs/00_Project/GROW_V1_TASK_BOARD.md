@@ -12,7 +12,7 @@ Updated: 2026-09-29. Status is based on the current repository and GitHub audit,
 | Design | Penpot previously showed pages 00–18 and Page 17 content; connector unavailable on this audit | Live page-by-page audit and linked prototype, Flutter comparison; see [acceptance matrix](../01_Design/PENPOT_ACCEPTANCE_MATRIX.md) |
 | Navigation/UI | #99 then #100; #103 and #101 are separate | Review, current-head CI, real-device regression and accessibility checks |
 | Operations | Local Work Request UI exists; issue #85 tracks non-production data | Approved contract delta, real data/RLS, tests, then separate Manufacturing Task and Machine Queue |
-| GitHub | 9 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
+| GitHub | 8 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
 
 The non-sensitive [backend security baseline](../03_Database/BACKEND_SECURITY_BASELINE.md) is the database-entry gate for every operational module.
 
