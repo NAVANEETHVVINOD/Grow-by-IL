@@ -19,6 +19,7 @@ The [auth provider release checklist](../03_Database/AUTH_PROVIDER_RELEASE_CHECK
 The [role and position contract](../03_Database/ROLE_AND_POSITION_CONTRACT.md) separates current account roles from future core-position assignments before any authorization schema is proposed.
 The [Storage access contract](../03_Database/STORAGE_ACCESS_CONTRACT.md) reconciles proposed buckets with Flutter media calls before any upload UI is enabled.
 The [Work Request contract delta](../02_Product/WORK_REQUEST_CONTRACT_DELTA.md) separates the current simulated UI from the decisions and authorization evidence required for real operations.
+The [Profile ecosystem decision gate](../02_Product/PROFILE_ECOSYSTEM_DECISION_GATE.md) keeps the active minimum-profile auth path separate from unverified rich-profile migrations and privacy decisions.
 
 ## Next five executable tasks
 
