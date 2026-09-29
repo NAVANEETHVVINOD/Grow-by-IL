@@ -17,6 +17,7 @@ Updated: 2026-09-29. Status is based on the current repository and GitHub audit,
 The non-sensitive [backend security baseline](../03_Database/BACKEND_SECURITY_BASELINE.md) is the database-entry gate for every operational module.
 The [auth provider release checklist](../03_Database/AUTH_PROVIDER_RELEASE_CHECKLIST.md) is the configuration and Android-evidence gate for issues #112 and #113.
 The [role and position contract](../03_Database/ROLE_AND_POSITION_CONTRACT.md) separates current account roles from future core-position assignments before any authorization schema is proposed.
+The [Storage access contract](../03_Database/STORAGE_ACCESS_CONTRACT.md) reconciles proposed buckets with Flutter media calls before any upload UI is enabled.
 
 ## Next five executable tasks
 
