@@ -1,18 +1,18 @@
 # Grow V1 delivery board
 
-Updated: 2026-09-28. Status is based on the current repository and GitHub audit, not a claim that the app is launch-ready. This public board intentionally omits private security-advisory details and credentials. The historical local launch plans are reference material; this board is the current execution queue.
+Updated: 2026-09-29. Status is based on the current repository and GitHub audit, not a claim that the app is launch-ready. This public board intentionally omits private security-advisory details and credentials. The historical local launch plans are reference material; this board is the current execution queue.
 
 ## Current gates
 
 | Gate | Verified state | Release evidence still needed |
 | --- | --- | --- |
 | Security boundary | Private remediation and database tests exist; production deployment is not verified here | Independent security review, controlled deployment, read-only live verification |
-| Auth | PR #108 is draft; callback fix `6da983d` passed local focused tests and analyzer, current-head CI pending | Google provider and reliable email delivery configuration, fresh-device signup/sign-in/reset E2E, review |
+| Auth | PR #108 is draft; callback lifecycle hardening through `a608aa1` passed 175 local Flutter tests, analyzer, Quality Gate and Debug APK Build | Google provider and reliable email delivery configuration, fresh-device signup/sign-in/reset/cold-restart E2E, review |
 | Onboarding | PR #111 is draft; issue #110 tracks persistence ordering | Confirmed-account gate, persisted minimum profile, resume/error tests, device E2E |
 | Design | Penpot previously showed pages 00–18 and Page 17 content; connector unavailable on this audit | Live page-by-page audit and linked prototype, Flutter comparison; see [acceptance matrix](../01_Design/PENPOT_ACCEPTANCE_MATRIX.md) |
 | Navigation/UI | #99 then #100; #103 and #101 are separate | Review, current-head CI, real-device regression and accessibility checks |
 | Operations | Local Work Request UI exists; issue #85 tracks non-production data | Approved contract delta, real data/RLS, tests, then separate Manufacturing Task and Machine Queue |
-| GitHub | 13 open PRs, 33 open issues at initial audit; no PR had independent review | Three bot PRs closed and storage issue #120 opened afterward; reconcile stacks and verify exact heads before merging |
+| GitHub | 11 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
 
 ## Next five executable tasks
 
