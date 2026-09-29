@@ -8,21 +8,21 @@ Updated: 2026-09-29. Status is based on the current repository and GitHub audit,
 | --- | --- | --- |
 | Security boundary | Private remediation and database tests exist; production deployment is not verified here | Independent security review, controlled deployment, read-only live verification |
 | Auth | PR #108 is draft; callback lifecycle hardening through `a608aa1` passed 175 local Flutter tests, analyzer, Quality Gate and Debug APK Build | Google provider and reliable email delivery configuration, fresh-device signup/sign-in/reset/cold-restart E2E, review |
-| Onboarding | PR #111 is draft; issue #110 tracks persistence ordering | Confirmed-account gate, persisted minimum profile, resume/error tests, device E2E |
+| Onboarding | The stale RC5 screen PR #111 was closed without merge because #108 replaces that route; issue #110 tracks the active flow | Confirmed-account gate, persisted minimum profile, resume/error tests, device E2E |
 | Design | Penpot previously showed pages 00–18 and Page 17 content; connector unavailable on this audit | Live page-by-page audit and linked prototype, Flutter comparison; see [acceptance matrix](../01_Design/PENPOT_ACCEPTANCE_MATRIX.md) |
 | Navigation/UI | #99 then #100; #103 and #101 are separate | Review, current-head CI, real-device regression and accessibility checks |
 | Operations | Local Work Request UI exists; issue #85 tracks non-production data | Approved contract delta, real data/RLS, tests, then separate Manufacturing Task and Machine Queue |
-| GitHub | 11 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
+| GitHub | 10 open PRs, 34 open issues; no PR has independent review | Reconcile stacks and verify exact heads before merging; no green PR is merge-authorized by this board alone |
 
 ## Next five executable tasks
 
 These tasks may advance in parallel where their systems are independent. A green CI check is not a substitute for review or an Android E2E run.
 
 1. **Close the security release gate — #88.** Keep remediation private until safe disclosure. Independently review the exact tested head, validate against the live schema shape, deploy through a reviewed migration, and verify grants, RLS, account roles, and ordinary profile/project flows afterward. Do not run an unreviewed console patch.
-2. **Stabilize identity — #108, #110, #111, #112, #113, #120.** Define and test `created → email verified → explicit sign-in → profile complete → Home`; old or used links must not authenticate. Configure Google and email on the intended Supabase environment, protect role fields, test profile persistence and storage policy before uploads, and run the exact APK on a phone once available. Never put test credentials in logs or issues.
+2. **Stabilize identity — #108, #110, #112, #113, #120.** Define and test `created → email verified → explicit sign-in → profile complete → Home`; old or used links must not authenticate. Configure Google and email on the intended Supabase environment, protect role fields, test profile persistence and storage policy before uploads, and run the exact APK on a phone once available. Never put test credentials in logs or issues.
 3. **Finish the 00–18 Penpot system — #101.** Reconnect the connector, enumerate actual page names and boards, then complete the acceptance matrix: route, back/cancel/retry, all relevant states, 48 dp touch targets, text scaling, reduced motion, original doodles, authentic media, and Flutter token parity. Do not call a static frame a wired prototype.
 4. **Reconcile product and Work Request contracts — #93, #95, #70, #71, #79, #85.** Preserve the approved Work Request contract, then review its delta for Machine Request vs Component Request, routing by responsibility, quote/deposit semantics, cancellation and audit. Decide the one-lab/two-room model and position scope before schema changes. Avoid new inventory quantities or prices until the owner supplies them.
-5. **Restore a controlled merge queue — #80, #90, #99, #100, #103, #108, #111, #115.** Check each base, current SHA, required checks, diff, unresolved conversations and independent review. Merge dependent stacks in order (#99→#100 and #90→#115). Do not bulk-merge #44 or bypass governance because CI is green.
+5. **Restore a controlled merge queue — #80, #90, #99, #100, #103, #108, #115.** Check each base, current SHA, required checks, diff, unresolved conversations and independent review. Merge dependent stacks in order (#99→#100 and #90→#115). Do not bulk-merge #44 or bypass governance because CI is green.
 
 ## Remaining build sequence
 
