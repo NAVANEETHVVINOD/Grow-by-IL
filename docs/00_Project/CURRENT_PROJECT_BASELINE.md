@@ -7,6 +7,11 @@ Last updated: 2026-10-03
 Depends on: Read-only GitHub and local repository inspection
 Referenced by: [Delivery board](GROW_V1_TASK_BOARD.md)
 
+Follow-up: the [P0-03 investigation](../05_DevOps/P0_03_CI_INVESTIGATION.md)
+refreshes this baseline, proves the four current CI root causes and records the
+authorized diagnosis-only scope. Its board markers distinguish completed
+investigation from unresolved CI defects. No application or remote fix is applied.
+
 ## Repository facts
 
 Repository: [NAVANEETHVVINOD/Grow-by-IL](https://github.com/NAVANEETHVVINOD/Grow-by-IL).
