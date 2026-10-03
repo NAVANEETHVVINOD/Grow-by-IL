@@ -1,19 +1,23 @@
 # P0-03 CI and PR investigation
 
-Status: Diagnosis accepted locally after independent review; no fixes applied
+Status: Original diagnosis accepted; follow-up local CI trigger correction verified; remote CI problems remain open
 Owner: Project coordinator, evidence explorer, PR auditor and security/evidence reviewer
-Version: 1.0
+Version: 1.1
 Last updated: 2026-10-03
 Depends on: [Current baseline](../00_Project/CURRENT_PROJECT_BASELINE.md)
 Referenced by: [Single delivery board](../00_Project/GROW_V1_TASK_BOARD.md)
 
 ## Scope and completion meaning
 
-This pass completes the requested investigation, not CI repair. Only the existing board
+The original P0-03 pass completed the requested investigation. Only the existing board
 and evidence documents are edited locally. No application/product behavior, dependency,
 workflow, PR, branch protection or production database is changed. No push, merge,
 rerun, retarget or deployment is performed. Missing/failed/skipped required verification
 remains a failure. The native goal tracks this investigation; the board shows live markers.
+
+The later user-requested agent-orchestrator continuation prepared the narrowly scoped
+local correction recorded below. Statements about no workflow edit above describe the
+original investigation snapshot; current local preparation has its own exact evidence.
 
 ## Current verified state
 
@@ -281,3 +285,56 @@ gh pr view 100 --repo NAVANEETHVVINOD/Grow-by-IL --json headRefOid,baseRefName,s
   both parent/child workflow propagation with fresh PR events, and main's default-branch
   designation without an unsupported production implication. Corrections were accepted
   by the reviewers. No reviewer is counted as independent review of its own findings.
+
+## Follow-up: local workflow correction
+
+The coordinator ran the agent-orchestrator decision → implementation → actual QA →
+independent review loop. Two agents independently selected a workflow-only correction
+as the smallest next slice; dependency/toolchain and production work stayed separate.
+
+Base: RC5 `2fafcf2a7b41f3bb26df9db8200f4e8316a311ee`, freshly checked on GitHub.
+Isolated branch: `fix/stacked-pr-ci-20261003`, worktree `grow-stacked-ci`.
+Local commit: `6bdbd319907b42d4c06b523152dccef901fa5805`.
+The exact diff is one file, two insertions in `.github/workflows/ci.yml`:
+
+```yaml
+      - feat/home-lab-profile-navigation
+      - chore/production-hardening
+```
+
+These are added to `pull_request.branches`. Default PR activity types are retained.
+Push/tag filters, all jobs/steps, permissions, guard logic, secrets and build behavior
+are unchanged. No dependency or application file changed. Original dirty worktrees
+and the docs preservation branch were preserved.
+
+Actual local QA:
+
+- Before correction, an assertion against the original parsed workflow failed because
+  both stacked bases were absent. This reproduces the demonstrated coverage defect.
+- After correction, nine event/base cases passed: the five allowed bases, supported
+  synchronize/reopened examples, unknown-base rejection and default edited exclusion.
+- YAML parsed using existing PyYAML 6.0.2. Semantic comparison, normalizing only the
+  two intentional additions, matched the complete baseline workflow exactly.
+- `C:\Git\bin\bash.exe -n` accepted all 13 workflow shell blocks after replacing
+  GitHub expressions with safe syntax-fixture values.
+- The actual extracted architecture guard executed in two owned temporary Git fixtures
+  with real two-commit children and PR-style merge commits. A gated migration in the
+  first child commit was caught (expected exit 1); a clean two-commit child passed
+  (exit 0). A gated migration introduced only on the base was excluded in both cases.
+- An initial harness comparison failed because Windows default decoding misread UTF-8
+  source. Explicit UTF-8 decoding fixed the harness; the complete QA then passed.
+  No workflow was changed to suppress that failure.
+- `git diff --check`, staged whitespace, one-file/two-insertion scope and clean local
+  CI checkout passed. Three independent code/security reviews accepted the actual diff;
+  all applicable local QA conditions were satisfied.
+
+No Flutter/backend/device checks were run for this trigger-only change; application
+acceptance is not cleared. No new packages/tools were installed. Owned temporary QA
+fixtures were cleaned within their checked temporary directory. Hosted CI has not run
+on this local commit; #100/#115 therefore remain unverified remotely.
+
+Next gate: explicit permission to push this exact local branch and open a separate
+workflow-only draft PR targeting RC5. Then inspect real PR-event CI on the resulting
+head/merge revision. Later authorized propagation must reach BOTH parent/child stacks,
+preserve #90 hardening and satisfy each affected head's local review/QA/E2E contract.
+This local commit alone does not update any existing PR or authorize its merge.

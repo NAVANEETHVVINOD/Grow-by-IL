@@ -11,7 +11,28 @@ Use existing issues and PRs; this baseline adds no new product phase or Manufact
 Task implementation. Completion requires actual outputs and relevant checks, rather
 than a chat approval or a green badge on another revision.
 
-## Active goal: P0-03 investigation
+## Active goal: local stacked-PR CI coverage correction
+
+The agent-orchestrator decision loop selected this narrow slice after two agents
+independently recommended it. The coordinator owns integration and the board; agents
+review actual artifacts and QA evidence. Publication/propagation remain unauthorized.
+
+| Status | ID / task | Owner | Depends on | Evidence / next action |
+| --- | --- | --- | --- | --- |
+| ✓ | L01 Select next dependency-safe slice | Coordinator + two agents | Accepted P0-03 diagnosis | Add exactly the two known stacked PR bases; retain default PR events and all gates |
+| ✓ | L02 Isolate current RC5 source | Coordinator | L01 | Fresh remote SHA 2fafcf2 matches isolated grow-stacked-ci; originals preserved |
+| ✓ | L03 Implement workflow-only allowlist correction | Coordinator | L02 | Exactly two PR base entries in .github/workflows/ci.yml; no dependency/product changes |
+| ✓ | L04 Run event/range regression and scope QA | Coordinator | L03 | Before-regression reproduced; 9 selection cases, 13 shell blocks, 2 actual guard fixtures passed; unchanged jobs/permissions |
+| ✓ | L05 Independently review actual diff/evidence; correct findings | Agents + coordinator | L04 | Three independent code/security reviews accepted; no workflow correction required |
+| ✓ | L06 Commit locally and report pipeline handoff | Coordinator | L05 | CI commit 6bdbd3 on fix/stacked-pr-ci-20261003; clean CI checkout; no push or hosted repair claim |
+
+Local preparation goal is complete. Next pipeline gate is publication authorization
+for the exact workflow-only commit and a separate CI draft PR targeting RC5. Later
+propagation into both parent/child stacks is a further reviewed action; existing
+parent acceptance, #90 governance reconciliation and application E2E are still required.
+See the [local correction evidence](../05_DevOps/P0_03_CI_INVESTIGATION.md#follow-up-local-workflow-correction).
+
+## Completed goal: P0-03 investigation
 
 User-authorized scope: current evidence and diagnosis only. No implementation,
 push, merge, PR/settings mutation, production Supabase change or product feature work.
@@ -44,7 +65,7 @@ authorized. Detailed evidence and the proposed fix plan are in the
 | --- | --- | --- | --- | --- | --- | --- |
 | P0-01 Preserve documentation | Coordinator + security reviewer | Publication review | Local accepted; remote waiting | Blanket ignore removed; 107 historical MD copied, five sanitized, two private records excluded; nine existing public docs retained; local commit created | Scoped publication review and local checks passed, with preserved historical whitespace exception below | Obtain publication authorization for existing #121 path, then verify remote backup and current CI |
 | P0-02 Establish baseline | Evidence explorer + PR auditor | Repository read access | Accepted locally | Exact branch/PR SHAs, current CI, approvals and conflicts in baseline | Independent evidence review passed; governance navigation findings corrected | Use this baseline for the next executable slice; refresh remote state before external actions |
-| P0-03 Restore truthful PR verification | Coordinator / CI owner | P0-02 | ✓ Investigation complete; ✗ CI problems remain | Exact missing-check/toolchain/SDK causes documented in investigation | Independent diagnosis review and local docs QA passed; fixes not implemented; no hosted success claimed | Next engineering task requires separate correction-plan authorization |
+| P0-03 Restore truthful PR verification | Coordinator / CI owner | P0-02 | ✓ Diagnosis and local trigger correction; ✗ remote CI problems remain | Workflow-only correction committed as 6bdbd3; independent review and meaningful QA passed | Hosted success unverified; #123/#124 fixes not implemented | Authorize exact local correction publication; then review propagation and remaining independent corrections |
 | P1-01 Close security foundation | Security owner | Baseline + private remediation | Waiting | #88, non-sensitive backend baseline; deployment unverified | Live security acceptance unverified | Review exact private remediation and safe environment, then verify RLS/role/membership negative paths |
 | P1-02 Complete identity acceptance | Auth owner + QA | Security foundation, #108 | Waiting | #108 quality/debug success; #110/#112/#113/#120 remain open | Provider, persistence and real-device acceptance unverified | Test existing auth code before expansion; supply test environment/provider/device prerequisites when needed |
 
