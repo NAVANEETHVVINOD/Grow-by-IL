@@ -17,9 +17,13 @@ migrate_working_dir/
 hs_err_pid*
 replay_pid*
 
-# Project Specific Documentation (Sensitive)
-docs/
-/docs/
+# Documentation is versioned; private evidence and raw artifacts stay local.
+/docs/private/
+/docs/**/artifacts/
+/docs/**/*.json
+/docs/**/*.txt
+/docs/03_Database/LIVE_SCHEMA_LEDGER_2026-09-17.md
+/docs/03_Database/SCHEMA_AUTH_AUDIT_2026-09-17.md
 
 # IntelliJ related
 *.iml

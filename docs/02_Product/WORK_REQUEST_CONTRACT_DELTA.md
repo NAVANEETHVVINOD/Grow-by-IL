@@ -22,6 +22,10 @@ position, payment state, assigned head, or estimated completion date.
 | --- | --- |
 | Entry point | Expose one primary **Start a Work Request** action; do not duplicate it with a second New Request action. |
 | Routing | Machine-related work is routed to Machine responsibility; operation-related work is routed to Operations responsibility. The assignment is workflow data, not a client-writable account role. |
+| Separate requests | Owner decision, 2026-10-03: machine and operations work are submitted as separate requests and sent to their respective heads. |
+| Requester cancellation | Owner decision, 2026-10-03: the requester may directly cancel a Machine or Operations request before its responsible head takes or reviews it. Claim/review and cancellation must be checked atomically on the server; the first accepted action determines whether direct cancellation remains allowed. |
+| Cancellation after head involvement | After the responsible head takes or reviews a request, the requester submits a cancellation request with a reason. That head may approve or deny it. A pending or denied cancellation request does not mark the work cancelled. |
+| Catalog approval | Owner decision, 2026-10-03: Operations Head approves updated stock and current prices. |
 | Scope | Work Request, Manufacturing Task, and Machine Queue remain separate modules. |
 | Data honesty | Use loading, empty, unavailable and permission-denied states until the backend can return a real record. |
 | Stock and price | Do not seed quantities or prices. The product owner will supply the updated stock and official price rules later. |
@@ -44,7 +48,7 @@ persisted or shown as live operational data:
 | Material procurement | It does not prove availability or purchase authorization. | Inventory/procurement workflow, stock provenance, and approver authority. |
 | Collaborators | Plain names are not authenticated member references. | Member-selection/privacy policy and project relationship rule. |
 | External links and attachments | Links/files can expose data and require validation. | Allowed domains/file types, retention, malware scanning and storage RLS. |
-| Cancellation/rejection | Reasons need an auditable actor and transition rules. | Who may cancel, reject, resubmit or reopen, and whether a reason is mandatory. |
+| Cancellation/rejection | Reasons need an auditable actor and transition rules. | Implement the approved direct-cancel cutoff and head decision path; define remaining rejection/resubmission and downstream execution rules separately. |
 
 ## Minimal lifecycle to approve
 
@@ -63,6 +67,23 @@ Rejected -> resubmit only when the reviewer explicitly marks it resubmittable
 payment labels belong to the downstream workflow unless a reviewed contract
 defines the exact synchronized source. A submitted request must never become
 approved, paid, assigned, or completed from a client-only update.
+
+## Approved cancellation behavior
+
+- Before the responsible head takes or reviews the request, its requester can
+  cancel directly. This applies to both Machine and Operations requests.
+- After that cutoff, the UI offers **Request cancellation** and requires a
+  reason. The responsible head has **Approve** and **Deny** actions.
+- Submission records a pending cancellation decision while preserving the
+  current work status. Only approval changes the work status to cancelled;
+  denial preserves the current status and is shown to the requester.
+- Record the requester, reason, submission time, deciding head, decision and
+  decision time in the audit history. Deny cross-user requests and decisions
+  from an unrelated head on the server.
+- Test cancellation racing with head claim/review, approval and denial,
+  duplicate submissions/decisions, and permissions for both request types.
+  Manufacturing execution, consumed materials and refunds need their own
+  downstream rules before cancellation can trigger those effects.
 
 ## Required implementation gates
 
@@ -87,17 +108,15 @@ approved, paid, assigned, or completed from a client-only update.
 1. Which exact request categories are V1: machine, fabrication, component,
    design help, technical support, or another set? Machine and component
    requests should remain visibly distinct if both are approved.
-2. Can a student cancel a submitted request? If yes, until which state and
-   must a reason be supplied? Who may cancel after approval?
-3. What is the first real routing rule when a request spans both machine and
-   operations responsibility, or when the relevant head is absent?
-4. When, if ever, may a requester see an estimated date, a queue summary or
+2. When the relevant head is absent, should the separate request remain
+   pending or go to a designated deputy?
+3. When, if ever, may a requester see an estimated date, a queue summary or
    a named responsible person?
-5. Which requests can incur cost, who creates the quote, and which verified
+4. Which requests can incur cost, who creates the quote, and which verified
    payment/refund provider and audit record are authoritative?
 
 ## Next smallest safe task
 
-Have the owner approve the five questions and the current catalog boundary.
+Resolve the remaining questions and the current catalog boundary.
 Then create a reviewed Work Request API/schema proposal with authorization
 tests. Until then, do not turn the mock provider into a production backend.
