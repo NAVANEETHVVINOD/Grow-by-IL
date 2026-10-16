@@ -16,8 +16,8 @@ security-advisory repository is separate remediation work and remains separate.
 
 GitHub `main` remains the default branch; `rc5-release-candidate` is the active
 product integration target. Neither branch implies a production release. PR #122
-merged to main as aeeae736 after review and applicable quality, schema and Android
-build checks. PR #80 merged to main as 1fc7db0 after exact-head Quality Gate (CI),
+merged to main as aeeae736 after applicable quality, schema and Android build checks
+passed. PR #80 merged to main as 1fc7db0 after exact-head Quality Gate (CI),
 Android Production Build and schema verification passed. PR #121 merged the current
 documentation baseline to RC5 as 3b2af47 after its exact-head quality and Debug APK
 checks passed.
@@ -74,9 +74,12 @@ escalation owner. Do not reopen settled cancellation-routing decisions.
 
 Issue #88 requires live-versus-repository schema, grants, RLS, functions and migration
 reconciliation, followed by staging negative-authorization tests. Historical 28P01 is
-not asserted as a current verified outage. Provider/email setup, Android acceptance,
-profile/storage privacy and scoped position authority remain prerequisites to
-operational backend expansion. The Project tracks the issue dependencies and evidence.
+not asserted as a current verified outage. Issue #112 identifies the validation
+Supabase project and records Google sign-in as disabled; current provider readiness
+still needs confirmation. No Android device is connected for this acceptance run.
+Provider/email setup, Android acceptance, profile/storage privacy and scoped position
+authority remain prerequisites to operational backend expansion. The Project tracks
+the issue dependencies and evidence.
 
 Main requires `Quality Gate (CI)` and `Android Production Build`. RC5 requires
 `Quality Gate` and `Debug APK Build`. Missing, failed or skipped required execution
