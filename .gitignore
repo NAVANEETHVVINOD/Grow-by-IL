@@ -92,3 +92,11 @@ qa_artifacts/
 scratch/
 web/
 refactor_fonts.py
+
+# Local orchestration recovery and generated artifacts
+/.local/
+/.worktrees/
+/.claude/
+/.tooling-sources/
+/artifacts/
+/android/build/
