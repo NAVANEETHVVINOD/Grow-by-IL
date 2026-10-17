@@ -47,8 +47,8 @@ the 17 October review separately confirmed only the current nested application c
 and did not repeat every historical hash check.
 
 The scoped `.local/recovery/2026-10-16/original-primary-docs` inventory contains 109
-Markdown files among 113 total files. Seven paths overlap another inventory; none of
-those overlapping files are byte-identical. This is not a count of all `.local/recovery`,
+Markdown files among 113 total files. Seven paths overlap the current `docs/` tree;
+files at those paths are not byte-identical. This is not a count of all `.local/recovery`,
 which also contains user recovery data. Recovery may contain credentials or signing
 material: never attach it to public issues or PRs. It is local, not an off-machine backup.
 The disposition of `.local/recovery` remains pending; preserve it until that review is
@@ -64,8 +64,8 @@ reviewed files. Never apply every old auth patch over newer code blindly.
 The current narrative Markdown is under `docs/`; `docs/` is no longer broadly ignored.
 The earlier consolidation record counted 100 historical Markdown files in a private
 archive; the scoped `.local/recovery/2026-10-16/original-primary-docs` inventory counted
-109 Markdown files among 113 total files. Seven paths overlap another inventory, but
-none are byte-identical.
+109 Markdown files among 113 total files. Seven paths overlap the current `docs/` tree,
+but files at those paths are not byte-identical.
 These are dated, scoped inventories, not proof that all old material is redundant or
 safe to publish. Issues #72 and #74 track whether a safe, useful subset should be
 published. Old alone never means safe to destroy.

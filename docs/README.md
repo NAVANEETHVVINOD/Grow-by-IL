@@ -54,8 +54,8 @@ is separate remediation work, not a duplicate app to delete.
 The 17 October workspace review found one Grow application checkout nested under the
 outer `Grow/` workspace and no second Grow Git repository. The scoped
 `.local/recovery/2026-10-16/original-primary-docs` inventory contains 109 Markdown
-files among 113 total files. Seven paths overlap another inventory; none of those
-overlapping files are byte-identical. This is not a count of all `.local/recovery`.
+files among 113 total files. Seven paths overlap the current `docs/` tree; files at
+those paths are not byte-identical. This is not a count of all `.local/recovery`.
 The recovery disposition remains pending; preserve `.local`, secrets, and user data.
 Recovery is local, not an off-machine backup. Do not restore old competing roadmaps as
 live boards.

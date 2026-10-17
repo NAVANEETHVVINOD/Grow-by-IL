@@ -71,8 +71,8 @@ The current narrative Markdown is consolidated under `docs/`; the broad `docs/`
 ignore is removed. Short root pointers, repository-required files and GitHub templates
 remain at their required root locations. The scoped inventory of
 `.local/recovery/2026-10-16/original-primary-docs` contains 109 Markdown files among
-113 total files. Seven paths overlap another inventory; none of the overlapping files
-are byte-identical. This is not a count of all `.local/recovery`. Issues #72 and #74
+113 total files. Seven paths overlap the current `docs/` tree; files at those paths
+are not byte-identical. This is not a count of all `.local/recovery`. Issues #72 and #74
 track whether safe, useful historical material should be published. Local recovery is
 not an off-machine backup, and its disposition remains pending.
 
