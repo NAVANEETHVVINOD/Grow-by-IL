@@ -10,6 +10,7 @@ class NeoTextField extends StatelessWidget {
     required this.controller,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
+    this.textInputAction,
     this.validator,
     this.prefixIcon,
   });
@@ -18,6 +19,7 @@ class NeoTextField extends StatelessWidget {
   final TextEditingController controller;
   final bool obscureText;
   final TextInputType keyboardType;
+  final TextInputAction? textInputAction;
   final String? Function(String?)? validator;
   final IconData? prefixIcon;
 
@@ -39,6 +41,7 @@ class NeoTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
           validator: validator,
           style: Theme.of(context)
               .textTheme
