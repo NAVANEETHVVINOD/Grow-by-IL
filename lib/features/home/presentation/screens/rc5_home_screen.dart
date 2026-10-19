@@ -256,7 +256,7 @@ class CompactActionsBox extends StatelessWidget {
             icon: Icons.qr_code_scanner_rounded,
             label: 'Check In',
             color: const Color(0xFFFFEA00), // Pure/Vibrant yellow
-            onTap: () => context.push('/lab'),
+            onTap: () => context.go('/lab'),
           ),
           _CompactActionItem(
             icon: FeatureFlags.enableWorkRequests
