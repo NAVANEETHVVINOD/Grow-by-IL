@@ -173,37 +173,15 @@ class _DigitalIdCardState extends State<DigitalIdCard>
               ],
             ),
             const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'EST. 2024',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDF5D7),
-                    borderRadius: BorderRadius.circular(4),
-                    border:
-                        Border.all(color: const Color(0xFF111111), width: 1.5),
-                  ),
-                  child: const Text(
-                    'VERIFIED MAKER',
-                    style: TextStyle(
-                      color: Color(0xFF111111),
+            if (widget.user.createdAt != null)
+              Text(
+                'MEMBER SINCE ${widget.user.createdAt!.year}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
                       fontSize: 9,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                     ),
-                  ),
-                ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
@@ -225,7 +203,7 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'SCAN TO IDENTIFY',
+                    'MEMBER QR',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -233,7 +211,9 @@ class _DigitalIdCardState extends State<DigitalIdCard>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Use this QR for lab access, tool checkout, and event attendance.',
+                    widget.user.qrCodeData?.isNotEmpty == true
+                        ? 'This code is linked to your member profile.'
+                        : 'No member QR is available for this account.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontSize: 10,
                           color: AppColors.textSecondary,
@@ -243,15 +223,16 @@ class _DigitalIdCardState extends State<DigitalIdCard>
               ),
             ),
             const SizedBox(width: 12),
-            QrImageView(
-              data: widget.user.qrCodeData ?? widget.user.id,
-              version: QrVersions.auto,
-              size: 80,
-              eyeStyle: const QrEyeStyle(
-                eyeShape: QrEyeShape.square,
-                color: Color(0xFF111111),
+            if (widget.user.qrCodeData?.isNotEmpty == true)
+              QrImageView(
+                data: widget.user.qrCodeData!,
+                version: QrVersions.auto,
+                size: 80,
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.square,
+                  color: Color(0xFF111111),
+                ),
               ),
-            ),
           ],
         ),
       ),
