@@ -23,7 +23,9 @@ import 'package:grow/features/lab/presentation/screens/tools_screen.dart';
 final _isCheckingInProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 class LabScreen extends ConsumerWidget {
-  const LabScreen({super.key});
+  const LabScreen({super.key, this.showBackButton = true});
+
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,10 +36,14 @@ class LabScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: showBackButton
+            ? IconButton(
+                icon:
+                    const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+                onPressed: () => context.pop(),
+              )
+            : null,
         title: Text(
           'Lab Session',
           style: TextStyle(

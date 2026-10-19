@@ -8,6 +8,7 @@ import 'core/constants/supabase_keys.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/rc5_theme.dart';
 import 'core/utils/app_logger.dart';
+import 'features/auth/data/auth_callback_guard.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -15,6 +16,11 @@ import 'core/utils/provider_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // A terminated callback may have persisted a temporary Supabase session.
+  // Restore the guard before auth/router initialization so that session can
+  // never be treated as an ordinary Grow sign-in.
+  final interruptedAuthCallback = await AuthCallbackGuard.restore();
 
   final sw = Stopwatch()..start();
 
@@ -70,7 +76,24 @@ void main() async {
   await Supabase.initialize(
     url: SupabaseKeys.url,
     anonKey: SupabaseKeys.anonKey,
+    // Grow's callback route exchanges the one-time PKCE code itself so an
+    // existing session can never be mistaken for a successful link.
+    authOptions: const FlutterAuthClientOptions(detectSessionInUri: false),
   );
+
+  if (interruptedAuthCallback) {
+    try {
+      if (Supabase.instance.client.auth.currentSession != null) {
+        await Supabase.instance.client.auth.signOut();
+      }
+    } catch (_) {
+      // GoTrue clears the local session before attempting remote revocation.
+      // If local clearance did not happen, keep the guard active.
+    }
+    if (Supabase.instance.client.auth.currentSession == null) {
+      await AuthCallbackGuard.clear();
+    }
+  }
 
   // ── Database Schema Health Check ───────────────────────
   try {

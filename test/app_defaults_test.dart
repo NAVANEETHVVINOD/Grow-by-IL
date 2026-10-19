@@ -14,7 +14,7 @@ void main() {
       expect(AppDefaults.defaultUserName, 'Maker');
     });
 
-    test('buildNewUserRow contains all required DB columns', () {
+    test('buildNewUserRow contains only client-writable profile columns', () {
       final row = AppDefaults.buildNewUserRow(
         userId: 'test-id',
         name: 'Test User',
@@ -24,12 +24,16 @@ void main() {
       expect(row['id'], 'test-id');
       expect(row['name'], 'Test User');
       expect(row['email'], 'test@example.com');
-      expect(row['role'], AppRole.student.value);
-      expect(row['profile_completed'], false);
-      expect(row['xp'], 0);
-      expect(row['level'], 1);
-      expect(row['reputation_score'], 100);
       expect(row['qr_code_data'], AppQr.generateUserQr('test-id'));
+      for (final serverOwned in [
+        'role',
+        'profile_completed',
+        'xp',
+        'level',
+        'reputation_score',
+      ]) {
+        expect(row.containsKey(serverOwned), isFalse);
+      }
     });
 
     test('buildNewUserRow uses defaultUserName for empty name', () {
